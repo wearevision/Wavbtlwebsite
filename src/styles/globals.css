@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "sans-serif";
+  --font-mono: "JetBrains Mono", "monospace";
+}
+
+:root {
+  /* A. Color Variables */
+  --wav-brand-pink: #FF00A8;
+  --wav-brand-purple: #9B00FF;
+  --wav-brand-blue: #0044FF;
+  --wav-neutral-white: #FFFFFF;
+  --wav-neutral-black: #000000;
+  --wav-neutral-gray100: #F1F1F1;
+  --wav-neutral-gray500: #7A7A7A;
+  --wav-neutral-gray900: #111111;
+
+  /* Default Mode (Monochrome) */
+  --bg-color: var(--wav-neutral-black);
+  --tile-overlay-bg: var(--wav-brand-purple);
+  --tile-overlay-opacity: 0.65;
+  --tile-stroke: var(--wav-neutral-black);
+  --img-filter: grayscale(100%);
+}
+
+/* B. Alternate Color Modes */
+
+/* Neon Mode */
+body.mode-neon {
+  --wav-neon-pink: #FF00E6;
+  --wav-neon-purple: #B700FF;
+  --wav-neon-blue: #00A8FF;
+  --tile-glow-color: var(--wav-neon-pink);
+}
+
+/* Duotone Mode */
+body.mode-duotone {
+  --wav-duotone-dark: #0D0D0D;
+  --wav-duotone-light: #A4A4A4;
+  --tile-overlay-bg: var(--wav-brand-blue);
+}
+
+/* Glass Mode */
+body.mode-glass {
+  --wav-glass-bg: rgba(255, 255, 255, 0.08);
+  --wav-glass-stroke: rgba(255, 255, 255, 0.25);
+  --wav-glass-blur: 12px;
+}
+
+/* C. Motion Variables */
+:root {
+  --motion-scale-hover: 1.10;
+  --motion-overlay-opacity: 0.65;
+  --motion-blur-wall: 20px;
+  --motion-easing-global: cubic-bezier(0.19, 1, 0.22, 1);
+  --motion-duration-short: 120ms;
+  --motion-duration-medium: 260ms;
+  --motion-duration-long: 420ms;
+}
+
+/* D. Shape & Geometry Variables */
+:root {
+  --shape-trapezoid-angle: 17deg;
+  --shape-trapezoid-ratio: 1.4;
+  --shape-expanded-ratio: 5.0;
+  --shape-stroke-width: 1.5px;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--wav-neutral-white);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+}
+
+.wav-blur-bg {
+  filter: blur(var(--motion-blur-wall));
+  transition: filter var(--motion-duration-medium) var(--motion-easing-global);
+}
