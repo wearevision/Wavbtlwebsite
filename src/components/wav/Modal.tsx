@@ -12,6 +12,7 @@ interface ModalProps {
   };
   onClose: () => void;
   mode: string;
+  isMobile: boolean;
 }
 
 // --- Animation Variants ---
@@ -244,8 +245,17 @@ const AnimatedTitle: React.FC<{ text: string; className?: string }> = ({ text, c
 }
 
 
-export const Modal: React.FC<ModalProps> = ({ event, onClose, mode }) => {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) => {
+  // Escape key listener for accessibility
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-12 pointer-events-none">

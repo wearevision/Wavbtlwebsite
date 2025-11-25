@@ -111,6 +111,7 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
       >
         {/* Image */}
         <img 
+          loading="lazy"
           src={image} 
           alt={title}
           className={clsx(

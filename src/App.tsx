@@ -57,6 +57,7 @@ export default function App() {
   // Mouse position for global 3D effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const lastOrientationUpdate = useRef(0);
 
   // 1. Mobile Detection
   useEffect(() => {
@@ -88,6 +89,12 @@ export default function App() {
       const handleOrientation = (e: DeviceOrientationEvent) => {
         // Fallback if sensors are not available or permission denied
         if (e.gamma === null || e.beta === null) return;
+        
+        // Throttle to ~60fps (16ms) or ~30fps (33ms) to save battery/CPU
+        // Using 20ms throttle
+        const now = Date.now();
+        if (now - lastOrientationUpdate.current < 20) return;
+        lastOrientationUpdate.current = now;
         
         // Gamma (Left/Right Tilt): -90 to 90
         // Requirement: Map -45 to 45 -> -1 to 1 (For Z rotation in Wall)
@@ -212,6 +219,7 @@ export default function App() {
             event={selectedEvent} 
             onClose={() => setSelectedId(null)} 
             mode={mode}
+            isMobile={isMobile}
           />
         )}
       </AnimatePresence>
