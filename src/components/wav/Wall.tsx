@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion, MotionValue, useSpring, useTransform } from 'motion/react';
 import { Tile } from './Tile';
 import { clsx } from 'clsx';
+import { WavEvent } from '../../types';
 
 interface WallProps {
   mouseX: MotionValue<number>;
@@ -9,14 +10,17 @@ interface WallProps {
   onSelect: (id: string) => void;
   mode: string;
   isMobile?: boolean;
-  events: any[];
+  events: WavEvent[];
   isLoading?: boolean;
 }
 
 export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMobile = false, events, isLoading = false }) => {
   // 1. Infinite Wall logic
-  const ROWS = 9; // Matches 54 events (9 * 6 = 54) to cover mobile height completely without repeats 
-  const COLS = 6; 
+  // Mobile: 9 rows, 6 cols.
+  // Desktop: Scaled to ~65% size -> Increased density. 
+  // Rows: 9 * 1.5 ~= 14. Cols: 6 * 1.5 = 9.
+  const ROWS = isMobile ? 9 : 14; 
+  const COLS = isMobile ? 6 : 9; 
   
   const tiles = useMemo(() => {
     if (!events || events.length === 0) return [];
@@ -26,7 +30,7 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
       const eventData = events[i % events.length];
       return {
         id: `tile-${i}`,
-        image: eventData.image || eventData.imageUrl, // support both keys
+        image: eventData.image, 
         title: eventData.title,
         brand: eventData.brand,
         // Pass description if needed, though Tile doesn't display it currently

@@ -2,6 +2,7 @@ import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import * as kv from "./kv_store.tsx";
+import { generateRefinement } from "./ai.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 
 const app = new Hono();
@@ -58,20 +59,36 @@ app.get(`${BASE_PATH}/events`, async (c) => {
   try {
     const events = await kv.get("wav_events") || [];
 
-    // Generate signed URLs for images
+    // Generate signed URLs for images and gallery media
     const eventsWithUrls = await Promise.all(events.map(async (event: any) => {
-      let imageUrl = event.imageUrl;
-      let logoUrl = event.logoUrl;
+      let imageUrl = event.imageUrl || event.image; // fallback
+      let logoUrl = event.logoUrl || event.logo; // fallback
+      let gallery = event.gallery || [];
 
+      // Sign main image
       if (event.imagePath) {
-        const { data } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(event.imagePath, 3600 * 24); // 24 hours
+        const { data } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(event.imagePath, 3600 * 24);
         if (data) imageUrl = data.signedUrl;
       }
-       if (event.logoPath) {
-        const { data } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(event.logoPath, 3600 * 24); // 24 hours
+      
+      // Sign logo
+      if (event.logoPath) {
+        const { data } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(event.logoPath, 3600 * 24);
         if (data) logoUrl = data.signedUrl;
       }
-      return { ...event, imageUrl, logoUrl };
+
+      // Sign gallery items
+      if (Array.isArray(gallery) && gallery.length > 0) {
+        gallery = await Promise.all(gallery.map(async (item: any) => {
+          if (item.path) {
+            const { data } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(item.path, 3600 * 24);
+            if (data) return { ...item, url: data.signedUrl };
+          }
+          return item;
+        }));
+      }
+
+      return { ...event, imageUrl, logoUrl, image: imageUrl, logo: logoUrl, gallery };
     }));
 
     return c.json(eventsWithUrls);
@@ -89,6 +106,43 @@ app.post(`${BASE_PATH}/events`, async (c) => {
     return c.json({ success: true });
   } catch (e) {
      console.error("Error saving events:", e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+// POST /refine - AI Refinement
+app.post(`${BASE_PATH}/refine`, async (c) => {
+  try {
+    const { messages, currentDraft, event } = await c.req.json();
+    const result = await generateRefinement(messages, currentDraft, event);
+    return c.json(result);
+  } catch (e) {
+    console.error("Error in /refine:", e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+// POST /signup - Create initial admin user
+app.post(`${BASE_PATH}/signup`, async (c) => {
+  try {
+    const { email, password } = await c.req.json();
+    
+    if (!email || !password) {
+        return c.json({ error: "Email and password required" }, 400);
+    }
+
+    const { data, error } = await supabase.auth.admin.createUser({
+      email: email,
+      password: password,
+      user_metadata: { name: 'Admin User' },
+      email_confirm: true
+    });
+
+    if (error) throw error;
+
+    return c.json({ user: data.user });
+  } catch (e) {
+    console.error("Error creating user:", e);
     return c.json({ error: e.message }, 500);
   }
 });
