@@ -16,7 +16,7 @@ export function enrichDescription(original: string, event: WavEvent): string {
   // In a real scenario, this would call an LLM. Here we use a template-based approach 
   // to demonstrate the "Semantic Optimization" output as requested.
   
-  const contextIntro = `Para el proyecto ${event.title}, desarrollado junto a ${event.brand}, diseñamos una propuesta integral de brand experience.`;
+  const contextIntro = `Para el proyecto ${event.title}, desarrollado junto a ${event.brand}${event.category ? `, categoría ${event.category}` : ''}, diseñamos una propuesta integral de brand experience.`;
   
   const techContext = "La implementación integró activaciones BTL de alto impacto, combinando escenografía física con instalaciones tecnológicas avanzadas para crear una narrativa coherente.";
   

@@ -5,7 +5,22 @@ const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c4bb
 
 export interface RefineResponse {
   draft: string;
-  response: string;
+  chat_response: string; // Mapped from backend output
+  summary?: string;
+  title?: string;
+  slug?: string;
+  highlights?: string[];
+  keywords?: string[];
+  hashtags?: string[];
+  instagram_hook?: string;
+  instagram_body?: string;
+  instagram_closing?: string;
+  instagram_hashtags?: string;
+  linkedin_post?: string;
+  linkedin_article?: string;
+  alt_title_1?: string;
+  alt_title_2?: string;
+  alt_instagram?: string;
 }
 
 export async function refineDescription(

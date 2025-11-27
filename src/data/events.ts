@@ -303,7 +303,7 @@ export const events = [
       "brand": "Coldplay",
       "title": "Stage Colors",
       "description": "Gira mundial con pulseras LED. La innovación fue convertir al público en una pantalla gigante de píxeles.",
-      "image": "https://images.unsplash.com/photo-1618613403887-ed08ea9f8f6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+      "image": "https://images.unsplash.com/photo-1723391588634-32ee56b12a6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
     },
     {
       "brand": "Bauhaus Archive",

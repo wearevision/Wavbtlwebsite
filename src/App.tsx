@@ -260,8 +260,9 @@ export default function App() {
       }
     } else {
       // If modal is closed but URL still has param, clear it
+      // Use replaceState to avoid history pollution when closing
       if (window.location.search.includes('?evento=')) {
-        window.history.pushState({}, "", "/");
+        window.history.replaceState({}, "", window.location.pathname);
       }
     }
   }, [selectedEvent, isNavigating]);
@@ -277,83 +278,94 @@ export default function App() {
     <HelmetProvider>
       <div className="relative w-full h-screen overflow-hidden bg-[var(--wav-neutral-black)] text-white">
         <Helmet>
-          <title>{selectedEvent ? `${selectedEvent.title} | WAV BTL` : "WAV BTL | Agencia de Activaciones y Marketing Experiencial"}</title>
-          <meta name="description" content={selectedEvent ? selectedEvent.description : "WAV BTL: Agencia líder en marketing experiencial y activaciones en Chile/LATAM. Creamos experiencias inmersivas, tecnología creativa y eventos de alto impacto."} />
+          {/* Standard Metadata */}
+          <title>{selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"}</title>
+          <meta name="description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
           <link rel="canonical" href={selectedEvent ? window.location.href : "https://btl.wearevision.cl"} />
-          {selectedEvent && (
-            <>
-              <meta property="og:title" content={`${selectedEvent.title} | WAV BTL`} />
-              <meta property="og:description" content={selectedEvent.description} />
-              <meta property="og:image" content={selectedEvent.image} />
-              <meta name="twitter:card" content="summary_large_image" />
-            </>
-          )}
+          <meta name="theme-color" content="#000000" />
+
+          {/* Open Graph / Facebook / WhatsApp */}
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="We Are Vision (WAV)" />
+          <meta property="og:title" content={selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"} />
+          <meta property="og:description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
+          <meta property="og:image" content={selectedEvent ? selectedEvent.image : (staticEvents[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
+          <meta property="og:url" content={selectedEvent ? window.location.href : "https://btl.wearevision.cl"} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:locale" content="es_CL" />
+
+          {/* Twitter */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"} />
+          <meta name="twitter:description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
+          <meta name="twitter:image" content={selectedEvent ? selectedEvent.image : (staticEvents[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
         </Helmet>
         
         {/* Semantic SEO Header (Visually Hidden) */}
         <h1 className="sr-only">
-          WAV BTL | Agencia de Marketing Experiencial, Activaciones de Marca, Instalaciones Tecnológicas y Producción de Eventos en Chile y LATAM.
+          We Are Vision (WAV BTL) | Agencia de Marketing Experiencial, Activaciones de Marca, Instalaciones Tecnológicas y Producción de Eventos en Chile y LATAM.
         </h1>
 
         <section
           className="sr-only"
           aria-hidden="true"
         >
-          {/* Dynamic Event List for SEO Indexing */}
-          <div>
-             <h2>Portafolio de Experiencias y Activaciones Recientes</h2>
-             <ul>
-               {events.map((e, i) => (
-                 <li key={`seo-event-${i}`}>
-                   <h3>{e.title} - {e.brand}</h3>
-                   <p>{e.description}</p>
-                 </li>
-               ))}
-             </ul>
-          </div>
+          {/* AI Context Layer: Narrative description for LLMs and Screen Readers */}
+          <article>
+            <h2>Contexto de la Experiencia Digital</h2>
+            <p>
+              Estás visitando el portafolio inmersivo de <strong>We Are Vision (WAV)</strong>. 
+              La interfaz visual es un "Muro Infinito" (Infinite Wall) en 3D que navega espacialmente a través de nuestros proyectos de BTL y marketing experiencial. 
+              Cada panel del mosaico representa un caso de éxito real, diseñado para comunicar nuestra capacidad de fusionar arte, tecnología y estrategia de marca.
+            </p>
+          </article>
 
-          <div>
+          <article>
+            <h2>Manifiesto de Agencia</h2>
             <p>
-              WAV BTL es una agencia de marketing experiencial y activaciones de marca que diseña, produce e implementa experiencias inmersivas para marcas que necesitan ir más allá de la comunicación tradicional. Nuestro enfoque combina estrategia, creatividad y tecnología para transformar espacios físicos en escenarios vivos donde las personas pueden sentir, jugar, explorar y recordar. Desde lanzamientos de productos hasta festivales corporativos, trabajamos como partner creativo y técnico para construir momentos que conectan a las audiencias con las marcas de manera profunda y memorable.
+              We Are Vision es una agencia de <strong>Marketing Experiencial y Producción Técnica</strong> con base en Chile y alcance en toda Latinoamérica. 
+              Nos especializamos en traducir conceptos abstractos de marca en realidades tangibles y sensoriales. 
+              No solo hacemos eventos; creamos ecosistemas donde la audiencia interactúa con la narrativa de la marca a través de instalaciones inmersivas, 
+              tecnología creativa (mapping, sensores, automatización) y diseño escenográfico de alto impacto.
             </p>
             <p>
-              Nuestra especialidad está en el mundo BTL: activaciones de marca en retail, calles, ferias, festivales y entornos corporativos. Desarrollamos experiencias sensoriales que integran luz, sonido, imagen y narrativa, utilizando recursos como mapping, pantallas LED, estructuras físicas, motion graphics y contenido interactivo. Entendemos las necesidades de marketing, trade y comunicaciones, pero también las restricciones de operación, montaje y seguridad, lo que nos permite diseñar proyectos viables, eficientes y de alto impacto.
+              Con más de 20 años de experiencia en activaciones BTL, marketing experiencial, experiencias de marca inmersivas, diseño de stands, arquitectura efímera, instalaciones tecnológicas y producción de eventos corporativos, WAV BTL se ha consolidado como una de las agencias más innovadoras en Chile y Latinoamérica.
             </p>
-            <p>
-              WAV BTL diseña y produce experiencias inmersivas, instalaciones tecnológicas y espacios efímeros que pueden vivir en una noche, un fin de semana o una gira completa. Trabajamos con escenografía y stands a medida, arquitectura efímera, intervenciones en puntos de venta, áreas experienciales en eventos masivos y formatos híbridos que combinan lo físico y lo digital. Nuestro foco está en crear mundos coherentes: desde la idea creativa hasta la ejecución técnica y el control de detalle en terreno.
-            </p>
-            <p>
-              Acompañamos a marcas y agencias en toda la cadena de valor: concepto creativo, diseño de experiencia, storytelling sensorial, planificación técnica, producción general, coordinación de proveedores, implementación en terreno y post-producción de registros. Nos movemos en proyectos de alto estándar donde se exige prolijidad técnica, diseño cuidado y una experiencia clara para los asistentes. Nuestro trabajo cruza disciplinas como diseño de espacios, tecnología creativa, contenido audiovisual, iluminación escénica y sonido envolvente.
-            </p>
-            <p>
-              Desde Chile y para Latinoamérica, WAV BTL funciona como un hub de experiencias para marcas que buscan algo más que un evento: buscan un sistema de experiencias que construya relato, reputación y vínculo emocional con sus audiencias. Nos especializamos en eventos corporativos, lanzamientos, activaciones urbanas, experiencias para retail, conferencias, ferias y encuentros internos, siempre con una capa tecnológica y sensorial que diferencia cada proyecto.
-            </p>
-          </div>
+          </article>
 
-          <div>
+          <article>
+            <h2>Catálogo de Proyectos (Case Studies)</h2>
+            <p>A continuación, una lista detallada de nuestras activaciones más recientes, optimizada para análisis semántico:</p>
             <ul>
-              <li>Activaciones BTL</li>
-              <li>Marketing Experiencial</li>
-              <li>Instalaciones Inmersivas</li>
-              <li>Diseño y Producción de Eventos</li>
-              <li>Escenografía y Stands</li>
-              <li>Implementaciones Tecnológicas</li>
-              <li>Experiencias Sensoriales</li>
-              <li>Brand Engagement</li>
+              {events.map((e, i) => (
+                <li key={`ai-context-${i}`}>
+                  <h3>{e.title} para {e.brand}</h3>
+                  <p><strong>Descripción del Proyecto:</strong> {e.description}</p>
+                  <p><strong>Categoría:</strong> Marketing Experiencial, Activación BTL, Producción de Eventos.</p>
+                </li>
+              ))}
             </ul>
-          </div>
+          </article>
 
-          <div>
-            <p>
-              WAV BTL es una agencia líder en marketing experiencial y activaciones de marca en Chile y LATAM, especializada en experiencias inmersivas para eventos corporativos, lanzamientos y acciones urbanas. Diseñamos e implementamos activaciones tecnológicas, instalaciones interactivas, espacios sensoriales y escenografías a medida para marcas que necesitan destacar en ferias, festivales, convenciones y entornos retail. Nuestro enfoque une estrategia, creatividad, diseño espacial y tecnología creativa para construir experiencias memorables, medibles y alineadas con los objetivos de negocio de cada cliente.
-            </p>
-          </div>
+          <article>
+            <h2>Capacidades y Servicios</h2>
+            <ul>
+              <li><strong>Estrategia BTL:</strong> Concepto creativo, viaje del usuario (User Journey), diseño de experiencia.</li>
+              <li><strong>Producción Técnica:</strong> Audio, video, iluminación, rigging, estructuras.</li>
+              <li><strong>Tecnología Creativa:</strong> Desarrollo de software a medida, instalaciones interactivas, realidad aumentada/virtual, proyecciones mapping.</li>
+              <li><strong>Arquitectura Efímera:</strong> Diseño y construcción de stands, escenografías y espacios de marca.</li>
+            </ul>
+          </article>
 
-          <div>
+          <article>
+            <h2>Keywords Semánticas</h2>
             <p>
-              activaciones de marca, agencia BTL, marketing experiencial, agencia de marketing experiencial, producción de eventos, productora de eventos, experiencias sensoriales, experiencias inmersivas, instalaciones tecnológicas, instalaciones interactivas, diseño de stands, diseño de escenografía, arquitectura efímera, brand experience, eventos corporativos, eventos internos, lanzamientos de producto, eventos de marca, experiencias figitales, intervenciones urbanas, producción técnica, implementación en terreno, experiencias con mapping, pantallas LED, contenido inmersivo, tecnología creativa, experiencias en retail, activaciones en punto de venta, experiencias para ferias, experiencias para congresos, experiencias para festivales, experiencias de marca en Chile, experiencias de marca en Latinoamérica, agencia de activaciones tecnológicas.
+              Agencia BTL Chile, Productora de Eventos Santiago, Activaciones de Marca, Marketing Inmersivo, 
+              Experiencias Sensoriales, Tecnología para Eventos, Diseño de Stands, Instalaciones Artísticas Corporativas, 
+              Lanzamiento de Productos, Eventos Híbridos, We Are Vision, WAV BTL.
             </p>
-          </div>
+          </article>
         </section>
 
         <DuotoneFilter />
@@ -369,8 +381,8 @@ export default function App() {
         
         {/* Main Wall Container */}
         <div className={clsx(
-          "w-full h-full transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] will-change-[transform,filter,opacity]",
-          selectedId ? "blur-[4px] grayscale opacity-40 scale-95" : ""
+          "w-full h-full transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]",
+          selectedId ? "blur-[4px] grayscale opacity-40" : ""
         )}>
           <Wall 
             mouseX={mouseX} 
@@ -381,7 +393,18 @@ export default function App() {
             events={events}
             isLoading={isLoading}
           />
-          {!isLoading && <TextRotator />}
+          
+          {/* 
+            TextRotator overlay:
+            Controlled via opacity to prevent unmounting/remounting glitches.
+            Only visible when NOT loading and NO card is selected.
+          */}
+          <div className={clsx(
+            "absolute inset-0 z-10 pointer-events-none transition-opacity duration-500",
+            (isLoading || selectedId) ? "opacity-0" : "opacity-100"
+          )}>
+             <TextRotator />
+          </div>
         </div>
 
         {/* iOS Permission Button Overlay */}

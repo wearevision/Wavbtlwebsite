@@ -1,51 +1,71 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getEvents, saveEvents, uploadFile } from '../../utils/api';
-import { enrichDescription } from '../../utils/enrich';
-import { refineDescription } from '../../utils/refine';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Loader2, Plus, Trash2, Upload, Save, ArrowLeft, Sparkles, 
   Check, Copy, Image as ImageIcon, Film, X, Send, MessageSquare, 
-  Bot, User as UserIcon, RefreshCw, ChevronRight, Lock
+  Bot, User as UserIcon, RefreshCw, ChevronRight, Lock, Wand2, AlertTriangle
 } from 'lucide-react';
-import { WavEvent, WavMedia } from '../../types';
-import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '../../utils/supabase/info';
-
-const supabase = createClient(`https://${projectId}.supabase.co`, publicAnonKey);
-
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  text: string;
-}
+import { supabase } from '../../utils/supabase/client';
+import { publicAnonKey, projectId } from '../../utils/supabase/info';
+import { useAdminAIChat, ChatMessage } from '../../src/hooks/useAdminAIChat';
+import { useAdminEvents } from '../../src/hooks/useAdminEvents';
+import { useEventValidation, hasValidationErrors } from '../../src/hooks/useEventValidation';
+import { FormField } from './FormField';
+import { EventEditorCard } from './EventEditorCard';
+import { FIELD_TOOLTIPS, getCharCount } from '../../utils/validation';
 
 export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [emailInput, setEmailInput] = useState("admin@wearevision.cl");
   const [passwordInput, setPasswordInput] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [events, setEvents] = useState<WavEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState<string | null>(null); 
   const [activeTab, setActiveTab] = useState<'content' | 'ai'>('content');
 
-  // --- AI Editor State ---
-  const [selectedAiEventIndex, setSelectedAiEventIndex] = useState<number | null>(null);
-  const [aiDraft, setAiDraft] = useState("");
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [isRefining, setIsRefining] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  // --- Hooks ---
+  const {
+    events,
+    loading,
+    saving,
+    saveStatus, // New prop
+    lastSavedAt,
+    uploading,
+    handleSave,
+    handleFileChange,
+    removeGalleryItem,
+    updateEvent,
+    addEvent,
+    removeEvent,
+    handleApprove,
+    handleCleanupEvents
+  } = useAdminEvents();
+
+  // Validation hook
+  const validationMap = useEventValidation(events);
+  const hasErrors = useMemo(() => {
+    for (const state of validationMap.values()) {
+      if (!state.isValid) return true;
+    }
+    return false;
+  }, [validationMap]);
+
+  const {
+    selectedAiEventIndex,
+    setSelectedAiEventIndex,
+    aiDraft,
+    setAiDraft,
+    aiFormState,
+    setAiFormState,
+    chatHistory,
+    chatInput,
+    setChatInput,
+    isRefining,
+    chatEndRef,
+    handleAiSelectEvent,
+    handleSendMessage
+  } = useAdminAIChat(events);
 
   useEffect(() => {
     checkSession();
-    loadData();
   }, []);
-
-  useEffect(() => {
-    // Auto-scroll chat
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
 
   const checkSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -97,118 +117,41 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
     setIsAuthenticated(false);
   };
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const data = await getEvents();
-      const normalizedData = data.map(e => ({
-        ...e,
-        gallery: e.gallery || (e.image ? [{ 
-            id: 'legacy-cover', 
-            type: 'image', 
-            url: e.image, 
-            path: e.imagePath 
-        } as WavMedia] : [])
-      }));
-      setEvents(normalizedData);
-    } catch (e) {
-      console.error(e);
-      alert("Error cargando datos");
-    }
-    setLoading(false);
-  };
-
-  // --- AI Handlers ---
-
-  const handleAiSelectEvent = (index: number) => {
-    setSelectedAiEventIndex(index);
-    // Generate initial draft using the basic enricher
-    const initialDraft = enrichDescription(events[index].description, events[index]);
-    setAiDraft(initialDraft);
-    setChatHistory([
-      { role: 'assistant', text: `Hola. He generado un primer borrador para "${events[index].title}". ¿Qué te gustaría mejorar?` }
-    ]);
-  };
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim() || selectedAiEventIndex === null) return;
-
-    const prompt = chatInput;
-    setChatInput("");
-    setIsRefining(true);
-
-    // Add User Message
-    const newHistory: ChatMessage[] = [...chatHistory, { role: 'user', text: prompt }];
-    setChatHistory(newHistory);
-
-    try {
-      // Call AI Refiner with full history
-      const { draft: newDraft, response: aiResponse } = await refineDescription(
-        newHistory, 
-        aiDraft, 
-        events[selectedAiEventIndex]
-      );
-      
-      setAiDraft(newDraft);
-      
-      // Add AI Response
-      setChatHistory(prev => [...prev, { 
-        role: 'assistant', 
-        text: aiResponse 
-      }]);
-
-    } catch (error) {
-      console.error(error);
-      setChatHistory(prev => [...prev, { role: 'assistant', text: "Lo siento, hubo un error al procesar tu solicitud." }]);
-    } finally {
-      setIsRefining(false);
-    }
-  };
-
-  async function handleApprove(eventId: string, finalText: string) {
-    try {
-      // Safely access environment variables to prevent crashes
-      // @ts-ignore
-      const env = import.meta.env || {};
-      // @ts-ignore
-      const procEnv = typeof process !== 'undefined' ? process.env : {};
-      
-      // Try VITE_ prefixed first (standard), then fallback to direct name
-      const token = env.VITE_EDGE_ADMIN_TOKEN || procEnv.EDGE_ADMIN_TOKEN || "";
-
-      if (!token) {
-        console.warn("Warning: EDGE_ADMIN_TOKEN or VITE_EDGE_ADMIN_TOKEN is missing.");
-      }
-
-      const response = await fetch(
-        "https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/update-event-description",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            eventId,
-            newDescription: finalText
-          })
+  const handleCopy = (text: string) => {
+    if (!text) return;
+    
+    const fallbackCopy = (val: string) => {
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = val;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (successful) alert("Copiado");
+            else alert("No se pudo copiar. Por favor selecciona el texto manualmente.");
+        } catch (err) {
+            console.error("Fallback copy failed", err);
+            alert("Error al copiar.");
         }
-      );
+    };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("EDGE ERROR:", errorText);
-        alert("Error al guardar en Supabase: " + errorText);
-        return;
-      }
-
-      alert("Descripción actualizada correctamente en Supabase.");
-    } catch (error) {
-      console.error("NETWORK ERROR:", error);
-      alert("Error de red o conexión.");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+            .then(() => alert("Copiado"))
+            .catch(err => {
+                // Quietly try fallback if API fails (common in iframes/permissions policy)
+                fallbackCopy(text);
+            });
+    } else {
+        fallbackCopy(text);
     }
-  }
-
+  };
 
   // --- Auth Gate ---
   if (!isAuthenticated) {
@@ -261,91 +204,6 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
     );
   }
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await saveEvents(events);
-      alert("Cambios guardados correctamente");
-    } catch (e) {
-      alert("Error al guardar cambios");
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleFileChange = async (index: number, field: 'cover' | 'logo' | 'gallery', file: File) => {
-    const uploadId = `${index}-${field}-${Date.now()}`;
-    setUploading(uploadId);
-    
-    try {
-      const result = await uploadFile(file);
-      const newEvents = [...events];
-      const objectUrl = URL.createObjectURL(file);
-      
-      if (field === 'gallery') {
-          const isVideo = file.type.startsWith('video/');
-          const newMedia: WavMedia = {
-              id: crypto.randomUUID(),
-              type: isVideo ? 'video' : 'image',
-              url: objectUrl,
-              path: result.path
-          };
-          newEvents[index].gallery = [...(newEvents[index].gallery || []), newMedia];
-          if (!isVideo && (!newEvents[index].imagePath || newEvents[index].gallery?.length === 1)) {
-              newEvents[index].image = objectUrl;
-              newEvents[index].imagePath = result.path;
-          }
-      } else if (field === 'logo') {
-        newEvents[index].logoPath = result.path;
-        newEvents[index].logoUrl = objectUrl;
-      }
-      setEvents(newEvents);
-    } catch (e) {
-      console.error(e);
-      alert("Error subiendo archivo");
-    } finally {
-      setUploading(null);
-    }
-  };
-
-  const removeGalleryItem = (eventIndex: number, mediaId: string) => {
-      if (!confirm("¿Eliminar este archivo?")) return;
-      const newEvents = [...events];
-      const gallery = newEvents[eventIndex].gallery || [];
-      newEvents[eventIndex].gallery = gallery.filter(m => m.id !== mediaId);
-      if (newEvents[eventIndex].gallery?.length && newEvents[eventIndex].gallery[0].type === 'image') {
-          const first = newEvents[eventIndex].gallery[0];
-          newEvents[eventIndex].image = first.url;
-          newEvents[eventIndex].imagePath = first.path;
-      }
-      setEvents(newEvents);
-  };
-
-  const updateEvent = (index: number, field: string, value: string) => {
-    const newEvents = [...events];
-    newEvents[index] = { ...newEvents[index], [field]: value };
-    setEvents(newEvents);
-  };
-
-  const addEvent = () => {
-    setEvents([{
-      brand: "Nueva Marca",
-      title: "Nuevo Evento",
-      description: "Descripción del evento...",
-      image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80",
-      gallery: []
-    }, ...events]);
-  };
-
-  const removeEvent = (index: number) => {
-    if (confirm("¿Estás seguro de eliminar este evento?")) {
-      const newEvents = [...events];
-      newEvents.splice(index, 1);
-      setEvents(newEvents);
-    }
-  };
-
   if (loading) {
     return <div className="flex items-center justify-center h-screen bg-black text-white"><Loader2 className="animate-spin" /></div>;
   }
@@ -366,7 +224,7 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
               <span className="text-xs text-neutral-500 hidden md:inline-block">Sesión Segura</span>
               <button 
                 onClick={handleLogout}
-                className="text-xs text-red-400 hover:text-red-300 underline mr-4"
+                className="text-xs text-red-400 hover:text-red-300 underline mr-4 pt-[0px] pr-[0px] pb-[0px] pl-[5px]"
               >
                 Cerrar Sesión
               </button>
@@ -411,107 +269,92 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
               Optimización Conversacional IA
             </button>
           </div>
+
+          {/* Status Indicator */}
+          <div className="absolute top-4 right-4 flex flex-col items-end pointer-events-none">
+              <span className={`text-[10px] font-mono uppercase tracking-widest transition-opacity duration-300 ${
+                  saveStatus === 'idle' ? 'opacity-0' : 'opacity-100'
+              } ${
+                  saveStatus === 'success' ? 'text-green-500' : 
+                  saveStatus === 'error' ? 'text-red-500' : 
+                  'text-neutral-500'
+              }`}>
+                  {saveStatus === 'saving' && "Saving..."}
+                  {saveStatus === 'success' && "Synced ✓"}
+                  {saveStatus === 'error' && "Error ✗"}
+              </span>
+              
+              {/* Last Saved Timestamp */}
+              {lastSavedAt && (
+                <span className="text-[9px] text-neutral-600 font-mono mt-1 transition-opacity duration-500">
+                   Last saved: {lastSavedAt}
+                </span>
+              )}
+          </div>
         </div>
 
         {activeTab === 'content' ? (
           // --- CONTENT EDITOR TAB ---
           <div className="grid gap-6 pb-20">
-          {events.map((event, i) => (
-            <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden shadow-sm">
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div className="md:col-span-4 space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-neutral-400">Galería Multimedia</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {event.gallery?.map((media) => (
-                                <div key={media.id} className="relative aspect-square bg-neutral-800 rounded-md overflow-hidden group">
-                                    {media.type === 'video' ? (
-                                        <video src={media.url} className="w-full h-full object-cover opacity-50" />
-                                    ) : (
-                                        <img src={media.url} alt="Gallery" className="w-full h-full object-cover" />
-                                    )}
-                                    <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-black/50 rounded text-[10px] text-white uppercase">
-                                        {media.type === 'video' ? <Film className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
-                                    </div>
-                                    <button 
-                                        onClick={() => removeGalleryItem(i, media.id)}
-                                        className="absolute top-1 right-1 p-1 bg-red-500/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            ))}
-                            <label className="aspect-square bg-neutral-800 rounded-md border border-dashed border-neutral-700 flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-800/50 hover:border-neutral-500 transition-all text-neutral-500 hover:text-neutral-300">
-                                <Upload className="h-5 w-5 mb-1" />
-                                <span className="text-[10px] font-medium">Subir</span>
-                                <input 
-                                    type="file" 
-                                    accept="image/*,video/mp4" 
-                                    multiple
-                                    className="hidden" 
-                                    onChange={(e) => e.target.files && Array.from(e.target.files).forEach(file => handleFileChange(i, 'gallery', file))}
-                                />
-                            </label>
-                        </div>
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-8 space-y-4">
-                     <div className="flex justify-between items-start">
-                       <div className="flex-1 grid grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                           <label className="text-xs font-medium text-neutral-400">Marca</label>
-                           <input 
-                             value={event.brand} 
-                             onChange={(e) => updateEvent(i, 'brand', e.target.value)}
-                             className="flex h-9 w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-pink-500"
-                           />
-                         </div>
-                         <div className="space-y-2">
-                           <label className="text-xs font-medium text-neutral-400">Logo URL</label>
-                            <div className="flex gap-2">
-                              <div className="relative flex-1">
-                                  <input 
-                                    value={event.logoUrl || ''} 
-                                    disabled
-                                    className="flex h-9 w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-1 text-sm text-neutral-400 disabled:cursor-not-allowed pr-8"
-                                  />
-                                  {event.logoUrl && <img src={event.logoUrl} className="absolute right-1 top-1 h-7 w-7 object-contain" />}
-                              </div>
-                               <label className="cursor-pointer p-2 bg-neutral-700 text-white rounded-md hover:bg-neutral-600 flex items-center justify-center shrink-0">
-                                <Upload className="h-4 w-4" />
-                                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileChange(i, 'logo', e.target.files[0])} />
-                              </label>
-                            </div>
-                         </div>
-                       </div>
-                       <button className="inline-flex items-center justify-center rounded-md h-9 w-9 text-red-500 hover:text-red-400 hover:bg-red-950/50 ml-2" onClick={() => removeEvent(i)}>
-                         <Trash2 className="h-5 w-5" />
-                       </button>
-                     </div>
-
-                     <div className="space-y-2">
-                       <label className="text-xs font-medium text-neutral-400">Título</label>
-                       <input 
-                         value={event.title} 
-                         onChange={(e) => updateEvent(i, 'title', e.target.value)}
-                         className="flex h-10 w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-lg font-bold text-white focus:outline-none focus:ring-1 focus:ring-pink-500"
-                       />
-                     </div>
-
-                     <div className="space-y-2">
-                       <label className="text-xs font-medium text-neutral-400">Descripción</label>
-                       <textarea 
-                         value={event.description} 
-                         onChange={(e) => updateEvent(i, 'description', e.target.value)}
-                         className="flex min-h-[100px] w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-pink-500"
-                       />
-                     </div>
-                  </div>
-                </div>
+          {/* Normalization Banner */}
+          <div className="bg-gradient-to-r from-blue-950/30 to-purple-950/30 border border-blue-500/20 rounded-xl p-4 flex items-start justify-between">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Wand2 className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-blue-300 mb-1">Sistema de Normalización Automática</h3>
+                <p className="text-neutral-400 leading-relaxed max-w-3xl text-[13px]">
+                  Todos los eventos se normalizan automáticamente al guardar. Si tienes eventos legacy en la base de datos,
+                  usa el botón de limpieza para generar IDs, slugs, convertir gallery a arrays y eliminar campos no permitidos.
+                </p>
               </div>
             </div>
+            <button
+              onClick={handleCleanupEvents}
+              disabled={saving}
+              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 whitespace-nowrap ml-4"
+            >
+              {saving ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Wand2 className="mr-2 h-3 w-3" />}
+              Normalizar Todos
+            </button>
+          </div>
+
+          {/* Validation Warning Banner */}
+          {hasErrors && (
+            <div className="bg-gradient-to-r from-red-950/40 to-orange-950/40 border-2 border-red-500/30 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-red-300 mb-1">⚠️ Errores de Validación Detectados</h3>
+                <p className="text-xs text-neutral-300 leading-relaxed mb-2">
+                  Algunos eventos tienen campos incompletos o inválidos. Revisa y corrige los errores antes de guardar.
+                </p>
+                <ul className="text-[11px] text-neutral-400 space-y-1 list-disc list-inside">
+                  <li>Verifica que todos los campos obligatorios estén completos (Marca, Título, Descripción, Imagen Principal)</li>
+                  <li>Asegúrate de que las URLs de imágenes sean válidas (HTTPS)</li>
+                  <li>Revisa los contadores de caracteres en cada campo</li>
+                </ul>
+              </div>
+              <div className="text-[10px] text-red-400 font-mono bg-red-950/30 px-3 py-2 rounded-md">
+                {Array.from(validationMap.values()).filter(v => !v.isValid).length} evento(s) con errores
+              </div>
+            </div>
+          )}
+
+          {/* Events List */}
+          {events.map((event, i) => (
+             <EventEditorCard 
+               key={event.id || i}
+               event={event}
+               index={i}
+               validation={validationMap.get(i)}
+               handleFileChange={handleFileChange}
+               updateEvent={updateEvent}
+               removeGalleryItem={removeGalleryItem}
+               removeEvent={removeEvent}
+             />
           ))}
           </div>
         ) : (
@@ -522,7 +365,7 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {events.map((event, idx) => (
                      <button 
-                        key={idx}
+                        key={event.id || idx}
                         onClick={() => handleAiSelectEvent(idx)}
                         className="bg-neutral-900 border border-neutral-800 hover:border-pink-500/50 p-6 rounded-[0px] text-left transition-all group"
                      >
@@ -544,9 +387,14 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
                         <button onClick={() => setSelectedAiEventIndex(null)} className="text-xs text-neutral-400 hover:text-white mb-1 flex items-center">
                            <ArrowLeft className="w-3 h-3 mr-1" /> Seleccionar otro evento
                         </button>
-                        <h2 className="text-xl font-bold text-white">
-                           Editando: <span className="text-pink-500">{events[selectedAiEventIndex].title}</span>
-                        </h2>
+                        <div className="flex flex-col">
+                            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">
+                                {events[selectedAiEventIndex].brand} • {events[selectedAiEventIndex].category || 'General'}
+                            </span>
+                            <h2 className="text-xl font-bold text-white">
+                               Editando: <span className="text-pink-500">{events[selectedAiEventIndex].title}</span>
+                            </h2>
+                        </div>
                      </div>
                      <div className="flex gap-2">
                         <button 
@@ -570,26 +418,403 @@ export const AdminPanel = ({ onBack }: { onBack: () => void }) => {
                      </div>
 
                      {/* Right: AI Draft */}
-                     <div className="space-y-2 flex flex-col">
+                     <div className="space-y-2 flex flex-col h-full overflow-y-auto pr-2">
                         <div className="flex items-center justify-between">
                            <label className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 uppercase tracking-wider flex items-center">
                               <Sparkles className="w-3 h-3 mr-2 text-pink-500" /> Borrador Optimizado
                            </label>
-                           <button 
-                              onClick={() => { navigator.clipboard.writeText(aiDraft); alert("Copiado"); }}
-                              className="text-[10px] flex items-center text-neutral-400 hover:text-white"
+                           <button
+                                onClick={() => handleSendMessage(`MODO: OPTIMIZE
+Genera una optimización completa para este evento.
+Mejora TODOS los campos textuales sin inventar información.
+
+Requerimientos:
+1. Título optimizado
+2. Slug SEO
+3. Highlights (3–5) potentes
+4. Meta description
+5. Keywords SEO
+6. Hashtags IG
+7. Copy Instagram completo
+8. Post LinkedIn breve
+9. Artículo LinkedIn
+10. Orden sugerido de fotos con hero y justificación (en chat_response)
+`)}
+                                className="px-3 py-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-full text-[10px] font-bold flex items-center shadow-lg shadow-purple-900/20 transition-all transform hover:scale-105"
                            >
-                              <Copy className="w-3 h-3 mr-1" /> Copiar
+                                <Sparkles className="w-3 h-3 mr-1" /> OPTIMIZAR TODO
                            </button>
                         </div>
-                        <textarea
-                           value={aiDraft}
-                           onChange={(e) => setAiDraft(e.target.value)}
-                           className="flex-1 bg-neutral-900 border border-pink-500/30 focus:border-pink-500 rounded-lg p-4 text-white text-sm leading-relaxed resize-none outline-none focus:ring-1 focus:ring-pink-500/50 transition-all"
-                        />
+
+                        {/* Main Description */}
+                        <div className="space-y-1">
+                            <label className="text-[10px] text-neutral-500 uppercase">Descripción Principal (Draft)</label>
+                            <textarea
+                               value={aiFormState.description || ''}
+                               onChange={(e) => setAiFormState(prev => ({ ...prev, description: e.target.value }))}
+                               className="w-full bg-neutral-900 border border-pink-500/30 focus:border-pink-500 rounded-lg p-3 text-white text-sm leading-relaxed resize-none h-32 outline-none focus:ring-1 focus:ring-pink-500/50 transition-all"
+                            />
+                        </div>
+
+                        {/* Generated Fields Grid */}
+                        <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            {/* Audit Block */}
+                            <div className="space-y-2 border-b border-neutral-800 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold text-orange-400 uppercase">Auditoría de Contenido</h4>
+                                    <button
+                                        onClick={() => handleSendMessage(`Audita este evento y detecta problemas narrativos, estructuras débiles o texto mejorable.
+
+Indica:
+
+1. Qué falta
+2. Qué sobra
+3. Qué es confuso
+4. Qué no está alineado con branding BTL
+5. Propuestas de mejora rápidas
+
+Datos del evento:
+${JSON.stringify(events[selectedAiEventIndex], null, 2)}`)}
+                                        className="px-2 py-1 bg-orange-900/20 hover:bg-orange-900/40 border border-orange-500/30 rounded text-[10px] text-orange-300 flex items-center gap-1"
+                                    >
+                                        <AlertTriangle className="w-3 h-3" /> Auditar (IA)
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* SEO Block */}
+                            <div className="space-y-2 border-t border-neutral-800 pt-2">
+                                <h4 className="text-xs font-bold text-blue-400 uppercase">SEO & Metadata</h4>
+                                
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-neutral-500">Título Optimizado</label>
+                                        <input 
+                                            value={aiFormState.title || ''}
+                                            onChange={(e) => setAiFormState(prev => ({ ...prev, title: e.target.value }))}
+                                            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 text-[15px] font-bold"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-neutral-500">Slug</label>
+                                        <div className="flex gap-1">
+                                            <input 
+                                                value={aiFormState.slug || ''}
+                                                onChange={(e) => setAiFormState(prev => ({ ...prev, slug: e.target.value }))}
+                                                className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs font-mono text-neutral-400 italic"
+                                            />
+                                            <button
+                                                onClick={() => handleSendMessage(`Genera un slug SEO corto, claro, sin tildes, sin mayúsculas, sin artículos redundantes.
+Datos del evento:
+- Año: ${events[selectedAiEventIndex].year || new Date().getFullYear()}
+- Marca: ${events[selectedAiEventIndex].brand}
+- Nombre: ${events[selectedAiEventIndex].title}
+- Título: ${aiFormState.title || events[selectedAiEventIndex].title}
+
+Devuélvelo SOLO como slug, sin explicación.`)}
+                                                className="px-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300"
+                                                title="Generar Slug con IA"
+                                            >
+                                                <Sparkles className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Meta Description (Summary)</label>
+                                    <textarea 
+                                        value={aiFormState.summary || ''}
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, summary: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-16 resize-none"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[13px] text-neutral-500">Highlights</label>
+                                        <button
+                                            onClick={() => handleSendMessage(`Genera 3–5 highlights claros, concretos y diferenciadores de este evento. Sin humo ni adjetivos vacíos.
+
+Datos:
+- Marca: ${events[selectedAiEventIndex].brand}
+- Evento: ${aiFormState.title || events[selectedAiEventIndex].title}
+- Descripción: ${aiFormState.description || events[selectedAiEventIndex].description}`)}
+                                            className="px-2 py-0.5 bg-blue-900/20 hover:bg-blue-900/40 border border-blue-500/30 rounded text-[9px] text-blue-300 flex items-center gap-1"
+                                            title="Generar Highlights con IA"
+                                        >
+                                            <Sparkles className="w-3 h-3" /> Generar
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                        {(aiFormState.highlights || []).map((h: string, i: number) => (
+                                            <div key={i} className="flex items-center bg-blue-900/20 border border-blue-500/20 rounded px-2 py-0.5">
+                                                <span className="text-blue-200 text-[10px] mr-1">{h}</span>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newH = [...(aiFormState.highlights || [])];
+                                                        newH.splice(i, 1);
+                                                        setAiFormState(prev => ({ ...prev, highlights: newH }));
+                                                    }}
+                                                    className="text-blue-400 hover:text-white"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button 
+                                            onClick={() => {
+                                                const newH = [...(aiFormState.highlights || []), "New Highlight"];
+                                                setAiFormState(prev => ({ ...prev, highlights: newH }));
+                                            }}
+                                            className="px-2 py-0.5 bg-neutral-800 text-[10px] text-neutral-400 rounded hover:bg-neutral-700"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <label className="text-[13px] text-neutral-500">Keywords</label>
+                                        <textarea
+                                            value={Array.isArray(aiFormState.keywords) ? aiFormState.keywords.join(', ') : aiFormState.keywords || ''}
+                                            onChange={(e) => setAiFormState(prev => ({ ...prev, keywords: e.target.value.split(',').map(s => s.trim()) }))}
+                                            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-12 resize-none"
+                                            placeholder="keyword1, keyword2..."
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[13px] text-neutral-500">Hashtags (Global)</label>
+                                        <div className="flex gap-1">
+                                            <textarea
+                                                value={Array.isArray(aiFormState.hashtags) ? aiFormState.hashtags.join(' ') : aiFormState.hashtags || ''}
+                                                onChange={(e) => setAiFormState(prev => ({ ...prev, hashtags: e.target.value.split(/[\s,]+/).filter(Boolean) }))}
+                                                className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-12 resize-none"
+                                                placeholder="#tag1 #tag2..."
+                                            />
+                                            <button
+                                                onClick={() => handleSendMessage(`Genera los mejores hashtags para Instagram, máximo 12, combinando:
+- tendencias actuales
+- industria del evento
+- marca
+- categoría BTL / brand experience
+
+Evento:
+${aiFormState.description || events[selectedAiEventIndex].description}
+
+Devuelve SOLO la lista separada por espacios, estilo Instagram real.`)}
+                                                className="px-2 bg-neutral-800 hover:bg-neutral-700 rounded text-xs text-neutral-300 flex items-center justify-center h-12"
+                                                title="Generar Hashtags con IA"
+                                            >
+                                                <Sparkles className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Social Block */}
+                            <div className="space-y-2 border-t border-neutral-800 pt-2">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold text-pink-400 uppercase">Instagram Content</h4>
+                                    <button
+                                        onClick={() => handleSendMessage(`Genera un copy profesional y emocional para Instagram con:
+
+1. Hook inicial de alto impacto  
+2. Cuerpo breve con storytelling  
+3. Cierre con CTA suave  
+4. 3 líneas de separación antes de los hashtags  
+5. Usa los hashtags proporcionados o genera nuevos si faltan  
+
+Datos:
+- Marca: ${events[selectedAiEventIndex].brand}
+- Título del evento: ${aiFormState.title || events[selectedAiEventIndex].title}
+- Highlights: ${(aiFormState.highlights || events[selectedAiEventIndex].highlights || []).join(', ')}
+- Descripción: ${aiFormState.description || events[selectedAiEventIndex].description}
+- Keywords: ${(aiFormState.keywords || events[selectedAiEventIndex].keywords || []).join(', ')}`)}
+                                        className="px-2 py-1 bg-pink-900/20 hover:bg-pink-900/40 border border-pink-500/30 rounded text-[10px] text-pink-300 flex items-center gap-1"
+                                        title="Generar Copy Completo"
+                                    >
+                                        <Sparkles className="w-3 h-3" /> Auto-Generar
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Hook</label>
+                                    <input 
+                                        value={aiFormState.instagram_hook || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, instagram_hook: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs font-bold text-white" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Body</label>
+                                    <textarea 
+                                        value={aiFormState.instagram_body || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, instagram_body: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-20" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Closing</label>
+                                    <input 
+                                        value={aiFormState.instagram_closing || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, instagram_closing: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Hashtags (IG)</label>
+                                    <input 
+                                        value={aiFormState.instagram_hashtags || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, instagram_hashtags: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-pink-400" 
+                                    />
+                                </div>
+                            </div>
+
+                            {/* LinkedIn Block */}
+                            <div className="space-y-2 border-t border-neutral-800 pt-2">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold text-blue-300 uppercase">LinkedIn Content</h4>
+                                    <button
+                                        onClick={() => handleSendMessage(`Genera un post para LinkedIn sobre este evento.
+
+El tono debe mezclar:
+- técnica narrativa
+- retórica (ethos, pathos, logos)
+- storytelling aplicado a negocios
+- marketing experiencial
+- neuromarketing
+- liderazgo creativo
+- impacto en marca y resultados
+
+Datos:
+- Marca: ${events[selectedAiEventIndex].brand}
+- Nombre del evento: ${aiFormState.title || events[selectedAiEventIndex].title}
+- Highlights: ${(aiFormState.highlights || events[selectedAiEventIndex].highlights || []).join(', ')}
+- Descripción: ${aiFormState.description || events[selectedAiEventIndex].description}
+
+Extensión máxima: 8–14 líneas.
+Nada de humo ni frases vacías.`)}
+                                        className="px-2 py-1 bg-blue-900/20 hover:bg-blue-900/40 border border-blue-500/30 rounded text-[10px] text-blue-300 flex items-center gap-1"
+                                        title="Generar Post LinkedIn"
+                                    >
+                                        <Sparkles className="w-3 h-3" /> Auto-Generar
+                                    </button>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[13px] text-neutral-500">Post Corto</label>
+                                    <textarea 
+                                        value={aiFormState.linkedin_post || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, linkedin_post: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-16" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[13px] text-neutral-500">Artículo Largo</label>
+                                        <button
+                                            onClick={() => handleSendMessage(`Escribe un artículo profesional para LinkedIn basado en este evento.
+
+Estructura:
+1. Introducción narrativa (contexto + tensión)
+2. El desafío de marca
+3. La solución BTL / experiencia creada
+4. Qué se logró (impacto y aprendizajes)
+5. Conclusión inspiradora orientada a negocio
+
+Debe mezclar:
+- storytelling estratégico
+- retórica
+- insights creativos
+- neuromarketing
+- experiencia de marca
+- liderazgo creativo
+
+Datos:
+- Marca: ${events[selectedAiEventIndex].brand}
+- Evento: ${aiFormState.title || events[selectedAiEventIndex].title}
+- Highlights: ${(aiFormState.highlights || events[selectedAiEventIndex].highlights || []).join(', ')}
+- Descripción: ${aiFormState.description || events[selectedAiEventIndex].description}`)}
+                                            className="px-2 py-0.5 bg-blue-900/20 hover:bg-blue-900/40 border border-blue-500/30 rounded text-[9px] text-blue-300 flex items-center gap-1"
+                                            title="Generar Artículo LinkedIn"
+                                        >
+                                            <Sparkles className="w-3 h-3" /> Generar Artículo
+                                        </button>
+                                    </div>
+                                    <textarea 
+                                        value={aiFormState.linkedin_article || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, linkedin_article: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-32" 
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Alternatives Block */}
+                            <div className="space-y-2 border-t border-neutral-800 pt-2">
+                                <h4 className="text-xs font-bold text-neutral-400 uppercase">Variantes Alternativas (A/B)</h4>
+                                
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input 
+                                        placeholder="Título Alt 1"
+                                        value={aiFormState.alt_title_1 || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, alt_title_1: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300" 
+                                    />
+                                    <input 
+                                        placeholder="Título Alt 2"
+                                        value={aiFormState.alt_title_2 || ''} 
+                                        onChange={(e) => setAiFormState(prev => ({ ...prev, alt_title_2: e.target.value }))}
+                                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300" 
+                                    />
+                                </div>
+                                <textarea 
+                                    placeholder="Copy Alt Instagram"
+                                    value={aiFormState.alt_instagram || ''} 
+                                    onChange={(e) => setAiFormState(prev => ({ ...prev, alt_instagram: e.target.value }))}
+                                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-neutral-300 h-16" 
+                                />
+                            </div>
+
+                            {/* Visual Strategy Block */}
+                            <div className="space-y-2 border-t border-neutral-800 pt-2">
+                                <h4 className="text-xs font-bold text-purple-400 uppercase">Estrategia Visual</h4>
+                                <button
+                                    onClick={() => handleSendMessage(`Revisa esta lista de imágenes:
+
+${(events[selectedAiEventIndex].gallery || []).map((g: any) => g.url).join('\n')}
+
+Diseña la estrategia visual para un portfolio con hero trapezoidal:
+
+1) Hero ideal  
+2) Orden óptimo de imágenes  
+3) Justificación clara basadas en composición, impacto visual, narrativa y claridad profesional
+
+Formato:
+Hero:
+Orden:
+Justificación:`)}
+                                    className="w-full py-2 bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 rounded text-xs text-purple-300 flex items-center justify-center gap-2"
+                                >
+                                    <ImageIcon className="w-4 h-4" /> Sugerir Orden de Fotos (IA)
+                                </button>
+                            </div>
+                        </div>
+
                         <button
-                           onClick={() => selectedAiEventIndex !== null && handleApprove(events[selectedAiEventIndex].id, aiDraft)}
-                           className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold text-sm flex items-center justify-center transition-colors shadow-lg shadow-pink-900/20 mt-2"
+                           onClick={() => {
+                                if (selectedAiEventIndex !== null && events[selectedAiEventIndex]?.id) {
+                                    // Filter out undefined values to prevent overwriting with undefined
+                                    const updates = Object.fromEntries(
+                                        Object.entries(aiFormState).filter(([_, v]) => v !== undefined)
+                                    );
+                                    handleApprove(events[selectedAiEventIndex].id, updates);
+                                }
+                           }}
+                           className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-bold text-sm flex items-center justify-center transition-colors shadow-lg shadow-pink-900/20 mt-4 sticky bottom-0 z-10"
                         >
                            <Check className="w-4 h-4 mr-2" /> Aprobar y Guardar en CMS
                         </button>

@@ -7,57 +7,93 @@ interface SchemaJSONLDProps {
 
 export const SchemaJSONLD: React.FC<SchemaJSONLDProps> = ({ events }) => {
   useEffect(() => {
+    const services = [
+       "Activaciones BTL",
+       "Experiencias inmersivas",
+       "Arquitectura efímera",
+       "Diseño de stands y escenografía",
+       "Producción de eventos corporativos",
+       "Instalaciones tecnológicas",
+       "Brand experience",
+       "Lanzamiento de productos y marcas",
+       "Guerrilla marketing"
+    ];
+
+    // 1. Organization (The Agency) with Merged Services & Portfolio
     const orgSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "WAV BTL",
+      "name": "We Are Vision",
+      "alternateName": ["WAV", "WAV BTL"],
       "url": "https://btl.wearevision.cl",
       "logo": "https://btl.wearevision.cl/favicon.png",
       "description": "Agencia de Marketing Experiencial, Activaciones de Marca, Instalaciones Tecnológicas y Producción de Eventos en Chile y LATAM.",
+      "foundingDate": "2003",
+      "email": "federico@wearevision.cl",
+      "dateModified": new Date().toISOString(),
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Santiago",
+        "addressCountry": "CL"
+      },
       "sameAs": [
         "https://www.instagram.com/wearevisioncl",
         "https://www.linkedin.com/company/wearevision"
-      ]
-    };
-
-    const serviceSchema = {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "serviceType": "Marketing Experiencial y Activaciones de Marca",
-      "provider": {
-        "@type": "Organization",
-        "name": "WAV BTL"
+      ],
+      
+      // 2. hasOfferCatalog containing structured list of services
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios BTL y Experiencias",
+        "itemListElement": services.map(service => ({
+            "@type": "Offer",
+            "itemOffered": {
+                "@type": "Service",
+                "name": service
+            }
+        }))
       },
-      "areaServed": ["Chile", "Latinoamérica"],
-      "description": "Servicios de activaciones BTL, producción de eventos, experiencias inmersivas, instalaciones tecnológicas, diseño de stands y escenografía."
+
+      // 3. Portfolio entries (CreativeWork)
+      "workExample": events.map(event => ({
+         "@type": "CreativeWork",
+         "name": event.title,
+         "headline": event.title,
+         "alternativeHeadline": event.brand,
+         "image": event.image,
+         "identifier": event.slug || event.id,
+         "url": `https://btl.wearevision.cl/?evento=${event.slug || ''}`,
+         "about": event.description,
+         "keywords": [
+             "activación BTL",
+             "experiencia inmersiva",
+             "instalación tecnológica",
+             "producción de eventos",
+             "arquitectura efímera",
+             "stand",
+             "brand experience"
+         ],
+         "provider": {
+            "@type": "Organization",
+            "name": "We Are Vision"
+         },
+         "creator": {
+            "@type": "Organization",
+            "name": "We Are Vision"
+          }
+      }))
     };
 
+    // 4. WebSite (The BTL Portfolio context)
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "WAV BTL",
+      "name": "WAV BTL Portfolio",
       "url": "https://btl.wearevision.cl",
-      "description": "Portafolio experiencial de activaciones y eventos BTL en Chile y Latinoamérica."
+      "description": "Portafolio experiencial de activaciones y eventos BTL en Chile y Latinoamérica de We Are Vision."
     };
 
-    const workSchemas = events.map(event => ({
-      "@context": "https://schema.org",
-      "@type": "CreativeWork",
-      "name": event.title,
-      "image": event.image,
-      "description": event.description,
-      "creator": {
-        "@type": "Organization",
-        "name": "WAV BTL"
-      }
-    }));
-
-    const fullSchema = [
-      orgSchema,
-      serviceSchema,
-      websiteSchema,
-      ...workSchemas
-    ];
+    const fullSchema = [orgSchema, websiteSchema];
 
     const script = document.createElement('script');
     script.type = "application/ld+json";
@@ -65,7 +101,6 @@ export const SchemaJSONLD: React.FC<SchemaJSONLDProps> = ({ events }) => {
     document.head.appendChild(script);
 
     return () => {
-      // Clean up script when component unmounts or events change
       try {
         document.head.removeChild(script);
       } catch (e) {

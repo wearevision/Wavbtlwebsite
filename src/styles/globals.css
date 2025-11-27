@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -8,13 +8,13 @@
 
 :root {
   /* A. Color Variables */
-  --wav-brand-pink: #FF00A8;
-  --wav-brand-purple: #9B00FF;
-  --wav-brand-blue: #0044FF;
-  --wav-neutral-white: #FFFFFF;
+  --wav-brand-pink: #ff00a8;
+  --wav-brand-purple: #9b00ff;
+  --wav-brand-blue: #0044ff;
+  --wav-neutral-white: #ffffff;
   --wav-neutral-black: #000000;
-  --wav-neutral-gray100: #F1F1F1;
-  --wav-neutral-gray500: #7A7A7A;
+  --wav-neutral-gray100: #f1f1f1;
+  --wav-neutral-gray500: #7a7a7a;
   --wav-neutral-gray900: #111111;
 
   /* Default Mode (Monochrome) */
@@ -29,16 +29,16 @@
 
 /* Neon Mode */
 body.mode-neon {
-  --wav-neon-pink: #FF00E6;
-  --wav-neon-purple: #B700FF;
-  --wav-neon-blue: #00A8FF;
+  --wav-neon-pink: #ff00e6;
+  --wav-neon-purple: #b700ff;
+  --wav-neon-blue: #00a8ff;
   --tile-glow-color: var(--wav-neon-pink);
 }
 
 /* Duotone Mode */
 body.mode-duotone {
-  --wav-duotone-dark: #0D0D0D;
-  --wav-duotone-light: #A4A4A4;
+  --wav-duotone-dark: #0d0d0d;
+  --wav-duotone-light: #a4a4a4;
   --tile-overlay-bg: var(--wav-brand-blue);
 }
 
@@ -51,7 +51,7 @@ body.mode-glass {
 
 /* C. Motion Variables */
 :root {
-  --motion-scale-hover: 1.10;
+  --motion-scale-hover: 1.1;
   --motion-overlay-opacity: 0.65;
   --motion-blur-wall: 20px;
   --motion-easing-global: cubic-bezier(0.19, 1, 0.22, 1);
@@ -64,7 +64,7 @@ body.mode-glass {
 :root {
   --shape-trapezoid-angle: 17deg;
   --shape-trapezoid-ratio: 1.4;
-  --shape-expanded-ratio: 5.0;
+  --shape-expanded-ratio: 5;
   --shape-stroke-width: 1.5px;
 }
 
@@ -79,5 +79,26 @@ body {
 
 .wav-blur-bg {
   filter: blur(var(--motion-blur-wall));
-  transition: filter var(--motion-duration-medium) var(--motion-easing-global);
+  transition: filter var(--motion-duration-medium)
+    var(--motion-easing-global);
+}
+
+/* Oculta el skip link */
+a[href="#main-content"], .skip-to-content {
+  position: absolute !important;
+  top: -100px !important;
+  left: -100px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Oculta el header vacío que genera la línea negra */
+header[role="banner"] {
+  display: none !important;
+}
+
+/* Asegura que no haya padding/margin que genere banda visual */
+body, html {
+  margin: 0 !important;
+  padding: 0 !important;
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, MotionValue, useSpring, useTransform } from 'motion/react';
 import { Tile } from './Tile';
 import { clsx } from 'clsx';
@@ -15,25 +15,41 @@ interface WallProps {
 }
 
 export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMobile = false, events, isLoading = false }) => {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+       // Set hasMounted to true after initial loading is complete.
+       // This prevents staggered animations on subsequent re-renders (e.g., closing a modal).
+       setHasMounted(true);
+    }
+  }, [isLoading]);
+
   // 1. Infinite Wall logic
-  // Mobile: 9 rows, 6 cols.
-  // Desktop: Scaled to ~65% size -> Increased density. 
-  // Rows: 9 * 1.5 ~= 14. Cols: 6 * 1.5 = 9.
-  const ROWS = isMobile ? 9 : 14; 
-  const COLS = isMobile ? 6 : 9; 
+  // Mobile: 12 rows, 5 cols. (Increased density for vertical coverage)
+  // Desktop: 24 rows, 12 cols. (Increased for infinite feel on larger screens)
+  const ROWS = isMobile ? 12 : 24; 
+  const COLS = isMobile ? 5 : 12; 
   
   const tiles = useMemo(() => {
     if (!events || events.length === 0) return [];
     
     return Array.from({ length: ROWS * COLS }).map((_, i) => {
-      // Use modulo to loop through the events array if grid is larger than data
-      const eventData = events[i % events.length];
+      // Use a large prime multiplier to scatter the events pseudo-randomly
+      // This prevents visual clusters and makes the repetition less obvious pattern-wise
+      const SCATTER_PRIME = 37; 
+      const eventIndex = (i * SCATTER_PRIME) % events.length;
+      const eventData = events[eventIndex];
+      
       return {
-        id: `tile-${i}`,
+        id: `tile-${i}-${eventIndex}`, // Critical: Must be unique for React key. 'i' ensures uniqueness in grid, 'eventIndex' tracks data.
+        // We construct a selection ID that matches App.tsx's parsing logic: "tile-{index}"
+        // App.tsx uses: events[parseInt(id.split('-')[1]) % events.length]
+        // So we must pass the EXACT eventIndex we calculated above.
+        eventId: `tile-${eventIndex}`, 
         image: eventData.image, 
         title: eventData.title,
         brand: eventData.brand,
-        // Pass description if needed, though Tile doesn't display it currently
       };
     });
   }, [events]);
@@ -77,17 +93,15 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
           x: smoothX,
           y: smoothY,
         }}
-        className="relative flex flex-col items-center justify-center shrink-0 origin-center will-change-transform"
+        className="relative flex flex-col items-center justify-center shrink-0 origin-center"
       >
         {/* 
            Grid Container
-           - Mobile: w-[200vw]. For 320px viewport, grid is 640px. 6 cols -> ~106px/col. 
-             Visible width 320px captures ~3 columns.
-           - Desktop: w-[120vw]. For 1920px viewport, grid is 2304px. 6 cols -> ~384px/col.
-             Visible width 1920px captures ~5 columns.
+           - Mobile: w-[160vw]. Reduced to improve vertical fit logic.
+           - Desktop: w-[140vw]. Expanded.
         */}
         <div 
-          className="grid gap-y-1 gap-x-0 w-[200vw] md:w-[120vw]"
+          className="grid gap-y-1 gap-x-0 w-[160vw] md:w-[160vw]"
           style={{
             gridTemplateColumns: `repeat(${COLS}, 1fr)`,
           }}
@@ -96,10 +110,11 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
             const row = Math.floor(i / COLS);
             const isEvenRow = row % 2 === 0;
             const shouldExplode = !isMobile; // Disable heavy layout animation on mobile
+            const useDelay = !hasMounted && !isLoading && shouldExplode;
 
             return (
               <motion.div 
-                layout={shouldExplode}
+                // Removed layout={shouldExplode} to prevent disappearing tiles bug during parent transforms
                 key={tile.id} 
                 initial={false}
                 animate={isLoading ? (
@@ -149,12 +164,11 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
                 transition={{ 
                   type: "tween", 
                   ease: "easeInOut", 
-                  duration: shouldExplode ? 0.8 : 0, // No transition on mobile
-                  delay: (isLoading || !shouldExplode) ? 0 : i * 0.05
+                  duration: (shouldExplode && !hasMounted) ? 0.8 : 0, 
+                  delay: useDelay ? Math.min(i * 0.02, 2.0) : 0
                 }}
                 className={clsx(
-                   "relative transition-transform duration-500",
-                   // Removed stagger logic to maintain perfect vertical alignment of trapezoids
+                   "relative", // Removed conflicting transition-transform duration-500 which fights with Framer Motion
                    
                    // Width Override for Slant Overlap:
                    "w-[calc(125%-4px)]"
@@ -162,8 +176,9 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
               >
                 <Tile 
                   {...tile} 
+                  id={tile.eventId} // Pass the REAL event ID to the Tile component
                   index={i}
-                  onSelect={() => onSelect(tile.id)} 
+                  onSelect={() => onSelect(tile.eventId)} // Pass real ID on click
                   mode={mode}
                 />
               </motion.div>

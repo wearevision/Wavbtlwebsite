@@ -89,11 +89,12 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
   return (
     <motion.div
       layoutId={`tile-${id}`}
-      className="relative group cursor-pointer w-full will-change-transform"
+      className="relative group cursor-pointer w-full"
       style={{ 
         // 3x Larger visual appearance = standard aspect ratio but grid column is wider.
         // Keeping 16:9 or similar cinematic ratio looks good for "larger" cards.
         aspectRatio: '1.6 / 1',
+        clipPath: clipPath, // Moved clipPath here to fix hit-testing on overlapping tiles
       }}
       whileHover={{ 
         scale: 1.05, 
@@ -101,18 +102,24 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
         transition: { duration: 0.2, ease: "easeOut" }
       }}
       onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       {/* Shape Container */}
       <div 
         className="w-full h-full relative overflow-hidden bg-neutral-900"
-        style={{ 
-          clipPath: clipPath,
-        }}
+        // clipPath removed from here
       >
         {/* Image */}
         <img 
           loading="lazy"
-          src={image} 
+          src={`${image}${image.includes('?') ? '&' : '?'}width=400&quality=80&format=webp`}
           alt={title}
           className={clsx(
             "w-full h-full object-cover transition-all duration-500",
@@ -128,7 +135,7 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
         <div 
           className={clsx(
             "absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center",
-            mode === 'glass' ? "backdrop-blur-md bg-white/10" : ""
+            mode === 'glass' ? "bg-white/10" : ""
           )}
           style={{
             background: mode === 'duotone' 

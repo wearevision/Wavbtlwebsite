@@ -1,236 +1,112 @@
-1. General Principles
+# WAV BTL — Design System & Engineering Guidelines (v2.0)
 
-These rules apply globally to the entire template and all derivative files:
+## 1. Core Philosophy: Cinematic Geometry
+These principles govern the entire application. They are non-negotiable.
 
-1.1 Simplicity & Scalability
-	•	Prefer flexible, responsive structures over fixed or absolute positioning.
-	•	Use Auto Layout and Layout Grids whenever possible.
-	•	Keep layers minimal and clean; avoid unnecessary nesting.
+### 1.1 The "No-Smoke" Policy
+*   **Visuals:** Functional, high-contrast, decisive. No decorative filler.
+*   **Motion:** Physics-based ease. No bounce, no rubber-banding. Snap to grid.
+*   **Code:** Semantic HTML, highly optimized rendering, strict typing.
 
-1.2 Consistency
-	•	Maintain consistent geometry, spacing, color logic, and naming.
-	•	Reuse and modify existing components instead of creating duplicates.
+### 1.2 Geometric Integrity
+*   The trapezoid (~17° angle) is the core brand atom.
+*   **Rule:** Never skew images. Mask them.
+*   **Rule:** Parallel horizontal lines always remain parallel.
 
-1.3 Editability
-	•	Every property (colors, spacing, angles, overlays, masks) must be easy to adjust.
-	•	Designers should be able to replace imagery or change the number of tiles without breaking the mosaic.
+---
 
-1.4 Performance
-	•	Keep vector masks simple and optimized.
-	•	Reduce frame complexity and avoid excessive effects layers.
+## 2. The Infinite Mosaic (PROTECTED SYSTEM)
+> ⚠️ **WARNING:** This logic is stable and production-ready. DO NOT MODIFY layout logic, spacing, or angular math without explicit authorization.
 
-⸻
+### 2.1 Mosaic Behavior
+*   **Structure:** Infinite wall of identical trapezoidal tiles.
+*   **Movement:** Interactive parallax reacting to mouse (X/Y) and scroll.
+*   **Overflow:** The grid must logically extend beyond the viewport to prevent "white edges" during rotation.
 
-2. Infinite Mosaic System
+### 2.2 Tile Specification
+*   **Mask:** 17° inward angle on vertical edges.
+*   **Spacing:** Strict 2px–4px uniform gap.
+*   **State - Resting:** Monochrome, high contrast.
+*   **State - Hover:** Scale 110% (image only), Color Reveal, Z-index bump.
 
-This is the core logic that defines how the homepage visual behaves.
+---
 
-2.1 Geometry
-	•	All tiles must be identical trapezoids.
-	•	Left and right vertical edges must share the same inward angle (~17°).
-	•	Horizontal edges must remain perfectly parallel.
-	•	No tile should rotate independently—only the entire mosaic wall rotates.
+## 3. Expanded Card (Modal) — New Architecture
+This is the primary reading environment. It must function as an editorial layout, not just a popup.
 
-2.2 Infinite Wall Behavior
-	•	The mosaic must extend beyond the frame in all directions.
-	•	No edges should be visible; the mosaic should feel endless.
-	•	Duplicate the grid outward to ensure it fills overflow areas.
+### 3.1 Layout Strategy: The "Split & Stack"
+The layout adapts drastically per breakpoint to preserve the content's hierarchy.
 
-2.3 Spacing Rules
-	•	Maintain a uniform spacing between every tile: 2–4 px max.
-	•	Spacing must be equal both horizontally and vertically.
-	•	Never allow tiles to touch or form uneven gaps.
+*   **Desktop (>1024px):** Asymmetric Split.
+    *   Left (Visuals): Sticky, Full Height, Trapezoidal Cut.
+    *   Right (Content): Scrollable, Clean Typography.
+*   **Tablet (768px - 1024px):** Hybrid Stack.
+    *   Top (Visuals): 45vh height.
+    *   Bottom (Content): Scrollable.
+*   **Mobile (<768px):** Vertical Flow.
+    *   Top (Visuals): Aspect Ratio 4:5 or 1:1. Diagonal bottom cut.
+    *   Bottom (Content): Full width, standard scroll.
 
-2.4 Tile Content
-	•	Every tile contains:
-	•	A trapezoid vector mask
-	•	A monochrome event image (Scale to Fill)
-	•	Hover overlay layer (gradient or color mode)
-	•	Optional dynamic states (active, selected, expanded)
+### 3.2 Content Constraints (Strict)
+To maintain the "Cinematic" look, content **must** fit these constraints. The UI must handle overflow gracefully if these are exceeded, but the design intent is strict.
 
-2.5 Image Rules
-	•	All imagery must remain black-and-white unless in hover state.
-	•	Use high-contrast photography with clear subjects.
-	•	Maintain crisp, non-distorted crops inside the trapezoid mask.
+*   **H1 Title:**
+    *   Max length: 60 characters.
+    *   Scale: Fluid (Clamp).
+    *   Line-height: 1.1 (Tight).
+*   **Body Text:**
+    *   Max length: 800 characters (approx 2 paragraphs).
+    *   Line-height: 1.6 (Relaxed).
+    *   Max-width: 65ch (Optimal reading measure).
 
-⸻
+### 3.3 Scroll Physics
+*   **Global Body:** Locked (overflow-hidden) when Modal is open.
+*   **Desktop:** Only the Right Column (Content) scrolls. The Image (Left) remains sticky.
+*   **Mobile:** The entire card surface scrolls. The background mosaic is blurred and fixed.
 
-3. Interaction & Motion Guidelines
+---
 
-3.1 Hover State
-	•	Scale tile to 110% while retaining the trapezoid mask.
-	•	Apply a gradient overlay with ~65% opacity.
-	•	Use color variables for overlays (pink, purple, blue).
-	•	Keep motion smooth using standardized easing curves.
+## 4. Color System & Modes
 
-3.2 Mosaic Motion
-	•	Cursor movement must influence the entire mosaic:
-	•	Z-axis rotation reacts to X-position.
-	•	Vertical parallax reacts to Y-position.
-	•	Use motion variables for consistency across animations.
+### 4.1 Brand Palette (Variables)
+*   `--brand-pink`: #FF00A8
+*   `--brand-purple`: #9B00FF
+*   `--brand-blue`: #0044FF
+*   `--bg-black`: #000000 (or #050505 for less harsh contrast)
+*   `--text-white`: #FFFFFF
+*   `--text-muted`: #A1A1AA (Gray-400)
 
-3.3 Expanded Card
+### 4.2 Modes
+*   **Monochrome:** Default.
+*   **Neon:** Active state (high saturation gradients).
+*   **Glass:** UI Overlays (Backdrop blur 20px, bg-black/30).
 
-When a tile is clicked:
-	•	Display a 5:1 trapezoidal card above the mosaic.
-	•	Expanded card includes:
-	•	Trapezoidal video container
-	•	Thumbnail sub-gallery
-	•	Title text
-	•	Descriptive paragraph
-	•	The mosaic behind the modal must blur at 20% Gaussian blur.
-	•	Do not blur UI elements or the modal itself.
+---
 
-⸻
+## 5. Technical Implementation Rules
 
-4. Color System & Modes
+### 5.1 React Components
+*   **Atom:** `Tile.tsx` (Pure presentation).
+*   **Molecule:** `Modal.tsx` (Layout controller).
+*   **Organism:** `Wall.tsx` (Grid logic).
 
-4.1 Brand Colors
+### 5.2 Tailwind Best Practices
+*   **Typography:** Use `text-balance` on titles to prevent widows.
+*   **Z-Index:**
+    *   Mosaic: `z-0`
+    *   Overlay/Blur: `z-40`
+    *   Modal Content: `z-50`
+    *   Navigation/Close: `z-55`
 
-Use Figma Variables:
-	•	Pink: #FF00A8
-	•	Purple: #9B00FF
-	•	Blue: #0044FF
-	•	White: #FFFFFF
-	•	Black: #000000
+### 5.3 Motion (Framer Motion)
+*   **Entrance:** `duration: 0.6, ease: [0.16, 1, 0.3, 1]` (Expo Out).
+*   **Exit:** `duration: 0.4, ease: [0.16, 1, 0.3, 1]`.
+*   Avoid linear easing for UI elements.
 
-4.2 Neutral Colors
-	•	Gray100 #F1F1F1
-	•	Gray500 #7A7A7A
-	•	Gray900 #111111
+---
 
-4.3 Color Modes
-
-Each mode must be available through variable sets.
-
-Monochrome Mode
-	•	Default mode for all imagery.
-	•	No color except on hover overlays.
-
-Neon Mode
-	•	High-saturation gradients.
-	•	Optional glow-layer effect (soft outer glow).
-	•	Intended for high-energy scenes.
-
-Duotone Mode
-	•	Replace shadows with dark neutral and highlights with bright neutral.
-	•	Useful for content unification.
-
-Glass Mode
-	•	Translucent overlays.
-	•	Backdrop blur (10–12 px).
-	•	Muted colors for subtle interactions.
-
-⸻
-
-5. Component Architecture
-
-5.1 Tile Component
-	•	Trapezoid mask (vector)
-	•	Image slot
-	•	Overlay slot
-	•	Interactive states
-	•	Should scale without skewing geometry
-
-5.2 Mosaic Frame
-	•	Repeating pattern of tile instances
-	•	Uses Grid Layout or manual duplication
-	•	Hidden overflow edges to simulate infinite wall
-
-5.3 Expanded Card Component
-	•	Parent trapezoid with 5:1 ratio
-	•	Inner masked containers (video + gallery)
-	•	Text content arranged via Auto Layout
-	•	Z-index above all mosaic layers
-
-⸻
-
-6. Layout & Auto Layout Guidelines
-
-6.1 Auto Layout Rules
-	•	Use vertical or horizontal auto-layout stacks only where helpful.
-	•	Keep spacing governed by variables (2–4 px).
-	•	Use “Scale” constraints for trapezoid shapes.
-	•	Ensure expanded card adapts fluidly to different screen sizes.
-
-6.2 Responsive Behavior
-	•	Tiles scale proportionally when the frame resizes.
-	•	Mosaic should preserve the trapezoid geometry at all breakpoints.
-	•	Expanded card should center and adapt to mobile width.
-	•	Never distort the trapezoid geometry during responsive adjustments.
-
-⸻
-
-7. Effects & Blur Rules
-
-7.1 Mosaic Blur (Modal Active)
-	•	Use 20% Gaussian blur.
-	•	Optionally add a dim overlay (~30% black).
-	•	Blur only the mosaic, not the UI or modal content.
-
-7.2 Glow Effects (Neon Mode)
-	•	Use soft, diffuse glow effects, never sharp halos.
-
-⸻
-
-8. Naming & File Organization
-
-8.1 Component Naming
-	•	Tile / Default
-	•	Tile / Hover
-	•	Tile / Selected
-	•	Tile / Expanded
-	•	Modal / Expanded Trapezoid
-	•	System / Mosaic Wall
-
-8.2 Page Organization
-	•	Page 1: Components
-	•	Page 2: Color Modes & Variables
-	•	Page 3: Mosaic System
-	•	Page 4: Prototype Interactions
-	•	Page 5: Export Frames
-
-8.3 Layer Naming
-	•	Use clear, semantic naming.
-	•	Avoid overly nested structures.
-
-⸻
-
-9. Template Usage Guidelines
-	•	Feel free to change images, swap color modes, adjust spacing, or scale the mosaic.
-	•	The system should remain stable under:
-	•	Tile addition or removal
-	•	Responsive resizing
-	•	Color mode toggles
-	•	Interaction changes
-	•	Always preserve the trapezoid geometry and spacing logic.
-
-⸻
-
-10. Best Practices for Remixing This Template
-	•	Always start from existing components instead of creating new shapes.
-	•	Use Variables instead of manual color edits.
-	•	Keep hover and active states consistent across all tiles.
-	•	Maintain the infinite-wall illusion by duplicating the mosaic outward.
-	•	Check spacing whenever adding new rows or columns.
-
-⸻
-
-11. What This Template Should Never Do
-	•	Never use inconsistent trapezoid angles.
-	•	Never distort images by stretching instead of “Scale to Fill.”
-	•	Never mix spacing values.
-	•	Never rotate individual tiles independently.
-	•	Never reveal raw rectangular images outside the mask.
-
-⸻
-
-12. Quality Bar
-
-Every exported frame or prototype should look:
-	•	Cinematic
-	•	Geometric
-	•	Polished
-	•	Professional
-	•	Emotionally expressive
-	•	Cohesive with WAV identity
+## 6. Developer Checklist for Commits
+1.  Did I break the Mosaic geometry? (Check corners).
+2.  Does the Modal title overlap the close button on Mobile?
+3.  Is the scroll locked on the `<body>` when the modal is open?
+4.  Are images using `object-cover` inside their masks?
