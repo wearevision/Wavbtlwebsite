@@ -24,7 +24,7 @@ export interface RefineResponse {
 }
 
 export async function refineDescription(
-  messages: { role: 'user' | 'assistant', text: string }[],
+  messages: { role: 'user' | 'assistant', content: string }[],
   currentDraft: string,
   event: WavEvent
 ): Promise<RefineResponse> {
@@ -54,7 +54,7 @@ export async function refineDescription(
     // Fallback if backend fails or API key is missing
     return {
       draft: currentDraft,
-      response: "Lo siento, el servicio de IA no está disponible en este momento. Por favor verifique la configuración del backend."
+      chat_response: "Lo siento, el servicio de IA no está disponible en este momento. Por favor verifique la configuración del backend."
     };
   }
 }

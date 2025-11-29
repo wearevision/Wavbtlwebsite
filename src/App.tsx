@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { X } from 'lucide-react';
 import { Wall } from './components/wav/Wall';
 import { TextRotator } from './components/wav/TextRotator';
 import { Controls } from './components/wav/Controls';
@@ -9,29 +10,10 @@ import { LogoLoader } from './components/wav/LogoLoader';
 import { SchemaJSONLD } from './components/wav/SchemaJSONLD';
 import { clsx } from 'clsx';
 import { events as staticEvents } from './data/events';
-import { getEvents } from './utils/api';
-import { WavEvent, ColorMode } from './types';
+import { getEvents, getCategories } from './utils/api';
+import { WavEvent } from './types';
+import { EventCategory } from './utils/contentRules';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-
-// SVG Filter for Duotone
-const DuotoneFilter = () => (
-  <svg className="hidden">
-    <filter id="duotone-filter">
-      <feColorMatrix
-        type="matrix"
-        values=".33 .33 .33 0 0
-                .33 .33 .33 0 0
-                .33 .33 .33 0 0
-                0   0   0   1 0"
-      />
-      <feComponentTransfer colorInterpolationFilters="sRGB">
-        <feFuncR type="table" tableValues="0.05 0.64" /> {/* Dark to Light (approx) */}
-        <feFuncG type="table" tableValues="0.05 0.64" />
-        <feFuncB type="table" tableValues="0.05 0.64" />
-      </feComponentTransfer>
-    </filter>
-  </svg>
-);
 
 // Interface for iOS specific requestPermission
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
@@ -70,28 +52,46 @@ const ensureUniqueSlugs = (events: WavEvent[]): WavEvent[] => {
 };
 
 export default function App() {
-  const [mode, setMode] = useState<ColorMode>('monochrome');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // Initialize isMobile with correct value to prevent flash/reflow
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  });
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [showPermissionButton, setShowPermissionButton] = useState(false);
   
   // Data & Admin State
-  // Initialize events with unique slugs
-  const [events, setEvents] = useState<WavEvent[]>(() => ensureUniqueSlugs(staticEvents));
+  // Initialize with empty array - data will load from Supabase
+  const [events, setEvents] = useState<WavEvent[]>([]);
+  const [categories, setCategories] = useState<EventCategory[]>([]);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
-    // Load dynamic events and add slugs
+    // Load dynamic events and categories
     fetchEvents();
+    fetchCategories();
   }, []);
 
-  const fetchEvents = () => {
-    getEvents().then(fetchedEvents => {
+  const fetchEvents = async () => {
+    try {
+      const fetchedEvents = await getEvents();
       setEvents(ensureUniqueSlugs(fetchedEvents));
-    });
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const categories = await getCategories();
+      setCategories(categories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
   };
   
   // Deep Linking: Back/Forward Navigation Support
@@ -233,11 +233,20 @@ export default function App() {
     }
   };
 
-  // Apply mode class to body
+  // Removed: mode class application (only monochrome mode now)
+
+  // Filter events by category
+  const filteredEvents = useMemo(() => {
+    if (!selectedCategory) return events;
+    return events.filter(event => event.category === selectedCategory);
+  }, [events, selectedCategory]);
+
+  // Close modal when category changes
   useEffect(() => {
-    document.body.className = `mode-${mode}`;
-    // Reset specific styles if needed, handled by CSS
-  }, [mode]);
+    if (selectedId && selectedCategory !== null) {
+      setSelectedId(null);
+    }
+  }, [selectedCategory]);
 
   const selectedEvent = useMemo(() => {
     if (!selectedId) return null;
@@ -268,10 +277,14 @@ export default function App() {
   }, [selectedEvent, isNavigating]);
 
   if (showAdmin) {
-    return <AdminPanel onBack={() => {
-      setShowAdmin(false);
-      fetchEvents(); // Reload data when returning from admin
-    }} />;
+    return <AdminPanel 
+      onBack={() => {
+        setShowAdmin(false);
+        fetchEvents(); // Reload data when returning from admin
+        fetchCategories(); // Reload categories as well
+      }} 
+      categories={categories}
+    />;
   }
 
   return (
@@ -340,7 +353,9 @@ export default function App() {
             <ul>
               {events.map((e, i) => (
                 <li key={`ai-context-${i}`}>
-                  <h3>{e.title} para {e.brand}</h3>
+                  <a href={`?evento=${e.slug}`}>
+                    <h3>{e.title} para {e.brand}</h3>
+                  </a>
                   <p><strong>Descripción del Proyecto:</strong> {e.description}</p>
                   <p><strong>Categoría:</strong> Marketing Experiencial, Activación BTL, Producción de Eventos.</p>
                 </li>
@@ -368,8 +383,6 @@ export default function App() {
           </article>
         </section>
 
-        <DuotoneFilter />
-        
         <SchemaJSONLD events={events} />
 
         {/* Loading Screen */}
@@ -384,15 +397,34 @@ export default function App() {
           "w-full h-full transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]",
           selectedId ? "blur-[4px] grayscale opacity-40" : ""
         )}>
-          <Wall 
-            mouseX={mouseX} 
-            mouseY={mouseY} 
-            onSelect={setSelectedId} 
-            mode={mode}
-            isMobile={isMobile}
-            events={events}
-            isLoading={isLoading}
-          />
+          {filteredEvents.length > 0 ? (
+            <Wall 
+              mouseX={mouseX} 
+              mouseY={mouseY} 
+              onSelect={setSelectedId} 
+              isMobile={isMobile}
+              events={filteredEvents}
+              isLoading={isLoading}
+            />
+          ) : !isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center px-6"
+              >
+                <p className="text-white/60 text-lg mb-4">
+                  No hay eventos en esta categoría
+                </p>
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className="px-6 py-3 bg-white text-black font-bold uppercase tracking-wider rounded-full hover:scale-105 transition-transform"
+                >
+                  Ver todos los eventos
+                </button>
+              </motion.div>
+            </div>
+          )}
           
           {/* 
             TextRotator overlay:
@@ -433,7 +465,6 @@ export default function App() {
               key={selectedId}
               event={selectedEvent} 
               onClose={() => setSelectedId(null)} 
-              mode={mode}
               isMobile={isMobile}
             />
           )}
@@ -441,11 +472,39 @@ export default function App() {
 
         {/* Controls */}
         <Controls 
-          currentMode={mode} 
-          setMode={setMode} 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          events={events}
           isModalOpen={!!selectedId} 
           onCloseModal={() => setSelectedId(null)}
         />
+
+        {/* Active Filter Indicator */}
+        <AnimatePresence>
+          {selectedCategory && !selectedId && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed top-8 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 flex items-center gap-3"
+            >
+              <span className="text-white/80 text-sm font-bold uppercase tracking-wider">
+                {categories.find(c => c.id === selectedCategory)?.label}
+              </span>
+              <span className="text-white/40 text-xs">
+                {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="text-white/60 hover:text-white transition-colors"
+                aria-label="Clear filter"
+              >
+                <X size={16} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Admin Trigger Button */}
         <button 

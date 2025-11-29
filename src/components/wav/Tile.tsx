@@ -9,10 +9,9 @@ interface TileProps {
   brand?: string;
   index: number;
   onSelect: () => void;
-  mode: string;
 }
 
-export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSelect, mode }) => {
+export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSelect }) => {
   // Geometry Update:
   // "Left side same angle as right side" -> Parallelogram ( / / )
   // "Top/Bottom parallel to render" -> Horizontal top/bottom edges
@@ -121,28 +120,14 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
           loading="lazy"
           src={`${image}${image.includes('?') ? '&' : '?'}width=400&quality=80&format=webp`}
           alt={title}
-          className={clsx(
-            "w-full h-full object-cover transition-all duration-500",
-            mode === 'duotone' ? "brightness-75" : "grayscale",
-            mode === 'neon' ? "contrast-125 grayscale" : "",
-          )}
-          style={{
-             filter: mode === 'duotone' ? 'url(#duotone-filter)' : undefined
-          }}
+          className="w-full h-full object-cover transition-all duration-500 grayscale"
         />
 
-        {/* Hover Gradient Overlay */}
+        {/* Hover Gradient Overlay - Monochrome mode only */}
         <div 
-          className={clsx(
-            "absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center",
-            mode === 'glass' ? "bg-white/10" : ""
-          )}
+          className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center"
           style={{
-            background: mode === 'duotone' 
-              ? 'var(--wav-brand-blue)'
-              : (mode === 'monochrome' || mode === 'neon')
-                ? 'linear-gradient(135deg, rgba(255,0,168,0.85) 0%, rgba(155,0,255,0.85) 50%, rgba(0,68,255,0.85) 100%)'
-                : undefined
+            background: 'linear-gradient(135deg, rgba(255,0,168,0.85) 0%, rgba(155,0,255,0.85) 50%, rgba(0,68,255,0.85) 100%)'
           }}
         >
           {/* Brand Text */}

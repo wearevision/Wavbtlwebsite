@@ -4,37 +4,53 @@ import { getCharCountStatus } from '../../utils/validation';
 
 interface FormFieldProps {
   label: string;
+  value: string;
+  onChange: (value: string) => void;
   tooltip?: string;
   error?: string;
-  children: React.ReactNode;
-  charCount?: {
-    current: number;
-    min: number;
-    max: number;
-  };
+  required?: boolean;
+  multiline?: boolean;
+  rows?: number;
+  maxLength?: number;
+  charCount?: number;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
   label,
+  value,
+  onChange,
   tooltip,
   error,
-  children,
-  charCount
+  required = false,
+  multiline = false,
+  rows = 3,
+  maxLength,
+  charCount,
+  placeholder,
+  disabled = false
 }) => {
   const hasError = !!error;
   
   let countStatus: 'error' | 'warning' | 'success' = 'success';
-  if (charCount) {
-    countStatus = getCharCountStatus(charCount.current, charCount.min, charCount.max);
+  if (charCount !== undefined && maxLength) {
+    countStatus = getCharCountStatus(charCount, 0, maxLength);
   }
+
+  const inputClassName = `w-full bg-neutral-900 border ${
+    hasError ? 'border-red-500' : 'border-neutral-800'
+  } rounded-md px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all ${
+    disabled ? 'opacity-50 cursor-not-allowed' : ''
+  }`;
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <label className={`text-xs font-medium ${hasError ? 'text-red-400' : 'text-neutral-400'}`}>
+          <label className={`text-sm font-medium ${hasError ? 'text-red-400' : 'text-neutral-300'}`}>
             {label}
-            {error && <span className="text-red-400 ml-1">*</span>}
+            {required && <span className="text-red-400 ml-1">*</span>}
           </label>
           {tooltip && (
             <div className="group relative">
@@ -46,16 +62,16 @@ export const FormField: React.FC<FormFieldProps> = ({
           )}
         </div>
         
-        {charCount && (
+        {charCount !== undefined && maxLength && (
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-mono ${
               countStatus === 'error' ? 'text-red-400' :
               countStatus === 'warning' ? 'text-yellow-400' :
               'text-neutral-500'
             }`}>
-              {charCount.current}/{charCount.max}
+              {charCount}/{maxLength}
             </span>
-            {countStatus === 'success' && charCount.current >= charCount.min && (
+            {countStatus === 'success' && charCount > 0 && (
               <CheckCircle2 className="w-3 h-3 text-green-500" />
             )}
             {countStatus === 'error' && (
@@ -65,7 +81,27 @@ export const FormField: React.FC<FormFieldProps> = ({
         )}
       </div>
 
-      {children}
+      {multiline ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${inputClassName} resize-none`}
+          rows={rows}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClassName}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
+      )}
 
       {error && (
         <div className="flex items-center gap-1 text-red-400 text-[11px] animate-in fade-in slide-in-from-top-1 duration-200">

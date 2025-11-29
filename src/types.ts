@@ -1,4 +1,5 @@
-export type ColorMode = 'monochrome' | 'neon' | 'duotone' | 'glass';
+// Removed: Only Monochrome mode is used now
+// export type ColorMode = 'monochrome';
 
 export type MediaType = 'image' | 'video';
 

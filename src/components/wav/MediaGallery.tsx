@@ -6,7 +6,6 @@ import { clsx } from 'clsx';
 
 interface MediaGalleryProps {
   gallery: WavMedia[];
-  mode: string;
   className?: string;
   currentIndex: number;
   onIndexChange: (index: number) => void;
@@ -14,7 +13,7 @@ interface MediaGalleryProps {
 
 const IMAGE_DURATION = 5000; // 5 seconds for images
 
-export const MediaGallery: React.FC<MediaGalleryProps> = ({ gallery, mode, className, currentIndex, onIndexChange }) => {
+export const MediaGallery: React.FC<MediaGalleryProps> = ({ gallery, className, currentIndex, onIndexChange }) => {
   // Muted by default as requested
   const [isMuted, setIsMuted] = useState(true); 
   const videoRef = useRef<HTMLVideoElement>(null);

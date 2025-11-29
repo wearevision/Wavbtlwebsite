@@ -5,6 +5,7 @@ import clsx from 'clsx';
 
 // IMPORT CORRECTO (named export)
 import { MediaGallery } from './MediaGallery';
+import { TrapezoidBadge } from './TrapezoidBadge';
 
 import { WavEvent, WavMedia } from '../../types';
 import { useFocusTrap } from '../../src/hooks/useFocusTrap';
@@ -86,11 +87,10 @@ const AnimatedText: React.FC<{ text: string; className?: string }> = ({ text, cl
 interface ModalProps {
   event: WavEvent;
   onClose: () => void;
-  mode: string;
   isMobile: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) => {
+export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -116,7 +116,7 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) 
     >
       {/* BACKDROP */}
       <motion.div
-        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+        className="absolute inset-0 bg-black/65 backdrop-blur-xl"
         onClick={onClose}
         variants={fadeIn}
       />
@@ -127,8 +127,8 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) 
         aria-modal="true"
         aria-labelledby="modal-title"
         className={clsx(
-          'relative pointer-events-auto bg-black/90',
-          'border border-white/10 rounded-3xl shadow-2xl overflow-hidden',
+          'relative pointer-events-auto',
+          'overflow-hidden',
           'w-full max-w-6xl lg:max-w-7xl',
           'flex flex-col lg:flex-row'
         )}
@@ -142,6 +142,23 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) 
           )}
           variants={isMobile ? slideUp : fadeIn}
         >
+          {/* Category Badge - Positioned above the media container */}
+          {event.category && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="absolute top-2 left-4 md:left-6 lg:left-10 z-20"
+            >
+              <TrapezoidBadge
+                label={event.category}
+                size="sm"
+                variant="white"
+                className="shadow-lg"
+              />
+            </motion.div>
+          )}
+
           {/* Clip container */}
           <motion.div
             variants={clipTrapezoid}
@@ -153,7 +170,6 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, mode, isMobile }) 
           >
             <MediaGallery
               gallery={safeGallery}
-              mode={mode}
               className="w-full h-full"
               currentIndex={galleryIndex}
               onIndexChange={setGalleryIndex}

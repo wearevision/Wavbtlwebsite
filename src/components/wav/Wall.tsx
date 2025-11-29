@@ -8,13 +8,12 @@ interface WallProps {
   mouseX: MotionValue<number>;
   mouseY: MotionValue<number>;
   onSelect: (id: string) => void;
-  mode: string;
   isMobile?: boolean;
   events: WavEvent[];
   isLoading?: boolean;
 }
 
-export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMobile = false, events, isLoading = false }) => {
+export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile = false, events, isLoading = false }) => {
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -52,7 +51,7 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
         brand: eventData.brand,
       };
     });
-  }, [events]);
+  }, [events, ROWS, COLS]);
 
   const springConfig = { damping: 40, stiffness: 150 };
   
@@ -84,9 +83,18 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
   const smoothX = useSpring(xShift, springConfig);
   const smoothY = useSpring(yShift, springConfig);
 
+  // Create a stable key based on events to trigger fade transition on filter change
+  const eventsKey = useMemo(() => {
+    return events.map(e => e.id || e.title).join('-');
+  }, [events]);
+
   return (
     <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black perspective-lg">
       <motion.div
+        key={eventsKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         style={{
           rotateZ: smoothRotateZ,
           rotateX: smoothRotateX,
@@ -179,7 +187,6 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, mode, isMo
                   id={tile.eventId} // Pass the REAL event ID to the Tile component
                   index={i}
                   onSelect={() => onSelect(tile.eventId)} // Pass real ID on click
-                  mode={mode}
                 />
               </motion.div>
             );

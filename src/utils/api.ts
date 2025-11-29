@@ -2,17 +2,9 @@ import { events as staticEvents } from '../data/events';
 import { projectId, publicAnonKey } from './supabase/info';
 import { WavEvent } from '../types';
 import { generateSlug } from './slug';
-import womImg from "figma:asset/0e52bb6912d7d8e5b6797e64881620f5fd80deb3.png";
-import altraImg from "figma:asset/29cd4a0251a94f11ff1fc14aa5794d250a39ccd2.png";
+import { EventCategory } from './contentRules';
 
 const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206`;
-
-// Image Overrides for specific brands/events (Client-side enforcement)
-const IMAGE_OVERRIDES: Record<string, string> = {
-  "wom": womImg,
-  "altra running": altraImg,
-  "altra": altraImg
-};
 
 // Fallback data for robustness
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80";
@@ -92,7 +84,29 @@ export const normalizeEventForSave = (rawEvent: any): any => {
     image = FALLBACK_IMAGE;
   }
 
-  // 3. Normalize brand (max 50 characters)
+  // 3. Assign default category if missing (temporary, will be replaced by AI categorization)
+  let category = rawEvent.category;
+  if (!category || typeof category !== 'string' || category.trim() === '') {
+    // Auto-assign based on brand/title keywords (temporary logic)
+    const text = `${rawEvent.brand || ''} ${rawEvent.title || ''}`.toLowerCase();
+    if (text.includes('festival') || text.includes('music') || text.includes('concierto')) {
+      category = 'Festivales y Música';
+    } else if (text.includes('retail') || text.includes('tienda') || text.includes('pop')) {
+      category = 'Retail Experience';
+    } else if (text.includes('arte') || text.includes('cultura') || text.includes('museo')) {
+      category = 'Arte y Cultura';
+    } else if (text.includes('tech') || text.includes('innovación') || text.includes('digital')) {
+      category = 'Tech y Innovación';
+    } else if (text.includes('instalación') || text.includes('mapping')) {
+      category = 'Instalaciones Interactivas';
+    } else if (text.includes('corporativo') || text.includes('evento') || text.includes('summit')) {
+      category = 'Eventos Corporativos';
+    } else {
+      category = 'Activaciones de Marca'; // Default fallback
+    }
+  }
+
+  // 4. Normalize brand (max 50 characters)
   let brand = rawEvent.brand;
   if (!brand || typeof brand !== 'string' || brand.trim() === '') {
     brand = 'Marca';
@@ -146,7 +160,7 @@ export const normalizeEventForSave = (rawEvent: any): any => {
     logo = undefined;
   }
 
-  // 9. Build STRICT WavEvent with extended fields
+  // 9. Build STRICT WavEvent with ALL extended fields
   const normalized: any = {
     id,
     brand,
@@ -155,15 +169,40 @@ export const normalizeEventForSave = (rawEvent: any): any => {
     image,
     slug,
     gallery,
-    // Optional fields
-    category: rawEvent.category || '',
+    // Optional/Extended fields
+    category, // Auto-assigned or from rawEvent
     logo: logo,
     imagePath: rawEvent.imagePath,
-    logoPath: rawEvent.logoPath
+    logoPath: rawEvent.logoPath,
+    // SEO & Content fields
+    summary: rawEvent.summary || '',
+    highlights: Array.isArray(rawEvent.highlights) ? rawEvent.highlights : [],
+    keywords: Array.isArray(rawEvent.keywords) ? rawEvent.keywords : [],
+    hashtags: Array.isArray(rawEvent.hashtags) ? rawEvent.hashtags : [],
+    // Social Media fields
+    instagram_hook: rawEvent.instagram_hook || '',
+    instagram_body: rawEvent.instagram_body || '',
+    instagram_closing: rawEvent.instagram_closing || '',
+    instagram_hashtags: rawEvent.instagram_hashtags || '',
+    linkedin_post: rawEvent.linkedin_post || '',
+    linkedin_article: rawEvent.linkedin_article || '',
+    // Alternative content
+    alt_title_1: rawEvent.alt_title_1 || '',
+    alt_title_2: rawEvent.alt_title_2 || '',
+    alt_instagram: rawEvent.alt_instagram || '',
+    // Metadata
+    year: rawEvent.year || new Date().getFullYear()
   };
 
   // Log if we're removing fields
-  const allowedFields = ['id', 'brand', 'title', 'description', 'image', 'slug', 'gallery', 'logo', 'category', 'imagePath', 'logoPath'];
+  const allowedFields = [
+    'id', 'brand', 'title', 'description', 'image', 'slug', 'gallery', 'logo', 'category', 
+    'imagePath', 'logoPath', 'summary',
+    'highlights', 'keywords', 'hashtags',
+    'instagram_hook', 'instagram_body', 'instagram_closing', 'instagram_hashtags',
+    'linkedin_post', 'linkedin_article',
+    'alt_title_1', 'alt_title_2', 'alt_instagram', 'year'
+  ];
   const removedFields = Object.keys(rawEvent).filter(key => !allowedFields.includes(key));
   if (removedFields.length > 0) {
     console.log(`[Frontend Normalize] Removed non-WavEvent fields for ${id}:`, removedFields.join(', '));
@@ -196,32 +235,59 @@ const validateEvent = (data: any, index: number): WavEvent => {
   const brand = typeof data.brand === 'string' ? data.brand : 'Brand';
   const title = typeof data.title === 'string' ? data.title : 'Untitled Event';
   
-  // Check for image overrides
-  let finalImage = optimizeUrl(data.image || data.imageUrl || FALLBACK_IMAGE);
-  
-  const lowerBrand = brand.toLowerCase();
-  const lowerTitle = title.toLowerCase();
-  
-  if (IMAGE_OVERRIDES[lowerBrand]) {
-    finalImage = IMAGE_OVERRIDES[lowerBrand];
-  } else if (lowerTitle.includes('altra running') || lowerBrand.includes('altra')) {
-    finalImage = IMAGE_OVERRIDES['altra'];
-  }
+    // Auto-assign based on keywords to match HARDCODED_CATEGORIES
+    if (!data.category || data.category === '') {
+      const text = `${data.brand || ''} ${data.title || ''} ${data.description || ''}`.toLowerCase();
+      
+      if (text.includes('festival') || text.includes('musica') || text.includes('concierto') || text.includes('sonido')) {
+        data.category = 'festivales-y-musica';
+      } else if (text.includes('retail') || text.includes('tienda') || text.includes('pop') || text.includes('compra')) {
+        data.category = 'retail-experience';
+      } else if (text.includes('arte') || text.includes('cultura') || text.includes('museo') || text.includes('galeria')) {
+        data.category = 'arte-y-cultura';
+      } else if (text.includes('tech') || text.includes('innovacion') || text.includes('digital') || text.includes('ia') || text.includes('data')) {
+        data.category = 'tech-y-innovacion';
+      } else if (text.includes('instalacion') || text.includes('mapping') || text.includes('luz') || text.includes('proyeccion')) {
+        data.category = 'instalaciones-interactivas';
+      } else if (text.includes('corporativo') || text.includes('evento') || text.includes('summit') || text.includes('conferencia')) {
+        data.category = 'eventos-corporativos';
+      } else {
+        data.category = 'activaciones-de-marca'; // Default fallback
+      }
+    }
 
-  // Return STRICT WavEvent schema (Extended)
+    // Return STRICT WavEvent schema (Extended) - preserve ALL fields from backend
   return {
     id: data.id || crypto.randomUUID(),
     brand: brand,
     title: title,
     description: typeof data.description === 'string' ? data.description : 'No description available.',
-    image: finalImage, // Fallback only for reading
+    image: optimizeUrl(data.image || data.imageUrl || FALLBACK_IMAGE),
     slug: data.slug || generateSlug(brand, title, data.id),
     gallery: Array.isArray(data.gallery) ? data.gallery : [],
-    // Extended fields
+    // Extended fields - preserve ALL data from backend
     category: typeof data.category === 'string' ? data.category : '',
     logo: data.logo || '',
     imagePath: data.imagePath,
-    logoPath: data.logoPath
+    logoPath: data.logoPath,
+    // SEO & Content fields
+    summary: data.summary || '',
+    highlights: Array.isArray(data.highlights) ? data.highlights : [],
+    keywords: Array.isArray(data.keywords) ? data.keywords : [],
+    hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
+    // Social Media fields
+    instagram_hook: data.instagram_hook || '',
+    instagram_body: data.instagram_body || '',
+    instagram_closing: data.instagram_closing || '',
+    instagram_hashtags: data.instagram_hashtags || '',
+    linkedin_post: data.linkedin_post || '',
+    linkedin_article: data.linkedin_article || '',
+    // Alternative content
+    alt_title_1: data.alt_title_1 || '',
+    alt_title_2: data.alt_title_2 || '',
+    alt_instagram: data.alt_instagram || '',
+    // Metadata
+    year: data.year || new Date().getFullYear()
   };
 };
 
@@ -253,9 +319,9 @@ export const getEvents = async (): Promise<WavEvent[]> => {
     }
 
     if (data.length === 0) {
-      console.warn("⚠️ WARNING: Backend returned EMPTY array. Is the KV store empty?");
-      console.warn("⚠️ Falling back to static events to prevent empty screen.");
-      return staticEvents.map((e, i) => validateEvent(e, i));
+      console.warn("⚠️ WARNING: Backend returned EMPTY array. KV store is empty.");
+      console.log("✅ Returning empty array (no fallback to static data).");
+      return [];
     }
     
     console.log(`✅ Successfully fetched ${data.length} events from backend.`);
@@ -343,4 +409,116 @@ export const createEvent = async (event: Partial<WavEvent>, token?: string) => {
     console.log(`[createEvent] ✅ Event created successfully.`);
     
     return result.event;
+};
+
+/**
+ * HARDCODED CATEGORIES (Frontend-only due to Supabase middleware issue)
+ * 
+ * These are the 7 core categories from the Masterplan Híbrido ABC.
+ * They are stored client-side to bypass Supabase Edge Function authentication
+ * issues that block any endpoint containing "categories" in the URL.
+ */
+const HARDCODED_CATEGORIES: EventCategory[] = [
+  {
+    id: 'activaciones-de-marca',
+    label: 'Activaciones de Marca',
+    description: 'Experiencias inmersivas que conectan marcas con audiencias en tiempo real',
+    seoDescription: 'Descubre nuestras activaciones de marca: experiencias inmersivas que conectan marcas con audiencias en tiempo real mediante tecnología y creatividad de vanguardia.',
+    keywords: ['activacion', 'marca', 'experiencial', 'inmersivo', 'engagement'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'eventos-corporativos',
+    label: 'Eventos Corporativos',
+    description: 'Conferencias, lanzamientos y experiencias empresariales de alto impacto',
+    seoDescription: 'Creamos eventos corporativos de alto impacto: conferencias, lanzamientos de producto y experiencias empresariales que transforman objetivos de negocio en momentos memorables.',
+    keywords: ['corporativo', 'conferencia', 'lanzamiento', 'empresa', 'b2b'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'instalaciones-interactivas',
+    label: 'Instalaciones Interactivas',
+    description: 'Arte digital, mapping y escenografías que transforman espacios',
+    seoDescription: 'Instalaciones interactivas que combinan arte digital, video mapping y escenografías innovadoras para transformar espacios en experiencias inmersivas únicas.',
+    keywords: ['instalacion', 'interactivo', 'mapping', 'arte digital', 'escenografia'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'festivales-y-musica',
+    label: 'Festivales y Música',
+    description: 'Escenarios, audiovisual en vivo y experiencias musicales',
+    seoDescription: 'Diseño y producción de festivales y experiencias musicales: escenarios innovadores, audiovisual en vivo y tecnología de vanguardia para eventos memorables.',
+    keywords: ['festival', 'musica', 'concierto', 'escenario', 'audiovisual'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'retail-experience',
+    label: 'Retail Experience',
+    description: 'Puntos de venta, pop-ups y experiencias de compra innovadoras',
+    seoDescription: 'Transformamos el retail con experiencias innovadoras: puntos de venta interactivos, pop-up stores y estrategias que conectan productos con consumidores.',
+    keywords: ['retail', 'punto de venta', 'pop-up', 'compra', 'comercio'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'arte-y-cultura',
+    label: 'Arte y Cultura',
+    description: 'Exposiciones, galerías y proyectos culturales',
+    seoDescription: 'Proyectos de arte y cultura que fusionan creatividad y tecnología: exposiciones inmersivas, galerías digitales y experiencias culturales innovadoras.',
+    keywords: ['arte', 'cultura', 'exposicion', 'galeria', 'museo'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  },
+  {
+    id: 'tech-y-innovacion',
+    label: 'Tech y Innovación',
+    description: 'AR/VR, AI, data viz y experiencias tecnológicas de vanguardia',
+    seoDescription: 'Experiencias tecnológicas de vanguardia: realidad aumentada, realidad virtual, inteligencia artificial y visualización de datos para proyectos innovadores.',
+    keywords: ['tecnologia', 'innovacion', 'ar', 'vr', 'ai', 'realidad aumentada', 'realidad virtual'],
+    isCore: true,
+    createdAt: new Date().toISOString(),
+    isArchived: false
+  }
+];
+
+export const getCategories = async () => {
+  console.group("📂 [API] getCategories()");
+  console.log("⚡ Using HARDCODED categories (frontend-only) due to Supabase middleware blocking backend endpoints");
+  console.log(`✅ Returning ${HARDCODED_CATEGORIES.length} hardcoded categories`);
+  console.groupEnd();
+  
+  // Return a copy to prevent mutations
+  return Promise.resolve([...HARDCODED_CATEGORIES]);
+};
+
+export const clearAllEvents = async (token?: string) => {
+    console.log(`[clearAllEvents] ⚠️ CLEARING ALL EVENTS FROM DATABASE`);
+    
+    const response = await fetch(`${BASE_URL}/events/clear`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token || publicAnonKey}`
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[clearAllEvents] Server returned error: ${errorText}`);
+      throw new Error(`Failed to clear events: ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log(`[clearAllEvents] ✅ All events cleared from database.`);
+    
+    return result;
 };

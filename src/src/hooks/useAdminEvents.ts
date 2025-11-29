@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getEvents, saveEvents, uploadFile, createEvent } from '../../utils/api';
+import { getEvents, saveEvents, uploadFile, createEvent, clearAllEvents } from '../../utils/api';
 import { WavEvent, WavMedia } from '../../types';
 import { supabase } from '../../utils/supabase/client';
 import { projectId } from '../../utils/supabase/info';
 import { processFileForUpload } from '../../utils/imageOptimizer';
 import { generateSlug } from '../../utils/slug';
+import { optimizeAllEvents } from '../../utils/optimize';
 
 export const useAdminEvents = () => {
   const [events, setEvents] = useState<WavEvent[]>([]);
@@ -162,10 +163,20 @@ export const useAdminEvents = () => {
       setEvents(newEvents);
   };
 
-  const updateEvent = (index: number, field: string, value: string) => {
-    const newEvents = [...events];
-    newEvents[index] = { ...newEvents[index], [field]: value };
-    setEvents(newEvents);
+  const updateEvent = (index: number, field: string, value: any) => {
+    console.log(`[updateEvent] Updating field "${field}" at index ${index}`);
+    
+    setEvents(prevEvents => {
+      if (!prevEvents[index]) {
+        console.error(`[updateEvent] ERROR: No event found at index ${index}!`);
+        return prevEvents;
+      }
+      
+      const newEvents = [...prevEvents];
+      newEvents[index] = { ...newEvents[index], [field]: value };
+      console.log(`[updateEvent] Field "${field}" updated successfully`);
+      return newEvents;
+    });
   };
 
   const addEvent = async () => {
@@ -262,6 +273,52 @@ export const useAdminEvents = () => {
     }
   }
 
+  const handleClearAllEvents = async () => {
+    if (!confirm(
+      "⚠️ PELIGRO: BORRAR TODOS LOS EVENTOS\n\n" +
+      "Esta acción eliminará PERMANENTEMENTE todos los eventos de la base de datos.\n\n" +
+      "NO SE PUEDE DESHACER.\n\n" +
+      "¿Estás ABSOLUTAMENTE SEGURO de que deseas continuar?"
+    )) {
+      return;
+    }
+
+    // Double confirmation
+    if (!confirm("ÚLTIMA CONFIRMACIÓN: ¿Borrar TODOS los eventos?")) {
+      return;
+    }
+
+    setSaving(true);
+    setSaveStatus('saving');
+    try {
+      const token = await getAdminToken();
+      
+      console.log("[handleClearAllEvents] Clearing ALL events from database...");
+      
+      await clearAllEvents(token);
+      
+      setSaveStatus('success');
+      setLastSavedAt(new Date().toLocaleString());
+      
+      alert("✅ Todos los eventos han sido borrados.\n\nLa base de datos está vacía.");
+      
+      // Reload data to show empty state
+      await loadData();
+      
+      // Reset success status after 3 seconds
+      setTimeout(() => {
+         setSaveStatus(prev => prev === 'success' ? 'idle' : prev);
+      }, 3000);
+
+    } catch (error) {
+      console.error("CLEAR ALL ERROR:", error);
+      setSaveStatus('error');
+      alert("Error al borrar eventos: " + error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleCleanupEvents = async () => {
     if (!confirm(
       "¿Normalizar todos los eventos en la base de datos?\n\n" +
@@ -329,6 +386,69 @@ export const useAdminEvents = () => {
     }
   };
 
+  const handleOptimizeAll = async () => {
+    const confirmed = confirm(
+      'Esta acción generará contenido con IA para todos los eventos que tengan campos vacíos o incompletos.\n\n' +
+      'Esto puede tardar varios minutos dependiendo de la cantidad de eventos.\n\n' +
+      '¿Deseas continuar?'
+    );
+
+    if (!confirmed) return;
+
+    setSaving(true);
+    setSaveStatus('saving');
+
+    try {
+      // Get admin token (same logic as handleSave)
+      const token = await getAdminToken();
+      
+      if (!token) {
+        throw new Error('No se pudo obtener el token de autenticación. Por favor, inicia sesión nuevamente.');
+      }
+
+      const result = await optimizeAllEvents(token);
+      
+      if (result.success) {
+        await loadData(); // Reload events to show optimized data
+        setSaveStatus('success');
+        alert(
+          `Optimización completada:\n\n` +
+          `Total de eventos: ${result.total}\n` +
+          `Optimizados: ${result.optimized}\n` +
+          `Ya completos (omitidos): ${result.skipped}\n` +
+          `Errores: ${result.errors}\n\n` +
+          `Revisa los eventos para verificar el contenido generado.`
+        );
+      } else {
+        throw new Error(result.error || 'Error desconocido');
+      }
+    } catch (error) {
+      console.error("OPTIMIZE ALL ERROR:", error);
+      setSaveStatus('error');
+      
+      let errorMessage = 'Error desconocido';
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = 
+          'No se pudo conectar al servidor.\n\n' +
+          'Posibles causas:\n' +
+          '1. El servidor Supabase Edge Functions no está activo\n' +
+          '2. Problema de red o CORS\n' +
+          '3. El endpoint no existe o cambió\n\n' +
+          'Soluciones:\n' +
+          '- Abre /test-health.html para diagnosticar\n' +
+          '- Verifica que el servidor esté desplegado en Supabase\n' +
+          '- Revisa la consola del navegador para más detalles';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      alert(`Error al optimizar eventos:\n\n${errorMessage}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return {
     events,
     loading,
@@ -344,6 +464,8 @@ export const useAdminEvents = () => {
     addEvent,
     removeEvent,
     handleApprove,
-    handleCleanupEvents
+    handleCleanupEvents,
+    handleClearAllEvents,
+    handleOptimizeAll
   };
 };

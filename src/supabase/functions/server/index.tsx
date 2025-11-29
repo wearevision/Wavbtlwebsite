@@ -4,6 +4,8 @@ import { logger } from "npm:hono/logger";
 import * as kv from "./kv_store.tsx";
 import { generateRefinement } from "./ai.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+import * as categories from "./categories.ts";
+import { optimizeAllEvents } from "./optimize.ts";
 
 /**
  * WAV BTL Server
@@ -20,10 +22,16 @@ import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 
 const app = new Hono();
 
-// Initialize Supabase Client
+// Initialize Supabase Clients
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+
+// Service client for admin operations (storage, etc.)
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Auth client for validating user tokens
+const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
 
 const BUCKET_NAME = "make-c4bb2206-assets";
 
@@ -84,26 +92,36 @@ const BASE_PATH = "/make-server-c4bb2206";
  */
 const verifyAuth = async (c: any) => {
   const authHeader = c.req.header("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) return false;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.error("Auth failed. No Authorization header or invalid format.");
+    return false;
+  }
 
   const token = authHeader.split(" ")[1];
   
   // 1. Check Master Key (Fastest)
   const adminToken = Deno.env.get("EDGE_ADMIN_TOKEN");
   if (adminToken && token === adminToken) {
+      console.log("Auth success via EDGE_ADMIN_TOKEN");
       return true;
   }
 
   // 2. Check Supabase Auth (Secure)
-  // We reuse the 'supabase' client initialized above
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  
-  if (user && !error) {
-      return true;
+  // Use supabaseAuth client (with ANON_KEY) to validate user tokens
+  try {
+    const { data: { user }, error } = await supabaseAuth.auth.getUser(token);
+    
+    if (user && !error) {
+        console.log(`Auth success for user: ${user.id}`);
+        return true;
+    }
+    
+    console.error("Auth failed. Token invalid or expired.", error?.message);
+    return false;
+  } catch (e) {
+    console.error("Auth failed. Exception during token validation:", e);
+    return false;
   }
-  
-  console.error("Auth failed. Token invalid or expired.", error?.message);
-  return false;
 };
 
 /**
@@ -376,6 +394,47 @@ const normalizeEvent = (rawEvent: any): any => {
 // Health check endpoint
 app.get(`${BASE_PATH}/health`, (c) => {
   return c.json({ status: "ok" });
+});
+
+// Test endpoint - Completely public, no auth required
+app.get(`${BASE_PATH}/test-public`, (c) => {
+  console.log('[TEST] Public endpoint called successfully - NO AUTH');
+  return c.json({ 
+    success: true, 
+    message: 'Public endpoint works - No authentication required',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Test categories endpoint - Returns hardcoded categories without DB access
+app.get(`${BASE_PATH}/test-categories`, (c) => {
+  console.log('[TEST-CATEGORIES] Returning hardcoded categories - NO DB ACCESS');
+  
+  const testCategories = [
+    {
+      id: 'test-1',
+      name: 'Activaciones de Marca',
+      slug: 'activaciones-de-marca',
+      description: 'Test category 1',
+      active: true,
+      order: 0
+    },
+    {
+      id: 'test-2',
+      name: 'Eventos Corporativos',
+      slug: 'eventos-corporativos',
+      description: 'Test category 2',
+      active: true,
+      order: 1
+    }
+  ];
+  
+  return c.json({ 
+    success: true, 
+    categories: testCategories,
+    count: testCategories.length,
+    message: 'Hardcoded test categories - No database access'
+  });
 });
 
 /**
@@ -879,6 +938,404 @@ app.post(`${BASE_PATH}/events/create`, async (c) => {
     console.error("Error creating event:", e);
     return c.json({ error: e.message }, 500);
   }
+});
+
+/**
+ * DELETE /events/clear
+ * 
+ * DANGER: Clears ALL events from the KV store. (Protected)
+ * 
+ * Use this to reset the database to empty state.
+ */
+app.delete(`${BASE_PATH}/events/clear`, async (c) => {
+  if (!await verifyAuth(c)) return c.text("Unauthorized", 401);
+
+  try {
+    console.log(`[DELETE /events/clear] ⚠️ CLEARING ALL EVENTS FROM KV STORE`);
+    
+    await kv.set("wav_events", []);
+    
+    console.log(`[DELETE /events/clear] ✅ All events cleared. KV store is now empty.`);
+
+    return c.json({ success: true, message: "All events cleared" });
+  } catch (e) {
+    console.error("Error clearing events:", e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * ========================================
+ * CATEGORIES ROUTES
+ * ========================================
+ */
+
+/**
+ * GET /categories-list (NEW PUBLIC ENDPOINT - NO AUTH)
+ * Get all active categories (Public - Auto-initializes if empty)
+ * 
+ * This is a PUBLIC endpoint that does not require authentication.
+ * Created as a workaround for caching issues with /categories endpoint.
+ */
+app.get(`${BASE_PATH}/categories-list`, async (c) => {
+  console.log('[GET /categories-list] ✅ PUBLIC endpoint called - NO AUTH REQUIRED');
+  
+  try {
+    // Auto-initialize if empty (idempotent)
+    console.log('[GET /categories-list] Step 1: Initializing categories if empty...');
+    const initialized = await categories.initializeCategoriesIfEmpty();
+    
+    // Get only active categories (not archived)
+    console.log('[GET /categories-list] Step 2: Fetching active categories...');
+    const activeCategories = await categories.getCategories(false);
+    
+    console.log(`[GET /categories-list] Step 3: Returning ${activeCategories.length} active categories`);
+    
+    return c.json({ 
+      success: true,
+      categories: activeCategories,
+      count: activeCategories.length
+    });
+  } catch (e) {
+    console.error('[GET /categories-list] ❌ Error:', e);
+    return c.json({ 
+      success: false,
+      error: e.message,
+      categories: []
+    }, 500);
+  }
+});
+
+/**
+ * GET /categories (LEGACY - KEPT FOR COMPATIBILITY)
+ * Get all active categories (Public - Auto-initializes if empty)
+ */
+app.get(`${BASE_PATH}/categories`, async (c) => {
+  console.log('[GET /categories] PUBLIC endpoint called - NO AUTH REQUIRED');
+  
+  try {
+    // Auto-initialize if empty (idempotent)
+    await categories.initializeCategoriesIfEmpty();
+    
+    // Get only active categories (not archived)
+    const activeCategories = await categories.getCategories(false);
+    
+    console.log(`[GET /categories] Returning ${activeCategories.length} active categories`);
+    
+    return c.json({ 
+      success: true,
+      categories: activeCategories
+    });
+  } catch (e) {
+    console.error('[GET /categories] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * GET /categories/all
+ * List all categories (including archived)
+ */
+app.get(`${BASE_PATH}/categories/all`, async (c) => {
+  try {
+    const cats = await categories.getCategories(true);
+    return c.json({ categories: cats });
+  } catch (e) {
+    console.error('[GET /categories/all] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories
+ * Save/update categories (Protected)
+ */
+app.post(`${BASE_PATH}/categories`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { categories: newCategories } = await c.req.json();
+    
+    if (!Array.isArray(newCategories)) {
+      return c.json({ error: "Categories must be an array" }, 400);
+    }
+
+    // Create snapshot before saving
+    await categories.createSnapshot('Pre-update snapshot');
+
+    // Save categories
+    const saved = await categories.saveCategories(newCategories);
+    
+    console.log(`[POST /categories] Saved ${saved.length} categories`);
+    
+    return c.json({ 
+      success: true, 
+      categories: saved,
+      message: `${saved.length} categories saved successfully`
+    });
+  } catch (e) {
+    console.error('[POST /categories] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/initialize
+ * Initialize categories with SEED if empty (Protected)
+ */
+app.post(`${BASE_PATH}/categories/initialize`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const initialized = await categories.initializeCategoriesIfEmpty();
+    
+    return c.json({ 
+      success: true,
+      categories: initialized,
+      message: 'Categories initialized'
+    });
+  } catch (e) {
+    console.error('[POST /categories/initialize] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/analyze
+ * AI analysis of category SEO potential (Protected)
+ */
+app.post(`${BASE_PATH}/categories/analyze`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const cats = await categories.getCategories(false);
+    
+    if (cats.length === 0) {
+      return c.json({ error: "No categories to analyze" }, 400);
+    }
+
+    const analysis = await categories.analyzeCategoriesWithAI(cats);
+    
+    return c.json({ 
+      success: true,
+      analysis
+    });
+  } catch (e) {
+    console.error('[POST /categories/analyze] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/suggest
+ * AI suggestion for event categorization (Protected)
+ */
+app.post(`${BASE_PATH}/categories/suggest`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { brand, title, description } = await c.req.json();
+    
+    const cats = await categories.getCategories(false);
+    
+    if (cats.length === 0) {
+      return c.json({ error: "No categories available" }, 400);
+    }
+
+    const suggestion = await categories.suggestCategoryForEvent(
+      { brand, title, description },
+      cats
+    );
+    
+    return c.json({ 
+      success: true,
+      suggestion
+    });
+  } catch (e) {
+    console.error('[POST /categories/suggest] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/optimize-seo
+ * AI optimization of SEO description (Protected)
+ */
+app.post(`${BASE_PATH}/categories/optimize-seo`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { label, description, keywords } = await c.req.json();
+    
+    if (!label || !description || !keywords) {
+      return c.json({ error: "Missing required fields" }, 400);
+    }
+
+    const optimized = await categories.optimizeSEODescription({
+      label,
+      description,
+      keywords
+    });
+    
+    return c.json({ 
+      success: true,
+      ...optimized
+    });
+  } catch (e) {
+    console.error('[POST /categories/optimize-seo] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/generate-keywords
+ * AI generation of keywords from existing events (Protected)
+ */
+app.post(`${BASE_PATH}/categories/generate-keywords`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { categoryLabel } = await c.req.json();
+    
+    if (!categoryLabel) {
+      return c.json({ error: "Missing categoryLabel" }, 400);
+    }
+
+    const events = await kv.get('wav_events') || [];
+    
+    const generated = await categories.generateKeywordsFromEvents(
+      categoryLabel,
+      events
+    );
+    
+    return c.json({ 
+      success: true,
+      ...generated
+    });
+  } catch (e) {
+    console.error('[POST /categories/generate-keywords] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * GET /categories/snapshots
+ * List available snapshots (Protected)
+ */
+app.get(`${BASE_PATH}/categories/snapshots`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const snapshots = await kv.get('wav_category_snapshots') || [];
+    
+    return c.json({ 
+      success: true,
+      snapshots: snapshots.map((s: any) => ({
+        timestamp: s.timestamp,
+        description: s.description,
+        categoryCount: s.categories.length,
+        eventCount: s.eventCount
+      }))
+    });
+  } catch (e) {
+    console.error('[GET /categories/snapshots] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /categories/rollback
+ * Restore categories from snapshot (Protected)
+ */
+app.post(`${BASE_PATH}/categories/rollback`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { timestamp } = await c.req.json();
+    
+    if (!timestamp) {
+      return c.json({ error: "Missing timestamp" }, 400);
+    }
+
+    const restored = await categories.restoreSnapshot(timestamp);
+    
+    return c.json({ 
+      success: true,
+      categories: restored,
+      message: `Restored ${restored.length} categories from snapshot`
+    });
+  } catch (e) {
+    console.error('[POST /categories/rollback] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /optimize-all-events
+ * 
+ * AI-powered optimization of all events (Protected)
+ * 
+ * - Analyzes all events in the database
+ * - Generates missing content using OpenAI
+ * - Auto-categorizes events without categories
+ * - Updates all events in batch
+ */
+app.post(`${BASE_PATH}/optimize-all-events`, async (c) => {
+  if (!await verifyAuth(c)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  try {
+    console.log('[POST /optimize-all-events] Starting full optimization...');
+    
+    const result = await optimizeAllEvents();
+    
+    console.log(`[POST /optimize-all-events] Complete. Optimized: ${result.optimized}, Skipped: ${result.skipped}, Errors: ${result.errors}`);
+    
+    return c.json({
+      success: true,
+      ...result,
+      message: `Optimization complete. ${result.optimized} events optimized, ${result.skipped} skipped, ${result.errors} errors.`
+    });
+  } catch (e) {
+    console.error('[POST /optimize-all-events] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * GET /health
+ * 
+ * Health check endpoint (Public)
+ */
+app.get(`${BASE_PATH}/health`, (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      hasAnonKey: !!supabaseAnonKey,
+      hasOpenAIKey: !!Deno.env.get('OPENAI_API_KEY'),
+      hasEdgeAdminToken: !!Deno.env.get('EDGE_ADMIN_TOKEN')
+    }
+  });
 });
 
 Deno.serve(app.fetch);
