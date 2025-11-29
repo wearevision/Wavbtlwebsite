@@ -202,6 +202,89 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
     }
   };
 
+  // Handle MEGA AUDIT - Optimiza TODOS los eventos con IA
+  const handleMegaAudit = async () => {
+    if (!confirm(
+      `⚠️ MEGA AUDIT - Llenado y Auditado Masivo\n\n` +
+      `Esta operación procesará TODOS los ${events.length} eventos con IA para:\n\n` +
+      `✅ Llenar campos faltantes (inferencia inteligente)\n` +
+      `✅ Optimizar SEO (títulos, keywords, meta descriptions)\n` +
+      `✅ Generar contenido social (Instagram, LinkedIn)\n` +
+      `✅ Crear variantes A/B testing\n` +
+      `✅ Inferir KPIs y métricas realistas\n` +
+      `✅ Aplicar mejores prácticas de productoras top\n\n` +
+      `⏱️ Tiempo estimado: ~${Math.ceil(events.length * 1.5)} segundos\n` +
+      `💰 Costo estimado API: ~$${(events.length * 0.02).toFixed(2)} USD\n\n` +
+      `¿Deseas continuar?`
+    )) {
+      return;
+    }
+
+    setIsSyncing(true);
+    setSyncProgress(0);
+
+    try {
+      console.log('[Mega Audit] Starting audit for', events.length, 'events');
+
+      // Call the audit-all endpoint
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/audit-all-events`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          }
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to audit events');
+      }
+
+      const result = await res.json();
+      
+      console.log('[Mega Audit] Complete:', result);
+
+      // Reload data to show optimized events
+      await loadData();
+
+      setSyncProgress(100);
+      
+      setTimeout(() => {
+        setIsSyncing(false);
+        setSyncProgress(0);
+      }, 500);
+
+      alert(
+        `✅ MEGA AUDIT COMPLETADO\n\n` +
+        `Total: ${result.total} eventos\n` +
+        `✅ Procesados: ${result.processed}\n` +
+        `❌ Fallidos: ${result.failed}\n\n` +
+        `Todos los eventos han sido optimizados con:\n` +
+        `• SEO mejorado (títulos, keywords, meta)\n` +
+        `• Contenido social completo\n` +
+        `• KPIs y métricas inferidas\n` +
+        `• Campos faltantes completados\n\n` +
+        `Revisa los eventos para ver los cambios.`
+      );
+
+    } catch (error: any) {
+      console.error('[Mega Audit] Error:', error);
+      alert(
+        `❌ ERROR EN MEGA AUDIT\n\n` +
+        `${error.message}\n\n` +
+        `Por favor verifica:\n` +
+        `• Conexión a internet\n` +
+        `• API key de OpenAI configurada\n` +
+        `• Logs del servidor para más detalles`
+      );
+      setIsSyncing(false);
+      setSyncProgress(0);
+    }
+  };
+
   // Handle save to Supabase with validation
   const handleSaveToSupabase = async () => {
     // Validate all events before saving
@@ -351,6 +434,15 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
             >
               {isSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               Pull desde Supabase
+            </button>
+            <button 
+              onClick={handleMegaAudit} 
+              disabled={saving || isSyncing}
+              className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-9 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white disabled:opacity-50 shadow-lg hover:shadow-xl"
+              title="Optimiza TODOS los eventos con IA: llena campos faltantes, optimiza SEO, genera contenido social, infiere KPIs y más"
+            >
+              {isSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Llenado y Auditado Masivo
             </button>
           </div>
 
@@ -600,7 +692,7 @@ const EventFieldsEditor: React.FC<EventFieldsEditorProps> = ({
   const getError = (field: string) => validation?.errors?.get(field);
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-8 max-w-4xl">
       {/* AI Quick Actions */}
       <div className="bg-gradient-to-r from-pink-950/20 to-purple-950/20 border border-pink-500/20 rounded-lg p-4">
         <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
@@ -613,17 +705,39 @@ const EventFieldsEditor: React.FC<EventFieldsEditorProps> = ({
 Genera una optimización completa para este evento.
 Mejora TODOS los campos textuales sin inventar información.
 
-Requerimientos:
+CAMPOS REQUERIDOS (TODOS):
 1. Título optimizado
 2. Slug SEO
-3. Highlights (3–5) potentes
-4. Meta description
-5. Keywords SEO
-6. Hashtags IG
-7. Copy Instagram completo
-8. Post LinkedIn breve
-9. Artículo LinkedIn
-10. Orden sugerido de fotos con hero y justificación`)}
+3. Resumen / Meta description (max 160 caracteres)
+4. Highlights (3–5 puntos clave potentes)
+5. Keywords SEO (5-8 keywords)
+6. Hashtags generales (5-10)
+7. Título SEO (max 60 caracteres)
+8. Descripción SEO (max 155 caracteres)
+9. Tags internos (3-5 tags para filtrado)
+
+CONTENIDO EDITORIAL:
+10. Tono de comunicación (ej: Corporativo, Festivo, Premium)
+11. Audiencia/Target (ej: Millennials, Ejecutivos, Familias)
+
+SOCIAL MEDIA COMPLETO:
+12. Instagram Hook (frase de apertura impactante)
+13. Instagram Body (cuerpo del post)
+14. Instagram Closing (CTA final)
+15. Instagram Hashtags (hashtags específicos IG)
+16. Alt Instagram Copy (variante para A/B testing)
+17. LinkedIn Post (versión breve corporativa)
+18. LinkedIn Artículo (versión larga profesional)
+
+A/B TESTING:
+19. Título Alternativo #1
+20. Título Alternativo #2
+21. Resumen Alternativo #1
+22. Resumen Alternativo #2
+
+ADICIONAL:
+23. Orden sugerido de fotos con hero y justificación (en chat_response)
+24. KPIs recomendados para medir (3-5 indicadores)`)}
             disabled={isRefining}
             className="px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-neutral-700 disabled:to-neutral-700 text-white rounded-md text-sm font-bold flex items-center justify-center gap-2"
           >
@@ -652,6 +766,7 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           </button>
         </div>
       </div>
+
       {/* Validation Errors */}
       {validation && !validation.isValid && (
         <div className="bg-red-950/40 border-2 border-red-500/30 rounded-lg p-4">
@@ -669,11 +784,12 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
         </div>
       )}
 
-      {/* Basic Fields */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-white">Información Básica</h3>
+      {/* 1. INFORMACIÓN BÁSICA */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Información Básica
+        </h3>
         
-        {/* Brand */}
         <FormField
           label="Marca"
           value={event.brand || ''}
@@ -685,7 +801,6 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           charCount={getCharCount(event.brand)}
         />
 
-        {/* Title */}
         <FormField
           label="Título"
           value={event.title || ''}
@@ -697,7 +812,6 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           charCount={getCharCount(event.title)}
         />
 
-        {/* Description */}
         <FormField
           label="Descripción"
           value={event.description || ''}
@@ -711,7 +825,6 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           charCount={getCharCount(event.description)}
         />
 
-        {/* Category */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">
             Categoría
@@ -730,11 +843,11 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           </select>
         </div>
 
-        {/* Summary */}
         <FormField
           label="Resumen (Meta Description)"
           value={event.summary || ''}
           onChange={(value) => updateEvent(eventIndex, 'summary', value)}
+          tooltip={FIELD_TOOLTIPS.description}
           multiline
           rows={3}
           maxLength={160}
@@ -742,11 +855,96 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
         />
       </div>
 
-      {/* Media */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-white">Multimedia</h3>
+      {/* 2. IDENTIFICACIÓN & LOCALIZACIÓN */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Identificación & Localización
+        </h3>
 
-        {/* Main Image */}
+        <FormField
+          label="Cliente"
+          value={event.client || ''}
+          onChange={(value) => updateEvent(eventIndex, 'client', value)}
+          tooltip={FIELD_TOOLTIPS.client}
+          placeholder="Nombre del cliente (si difiere de la marca)"
+        />
+
+        <FormField
+          label="Subcategoría"
+          value={event.subcategory || ''}
+          onChange={(value) => updateEvent(eventIndex, 'subcategory', value)}
+          tooltip={FIELD_TOOLTIPS.subcategory}
+          placeholder="Tipo específico de evento"
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            label="Año"
+            value={event.year?.toString() || ''}
+            onChange={(value) => updateEvent(eventIndex, 'year', value ? parseInt(value) : undefined)}
+            tooltip={FIELD_TOOLTIPS.year}
+            placeholder="2024"
+          />
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-neutral-300">
+              Mes
+            </label>
+            <select
+              value={event.month || ''}
+              onChange={(e) => updateEvent(eventIndex, 'month', e.target.value ? parseInt(e.target.value) : undefined)}
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
+            >
+              <option value="">Seleccionar mes</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            label="País"
+            value={event.country || ''}
+            onChange={(value) => updateEvent(eventIndex, 'country', value)}
+            tooltip={FIELD_TOOLTIPS.country}
+            placeholder="Chile"
+          />
+
+          <FormField
+            label="Ciudad"
+            value={event.city || ''}
+            onChange={(value) => updateEvent(eventIndex, 'city', value)}
+            tooltip={FIELD_TOOLTIPS.city}
+            placeholder="Santiago"
+          />
+        </div>
+
+        <FormField
+          label="Venue / Recinto"
+          value={event.venue || ''}
+          onChange={(value) => updateEvent(eventIndex, 'venue', value)}
+          tooltip={FIELD_TOOLTIPS.venue}
+          placeholder="Movistar Arena, Parque Bicentenario, etc."
+        />
+      </div>
+
+      {/* 3. MULTIMEDIA */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Multimedia
+        </h3>
+
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">
             Imagen Principal {hasError('image') && <span className="text-red-400">*</span>}
@@ -768,13 +966,12 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           )}
         </div>
 
-        {/* Logo */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">
             Logo de Marca (PNG/SVG)
           </label>
           {event.logo && (
-            <img src={event.logo} alt="Logo" className="h-16 object-contain" />
+            <img src={event.logo} alt="Logo" className="h-16 object-contain bg-neutral-800/50 rounded p-2" />
           )}
           <input
             type="file"
@@ -787,7 +984,18 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           />
         </div>
 
-        {/* Gallery */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-neutral-300">
+            OG Image (Open Graph para compartir en redes)
+          </label>
+          <FormField
+            value={event.og_image || ''}
+            onChange={(value) => updateEvent(eventIndex, 'og_image', value)}
+            tooltip={FIELD_TOOLTIPS.og_image}
+            placeholder="https://..."
+          />
+        </div>
+
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">
             Galería de Medios
@@ -823,39 +1031,28 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
         </div>
       </div>
 
-      {/* SEO & Keywords */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-white">SEO & Keywords</h3>
+      {/* 4. CONTENIDO EDITORIAL */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Contenido Editorial
+        </h3>
 
-        {/* Keywords */}
         <FormField
-          label="Keywords (separadas por comas)"
-          value={
-            Array.isArray(event.keywords) 
-              ? event.keywords.join(', ') 
-              : typeof event.keywords === 'string' 
-                ? event.keywords 
-                : ''
-          }
-          onChange={(value) => updateEvent(eventIndex, 'keywords', value.split(',').map(s => s.trim()).filter(Boolean))}
-          placeholder="keyword1, keyword2, keyword3"
+          label="Tono de Comunicación"
+          value={event.tone || ''}
+          onChange={(value) => updateEvent(eventIndex, 'tone', value)}
+          tooltip={FIELD_TOOLTIPS.tone}
+          placeholder="Corporativo, Festivo, Juvenil, Premium..."
         />
 
-        {/* Hashtags */}
         <FormField
-          label="Hashtags"
-          value={
-            Array.isArray(event.hashtags) 
-              ? event.hashtags.join(' ') 
-              : typeof event.hashtags === 'string'
-                ? event.hashtags
-                : ''
-          }
-          onChange={(value) => updateEvent(eventIndex, 'hashtags', value.split(/[\s,]+/).filter(Boolean))}
-          placeholder="#tag1 #tag2 #tag3"
+          label="Audiencia / Target"
+          value={event.audience || ''}
+          onChange={(value) => updateEvent(eventIndex, 'audience', value)}
+          tooltip={FIELD_TOOLTIPS.audience}
+          placeholder="Millennials, Ejecutivos, Familias..."
         />
 
-        {/* Highlights */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">
             Highlights (puntos clave)
@@ -873,6 +1070,7 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
                       updateEvent(eventIndex, 'highlights', newHighlights);
                     }}
                     className="flex-1 bg-neutral-900 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500"
+                    placeholder={`Highlight ${idx + 1}`}
                   />
                   <button
                     onClick={() => {
@@ -892,56 +1090,303 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
               const newHighlights = [...(event.highlights || []), ''];
               updateEvent(eventIndex, 'highlights', newHighlights);
             }}
-            className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-md text-sm text-neutral-300"
+            className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-md text-sm text-neutral-300 flex items-center gap-2"
           >
-            + Agregar Highlight
+            <Plus className="w-4 h-4" /> Agregar Highlight
           </button>
         </div>
       </div>
 
-      {/* Social Media */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-white">Contenido Social Media</h3>
+      {/* 5. SEO & METADATA */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          SEO & Metadata
+        </h3>
 
         <FormField
-          label="Instagram - Hook"
-          value={event.instagram_hook || ''}
-          onChange={(value) => updateEvent(eventIndex, 'instagram_hook', value)}
-          placeholder="Hook impactante para Instagram"
+          label="Título SEO"
+          value={event.seo_title || ''}
+          onChange={(value) => updateEvent(eventIndex, 'seo_title', value)}
+          tooltip={FIELD_TOOLTIPS.seo_title}
+          maxLength={60}
+          charCount={getCharCount(event.seo_title)}
+          placeholder="Título optimizado para buscadores (max 60 caracteres)"
         />
 
         <FormField
-          label="Instagram - Body"
-          value={event.instagram_body || ''}
-          onChange={(value) => updateEvent(eventIndex, 'instagram_body', value)}
+          label="Descripción SEO"
+          value={event.seo_description || ''}
+          onChange={(value) => updateEvent(eventIndex, 'seo_description', value)}
+          tooltip={FIELD_TOOLTIPS.seo_description}
+          multiline
+          rows={3}
+          maxLength={155}
+          charCount={getCharCount(event.seo_description)}
+          placeholder="Meta description optimizada (max 155 caracteres)"
+        />
+
+        <FormField
+          label="Keywords (separadas por comas)"
+          value={
+            Array.isArray(event.keywords) 
+              ? event.keywords.join(', ') 
+              : typeof event.keywords === 'string' 
+                ? event.keywords 
+                : ''
+          }
+          onChange={(value) => updateEvent(eventIndex, 'keywords', value.split(',').map(s => s.trim()).filter(Boolean))}
+          placeholder="evento, marca, activación, marketing"
+        />
+
+        <FormField
+          label="Tags Internos (separados por comas)"
+          value={
+            Array.isArray(event.tags) 
+              ? event.tags.join(', ') 
+              : typeof event.tags === 'string'
+                ? event.tags
+                : ''
+          }
+          onChange={(value) => updateEvent(eventIndex, 'tags', value.split(',').map(s => s.trim()).filter(Boolean))}
+          tooltip={FIELD_TOOLTIPS.tags}
+          placeholder="tag1, tag2, tag3"
+        />
+
+        <FormField
+          label="Hashtags"
+          value={
+            Array.isArray(event.hashtags) 
+              ? event.hashtags.join(' ') 
+              : typeof event.hashtags === 'string'
+                ? event.hashtags
+                : ''
+          }
+          onChange={(value) => updateEvent(eventIndex, 'hashtags', value.split(/[\s,]+/).filter(Boolean))}
+          placeholder="#tag1 #tag2 #tag3"
+        />
+      </div>
+
+      {/* 6. PERFORMANCE & RESULTADOS */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Performance & Resultados
+        </h3>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            label="Personas Alcanzadas"
+            value={event.people_reached || ''}
+            onChange={(value) => updateEvent(eventIndex, 'people_reached', value)}
+            tooltip={FIELD_TOOLTIPS.people_reached}
+            placeholder="50,000"
+          />
+
+          <FormField
+            label="Asistentes Presenciales"
+            value={event.attendees || ''}
+            onChange={(value) => updateEvent(eventIndex, 'attendees', value)}
+            tooltip={FIELD_TOOLTIPS.attendees}
+            placeholder="2,500"
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <FormField
+            label="Duración (días)"
+            value={event.days?.toString() || ''}
+            onChange={(value) => updateEvent(eventIndex, 'days', value ? parseInt(value) : undefined)}
+            tooltip={FIELD_TOOLTIPS.days}
+            placeholder="3"
+          />
+
+          <FormField
+            label="Ciudades (Gira)"
+            value={event.cities?.toString() || ''}
+            onChange={(value) => updateEvent(eventIndex, 'cities', value ? parseInt(value) : undefined)}
+            tooltip={FIELD_TOOLTIPS.cities}
+            placeholder="5"
+          />
+
+          <FormField
+            label="Pantallas / Screens"
+            value={event.screens?.toString() || ''}
+            onChange={(value) => updateEvent(eventIndex, 'screens', value ? parseInt(value) : undefined)}
+            tooltip={FIELD_TOOLTIPS.screens}
+            placeholder="12"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-neutral-300">
+            KPIs (Indicadores clave)
+          </label>
+          {event.kpis && event.kpis.length > 0 && (
+            <div className="space-y-2">
+              {event.kpis.map((kpi, idx) => (
+                <div key={idx} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={kpi}
+                    onChange={(e) => {
+                      const newKpis = [...event.kpis];
+                      newKpis[idx] = e.target.value;
+                      updateEvent(eventIndex, 'kpis', newKpis);
+                    }}
+                    className="flex-1 bg-neutral-900 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-pink-500"
+                    placeholder={`KPI ${idx + 1}: ej. +35% engagement`}
+                  />
+                  <button
+                    onClick={() => {
+                      const newKpis = event.kpis.filter((_, i) => i !== idx);
+                      updateEvent(eventIndex, 'kpis', newKpis);
+                    }}
+                    className="px-3 py-2 bg-red-900/20 hover:bg-red-900/40 rounded-md text-red-400"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => {
+              const newKpis = [...(event.kpis || []), ''];
+              updateEvent(eventIndex, 'kpis', newKpis);
+            }}
+            className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-md text-sm text-neutral-300 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Agregar KPI
+          </button>
+        </div>
+
+        <FormField
+          label="Notas de Resultados"
+          value={event.results_notes || ''}
+          onChange={(value) => updateEvent(eventIndex, 'results_notes', value)}
+          tooltip={FIELD_TOOLTIPS.results_notes}
           multiline
           rows={4}
-          placeholder="Cuerpo del post de Instagram"
+          placeholder="Observaciones cualitativas sobre el impacto y resultados del evento..."
+        />
+      </div>
+
+      {/* 7. SOCIAL MEDIA */}
+      <div className="space-y-4 bg-neutral-900/30 border border-neutral-800 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-neutral-700 pb-2">
+          Contenido Social Media
+        </h3>
+
+        <div className="space-y-3">
+          <h4 className="text-sm font-bold text-pink-400 uppercase tracking-wider">Instagram</h4>
+          
+          <FormField
+            label="Instagram - Hook"
+            value={event.instagram_hook || ''}
+            onChange={(value) => updateEvent(eventIndex, 'instagram_hook', value)}
+            placeholder="Hook impactante para Instagram"
+          />
+
+          <FormField
+            label="Instagram - Body"
+            value={event.instagram_body || ''}
+            onChange={(value) => updateEvent(eventIndex, 'instagram_body', value)}
+            multiline
+            rows={4}
+            placeholder="Cuerpo del post de Instagram"
+          />
+
+          <FormField
+            label="Instagram - Closing (CTA)"
+            value={event.instagram_closing || ''}
+            onChange={(value) => updateEvent(eventIndex, 'instagram_closing', value)}
+            placeholder="Cierre con llamado a la acción"
+          />
+
+          <FormField
+            label="Instagram - Hashtags"
+            value={event.instagram_hashtags || ''}
+            onChange={(value) => updateEvent(eventIndex, 'instagram_hashtags', value)}
+            placeholder="#hashtag1 #hashtag2 #hashtag3"
+          />
+
+          <FormField
+            label="Alt Copy Instagram (Variante)"
+            value={event.alt_instagram || ''}
+            onChange={(value) => updateEvent(eventIndex, 'alt_instagram', value)}
+            multiline
+            rows={3}
+            placeholder="Copy alternativo para A/B testing"
+          />
+        </div>
+
+        <div className="space-y-3 pt-4 border-t border-neutral-700">
+          <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider">LinkedIn</h4>
+
+          <FormField
+            label="LinkedIn - Post Breve"
+            value={event.linkedin_post || ''}
+            onChange={(value) => updateEvent(eventIndex, 'linkedin_post', value)}
+            multiline
+            rows={4}
+            placeholder="Post corto para LinkedIn (máx 1,300 caracteres)"
+          />
+
+          <FormField
+            label="LinkedIn - Artículo"
+            value={event.linkedin_article || ''}
+            onChange={(value) => updateEvent(eventIndex, 'linkedin_article', value)}
+            multiline
+            rows={6}
+            placeholder="Artículo largo para LinkedIn (hasta 110,000 caracteres)"
+          />
+        </div>
+      </div>
+
+      {/* 8. A/B TESTING */}
+      <div className="space-y-4 bg-gradient-to-br from-purple-950/30 to-pink-950/30 border border-purple-500/30 rounded-lg p-5">
+        <h3 className="text-base font-bold text-white uppercase tracking-wider border-b border-purple-700/50 pb-2 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          A/B Testing Variants
+        </h3>
+
+        <FormField
+          label="Título Alternativo #1"
+          value={event.alt_title_1 || ''}
+          onChange={(value) => updateEvent(eventIndex, 'alt_title_1', value)}
+          maxLength={100}
+          charCount={getCharCount(event.alt_title_1)}
+          placeholder="Primera variante del título para testing"
         />
 
         <FormField
-          label="Instagram - Closing"
-          value={event.instagram_closing || ''}
-          onChange={(value) => updateEvent(eventIndex, 'instagram_closing', value)}
-          placeholder="Cierre con CTA"
+          label="Título Alternativo #2"
+          value={event.alt_title_2 || ''}
+          onChange={(value) => updateEvent(eventIndex, 'alt_title_2', value)}
+          maxLength={100}
+          charCount={getCharCount(event.alt_title_2)}
+          placeholder="Segunda variante del título para testing"
         />
 
         <FormField
-          label="LinkedIn - Post Breve"
-          value={event.linkedin_post || ''}
-          onChange={(value) => updateEvent(eventIndex, 'linkedin_post', value)}
+          label="Resumen Alternativo #1"
+          value={event.alt_summary_1 || ''}
+          onChange={(value) => updateEvent(eventIndex, 'alt_summary_1', value)}
           multiline
-          rows={4}
-          placeholder="Post corto para LinkedIn"
+          rows={3}
+          maxLength={160}
+          charCount={getCharCount(event.alt_summary_1)}
+          placeholder="Primera variante del resumen"
         />
 
         <FormField
-          label="LinkedIn - Artículo"
-          value={event.linkedin_article || ''}
-          onChange={(value) => updateEvent(eventIndex, 'linkedin_article', value)}
+          label="Resumen Alternativo #2"
+          value={event.alt_summary_2 || ''}
+          onChange={(value) => updateEvent(eventIndex, 'alt_summary_2', value)}
           multiline
-          rows={6}
-          placeholder="Artículo largo para LinkedIn"
+          rows={3}
+          maxLength={160}
+          charCount={getCharCount(event.alt_summary_2)}
+          placeholder="Segunda variante del resumen"
         />
       </div>
     </div>

@@ -101,7 +101,31 @@ export function hasOnlyAllowedFields(event: any): string[] {
     'linkedin_article',
     'alt_title_1',
     'alt_title_2',
-    'alt_instagram'
+    'alt_instagram',
+    
+    // New Extended Schema Fields
+    'client',
+    'subcategory',
+    'year',
+    'month',
+    'country',
+    'city',
+    'venue',
+    'og_image',
+    'tone',
+    'audience',
+    'seo_title',
+    'seo_description',
+    'tags',
+    'people_reached',
+    'attendees',
+    'days',
+    'cities',
+    'screens',
+    'kpis',
+    'results_notes',
+    'alt_summary_1',
+    'alt_summary_2'
   ]);
 
   const forbiddenFields: string[] = [];
@@ -138,5 +162,25 @@ export const FIELD_TOOLTIPS = {
   image: 'URL de la imagen principal del evento (obligatorio, formato HTTPS)',
   slug: 'Identificador único generado automáticamente desde marca + título',
   gallery: 'Galería multimedia con imágenes y videos del proyecto',
-  logo: 'Logo de la marca en PNG o SVG con transparencia (opcional)'
+  logo: 'Logo de la marca en PNG o SVG con transparencia (opcional)',
+  client: 'Nombre del cliente si difiere de la marca',
+  subcategory: 'Subcategoría específica del evento',
+  year: 'Año de ejecución del evento',
+  month: 'Mes de ejecución (1-12)',
+  country: 'País donde se realizó el evento',
+  city: 'Ciudad principal del evento',
+  venue: 'Lugar o recinto (venue) del evento',
+  og_image: 'Imagen para compartir en redes sociales (OpenGraph)',
+  tone: 'Tono de la comunicación (ej: Corporativo, Festivo)',
+  audience: 'Público objetivo (Target)',
+  seo_title: 'Título optimizado para buscadores (máx 60 caracteres)',
+  seo_description: 'Descripción optimizada para buscadores (máx 155 caracteres)',
+  tags: 'Etiquetas internas para filtrado',
+  people_reached: 'Alcance estimado de personas',
+  attendees: 'Cantidad de asistentes presenciales',
+  days: 'Duración en días',
+  cities: 'Cantidad de ciudades (si es gira)',
+  screens: 'Cantidad de pantallas o recursos AV',
+  kpis: 'Indicadores clave de desempeño (KPIs)',
+  results_notes: 'Notas cualitativas sobre los resultados'
 };

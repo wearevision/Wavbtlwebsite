@@ -9,36 +9,15 @@ import { TrapezoidBadge } from './TrapezoidBadge';
 
 import { WavEvent, WavMedia } from '../../types';
 import { useFocusTrap } from '../../src/hooks/useFocusTrap';
+import { Z_INDEX } from '../../lib/constants/zIndex';
+import { SAFE_AREAS } from '../../lib/constants/safeAreas';
+import { MOTION_VARIANTS } from '../../lib/constants/animations';
 
 /* -------------------------------------------------------------------------- */
 /*                                   VARIANTS                                 */
 /* -------------------------------------------------------------------------- */
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.45 } },
-  exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
-const slideUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
-  exit: { opacity: 0, y: 40, transition: { duration: 0.3, ease: 'easeIn' } },
-};
-
-/* Clipping estable */
-const clipTrapezoid = {
-  hidden: { clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)' },
-  visible: {
-    clipPath: 'polygon(18% 0%, 100% 0%, 82% 100%, 0% 100%)',
-    transition: { duration: 0.6, ease: [0.19, 1, 0.22, 1] },
-  },
-  exit: {
-    clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
-    transition: { duration: 0.4, ease: [0.19, 1, 0.22, 1] },
-  },
-};
-
+// Local variants específicos del modal (los globales vienen de MOTION_VARIANTS)
 const titleVariants = {
   hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
@@ -57,6 +36,8 @@ const AnimatedTitle: React.FC<{ text: string; className?: string }> = ({ text, c
     exit="exit"
     className={clsx(
       'uppercase tracking-tight font-extrabold text-balance',
+      // Ancho aumentado 1.5×
+      'max-w-[95ch]',
       className
     )}
   >
@@ -66,13 +47,20 @@ const AnimatedTitle: React.FC<{ text: string; className?: string }> = ({ text, c
 
 const AnimatedText: React.FC<{ text: string; className?: string }> = ({ text, className }) => (
   <motion.div
-    variants={slideUp}
+    variants={MOTION_VARIANTS.slideUp}
     initial="hidden"
     animate="visible"
     exit="exit"
     className={clsx(
       'leading-relaxed text-neutral-300',
-      'max-h-[60vh] md:max-h-[70vh] overflow-y-auto pr-4 pb-20 custom-scroll',
+      // Ancho aumentado 1.5× (de 65ch a ~95ch)
+      'max-w-[95ch]',
+      // SCROLL SOLO EN DESCRIPCIÓN con scrollbar personalizado
+      'overflow-y-auto custom-scroll-modal',
+      // Max-height dinámico para mobile/tablet, sin límite en desktop
+      'max-h-[40vh] md:max-h-[45vh] lg:max-h-[50vh]',
+      // Padding right para el scrollbar
+      'pr-3',
       className
     )}
   >
@@ -108,8 +96,13 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
   return (
     <motion.div
       ref={containerRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10"
-      variants={fadeIn}
+      className={clsx(
+        "fixed inset-0 flex items-center justify-center",
+        // Margen balanceado para centrado óptimo
+        "p-6 md:p-16 lg:p-24",
+        Z_INDEX.MODAL_CONTENT
+      )}
+      variants={MOTION_VARIANTS.fade}
       initial="hidden"
       animate="visible"
       exit="exit"
@@ -118,7 +111,7 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
       <motion.div
         className="absolute inset-0 bg-black/65 backdrop-blur-xl"
         onClick={onClose}
-        variants={fadeIn}
+        variants={MOTION_VARIANTS.fade}
       />
 
       {/* CARD */}
@@ -129,44 +122,39 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
         className={clsx(
           'relative pointer-events-auto',
           'overflow-hidden',
-          'w-full max-w-6xl lg:max-w-7xl',
-          'flex flex-col lg:flex-row'
+          // Modal optimizado para layout centrado
+          'w-full max-w-xl md:max-w-2xl lg:max-w-5xl',
+          // Desktop: flex-row con items-center para centrar verticalmente foto y contenido
+          'flex flex-col lg:flex-row lg:items-center',
+          'z-10'
         )}
       >
         {/* LEFT (Visual) */}
         <motion.div
           className={clsx(
-            'relative w-full lg:w-7/12',
-            'h-[45vh] md:h-[50vh] lg:h-auto',
-            'p-4 md:p-6 lg:p-10'
+            'relative w-full lg:w-1/2',
+            // Aspect ratio 3:2 (3 de alto, 2 de ancho) = más ancha y menos rectangular
+            'h-[45vh] md:h-[50vh] lg:aspect-[2/3]',
+            // Padding reducido para diseño más compacto
+            'p-4 md:p-6 lg:p-6',
+            // Flex-shrink para evitar que se comprima
+            'lg:flex-shrink-0'
           )}
-          variants={isMobile ? slideUp : fadeIn}
+          variants={isMobile ? MOTION_VARIANTS.slideUp : MOTION_VARIANTS.fade}
         >
-          {/* Category Badge - Positioned above the media container */}
-          {event.category && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="absolute top-2 left-4 md:left-6 lg:left-10 z-20"
-            >
-              <TrapezoidBadge
-                label={event.category}
-                size="sm"
-                variant="white"
-                className="shadow-lg"
-              />
-            </motion.div>
-          )}
-
           {/* Clip container */}
           <motion.div
-            variants={clipTrapezoid}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="w-full h-full overflow-hidden bg-neutral-900 transform-gpu" // Added transform-gpu to force compositing layer
-            style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }} // Force stacking context for Safari/Chrome video clipping
+            initial={{ clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)' }}
+            animate={{ 
+              clipPath: 'polygon(18% 0%, 100% 0%, 82% 100%, 0% 100%)',
+              transition: { duration: 0.6, ease: [0.19, 1, 0.22, 1] }
+            }}
+            exit={{ 
+              clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
+              transition: { duration: 0.4, ease: [0.19, 1, 0.22, 1] }
+            }}
+            className="w-full h-full overflow-hidden bg-neutral-900 transform-gpu"
+            style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
           >
             <MediaGallery
               gallery={safeGallery}
@@ -190,42 +178,66 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
         {/* RIGHT (Content) */}
         <motion.div
           className={clsx(
-            'w-full lg:w-5/12',
-            'p-6 md:p-10 lg:pl-0 lg:pr-10',
-            'flex flex-col gap-6'
+            'w-full lg:w-1/2',
+            // Padding interior reducido
+            'p-6 md:p-6 lg:p-10',
+            'flex flex-col gap-5',
+            // Padding bottom grande para evitar overlap con botones (máscara)
+            'pb-32 md:pb-36',
+            // SIN overflow - el scroll está solo en la descripción
+            'overflow-visible'
           )}
-          variants={isMobile ? slideUp : fadeIn}
+          variants={isMobile ? MOTION_VARIANTS.slideUp : MOTION_VARIANTS.fade}
         >
-          {/* BRAND LOGO (Placeholder logic) */}
+          {/* BRAND LOGO + CATEGORY BADGE */}
           <motion.div 
             variants={titleVariants}
-            className="flex justify-start"
+            className="flex items-center justify-between gap-4"
           >
-            {event.logo ? (
-              <img 
-                src={event.logo} 
-                alt={`${event.brand} Logo`} 
-                className="h-8 md:h-10 lg:h-12 w-auto object-contain opacity-90 grayscale hover:grayscale-0 transition-all duration-300"
-              />
-            ) : (
-              <div className="h-8 md:h-10 lg:h-12 w-24 md:w-32 border border-dashed border-white/20 bg-white/5 rounded flex items-center justify-center group">
-                <span className="text-[10px] uppercase tracking-widest text-white/40 group-hover:text-white/70 transition-colors">
-                  {event.brand || "Brand"}
-                </span>
-              </div>
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              {event.logo ? (
+                <img 
+                  src={event.logo} 
+                  alt={`${event.brand} Logo`} 
+                  className="h-6 md:h-8 lg:h-10 w-auto object-contain opacity-90 grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              ) : (
+                <div className="h-6 md:h-8 lg:h-10 w-20 md:w-24 border border-dashed border-white/20 bg-white/5 rounded flex items-center justify-center group">
+                  <span className="text-[9px] uppercase tracking-widest text-white/40 group-hover:text-white/70 transition-colors">
+                    {event.brand || "Brand"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Category Badge a la derecha */}
+            {event.category && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <TrapezoidBadge
+                  label={event.category}
+                  size="xs"
+                  variant="white"
+                  className="shadow-lg"
+                />
+              </motion.div>
             )}
           </motion.div>
 
-          {/* TITLE */}
+          {/* TITLE - Tipografía más pequeña y compacta */}
           <AnimatedTitle
             text={event.title}
-            className="text-3xl md:text-4xl lg:text-5xl leading-[0.95]"
+            className="text-2xl md:text-3xl lg:text-3xl leading-[0.95]"
           />
 
-          {/* TEXT */}
+          {/* TEXT - Tipografía reducida para mejor lectura */}
           <AnimatedText
             text={event.description}
-            className="text-base md:text-lg"
+            className="text-sm md:text-sm lg:text-base"
           />
         </motion.div>
       </div>

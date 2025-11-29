@@ -26,7 +26,7 @@ export async function generateRefinement(
   const userText = lastUserMessage ? (lastUserMessage.text || lastUserMessage.content || "") : "";
   const textUpper = userText.toUpperCase();
 
-  // DETECT MODES (Legacy support + Helper triggers)
+  // DETECT MODES (Legacy support + Helper triggers + MEGA AUDIT MODE)
   const modes = {
     isShorter: ["SHORTER", "RESUMIDO", "BREVE", "CORTO", "LESS", "MENOS"].some(k => textUpper.includes(k)),
     isTechnical: ["TECHNICAL", "TÉCNICO", "TECNICO", "HARDWARE", "RIGGING", "SPECS"].some(k => textUpper.includes(k)),
@@ -34,6 +34,7 @@ export async function generateRefinement(
     isCorporate: ["CORPORATE", "FORMAL", "INSTITUCIONAL", "EJECUTIVO", "BUSINESS"].some(k => textUpper.includes(k)),
     isSeo: ["SEO", "IA", "SEARCH", "SGE", "GPT", "GOOGLE", "PERPLEXITY", "INDEXING"].some(k => textUpper.includes(k)),
     isImpact: ["IMPACTO", "VALOR", "OBJETIVO", "ROI", "ALCANCE", "RESULTADO", "METRICS"].some(k => textUpper.includes(k)),
+    isMegaAudit: ["OPTIMIZAR TODO", "AUDITAR", "LLENAR", "COMPLETAR", "INFERIR", "AUDIT", "FILL ALL"].some(k => textUpper.includes(k)),
   };
 
   let modeInstructions = "";
@@ -73,8 +74,50 @@ Tu rol:
 
 🧠 **CAPACIDADES Y MODOS:**
 
-1) MODO "OPTIMIZE" (Cuando se pida optimizar todo o generar contenido general):
-   Genera: Título optimizado, Slug SEO, Highlights, Meta description, Keywords, Hashtags IG, Copy Instagram, Post LinkedIn, Artículo LinkedIn, Orden de fotos.
+1) MODO "OPTIMIZE" / "MEGA AUDIT" (Cuando se pida optimizar todo, auditar o completar campos):
+   Genera TODOS estos campos obligatoriamente:
+   
+   **Core Content:**
+   - Título optimizado (fórmula: {Brand} | {Event Type} - {Location} {Year})
+   - Slug SEO-friendly (lowercase, guiones)
+   - Description (W4 format: What, When, Where, Why + métricas)
+   - Summary/Meta description (max 155 chars)
+   
+   **Editorial:**
+   - Tono de comunicación (Premium, Corporativo, Festivo, Juvenil, Técnico)
+   - Audiencia/Target (específico, ej: "Millennials 25-35, NSE ABC1")
+   - Highlights (3-5 puntos clave, accionables)
+   
+   **SEO & Metadata:**
+   - SEO Title (max 60 chars, keywords adelante)
+   - SEO Description (max 155 chars, incluye CTA)
+   - Keywords (5-8: branded + location + category + long-tail)
+   - Tags internos (3-5 para filtros)
+   - Hashtags (15-20: branded + category + location + trending)
+   
+   **Social Media:**
+   - Instagram: Hook, Body, Closing, Hashtags, Alt copy para A/B
+   - LinkedIn: Post breve (max 1,300 chars), Artículo largo profesional
+   
+   **A/B Testing:**
+   - 2 títulos alternativos (diferentes ángulos)
+   - 2 resúmenes alternativos
+   
+   **Performance & Location:**
+   - KPIs (3-5 métricas cuantificables y realistas)
+   - Brand, Client, Year, Month, Country, City, Venue
+   - Category, Subcategory
+   - People reached, Attendees, Days, Cities, Screens
+   - Results notes (párrafo agradecido, 150-250 chars)
+   
+   **Inferencia Inteligente:**
+   Si faltan datos, INFIERE basándote en:
+   - Tipo de evento (retail → 150K-300K alcance, 10-15 días)
+   - Cliente (premium → tone corporativo, venue exclusivo)
+   - Ubicación mencionada
+   - Patrones de eventos similares
+   
+   **En chat_response:** Orden sugerido de fotos con justificación
 
 2) MODO "SPECIFIC" (Cuando se pida algo puntual):
    Genera solo lo solicitado con la máxima calidad.
@@ -85,27 +128,68 @@ INSTRUCCIONES ESPECÍFICAS DE FORMATO JSON (CRÍTICO):
 Debes responder SIEMPRE con un objeto JSON válido. No incluyas markdown fuera del JSON.
 El CMS usará tu respuesta para rellenar formularios.
 
+ESTRUCTURA JSON COMPLETA (Todos los campos):
 {
   "draft": "El texto principal de la descripción (sin títulos)",
-  "summary": "Meta description para SEO",
+  "summary": "Meta description para SEO (max 160 caracteres)",
   "title": "Título optimizado",
   "slug": "slug-optimizado",
+  
+  "tone": "Tono de comunicación (ej: Corporativo, Festivo, Premium, Juvenil)",
+  "audience": "Audiencia/Target (ej: Millennials, Ejecutivos, Familias)",
   "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"],
-  "keywords": ["keyword1", "keyword2"],
-  "hashtags": ["#tag1", "#tag2"],
-  "instagram_hook": "Hook inicial de Instagram",
+  
+  "seo_title": "Título SEO optimizado (max 60 caracteres)",
+  "seo_description": "Descripción SEO optimizada (max 155 caracteres)",
+  "keywords": ["keyword1", "keyword2", "keyword3"],
+  "hashtags": ["#tag1", "#tag2", "#tag3"],
+  "tags": ["tag1", "tag2", "tag3"],
+  
+  "instagram_hook": "Hook inicial impactante de Instagram",
   "instagram_body": "Cuerpo del post de Instagram",
-  "instagram_closing": "Cierre del post de Instagram",
-  "instagram_hashtags": "Hashtags específicos de Instagram",
-  "linkedin_post": "Copy para LinkedIn (post corto)",
-  "linkedin_article": "Copy para LinkedIn (artículo largo)",
+  "instagram_closing": "Cierre del post de Instagram con CTA",
+  "instagram_hashtags": "#hashtag1 #hashtag2 #hashtag3",
+  "alt_instagram": "Variante alternativa copy Instagram para A/B testing",
+  
+  "linkedin_post": "Copy breve para LinkedIn (máx 1,300 caracteres)",
+  "linkedin_article": "Artículo largo para LinkedIn (profesional y detallado)",
+  
   "alt_title_1": "Variante alternativa título 1",
   "alt_title_2": "Variante alternativa título 2",
-  "alt_instagram": "Variante alternativa copy Instagram",
+  "alt_summary_1": "Variante alternativa resumen 1",
+  "alt_summary_2": "Variante alternativa resumen 2",
+  
+  "kpis": ["KPI 1: +35% engagement", "KPI 2: 50K alcance", "KPI 3: 2,500 asistentes"],
+  
   "chat_response": "Tu respuesta conversacional (Markdown). Aquí incluye el ORDEN SUGERIDO DE FOTOS (con justificación) si se solicita, o comentarios sobre los cambios."
 }
 
 Si algún campo no se puede generar o no es relevante para la solicitud actual, déjalo vacío pero NO omitas la clave (usa string vacío o array vacío).
+
+REGLAS CRÍTICAS:
+- NO uses emojis en ningún campo (excepto chat_response si es necesario)
+- Respeta los límites de caracteres especificados
+- Los arrays deben tener entre 3-5 elementos como mínimo
+- Todos los campos deben estar presentes en el JSON (aunque estén vacíos)
+
+---
+
+🎯 EJEMPLOS DE INFERENCIA INTELIGENTE:
+
+Si el evento dice "Coca-Cola en Santiago":
+→ INFIERE: tone="Festivo", audience="Familias y millennials", venue="Mall o espacio público", people_reached="150000-300000", days="10-15"
+
+Si dice "Lanzamiento en Teatro Municipal":
+→ INFIERE: tone="Premium, Corporativo", audience="Ejecutivos, prensa, stakeholders", attendees="300-800", category="Lanzamientos de Producto"
+
+Si menciona "Festival de música":
+→ INFIERE: tone="Energético, Juvenil", audience="Jóvenes 18-35", people_reached="5000-50000", days="2-3", screens="4-8"
+
+---
+
+TONE OF VOICE OBLIGATORIO:
+✅ Profesional, descriptivo, agradecido, realista
+❌ Marketing humo, clichés vacíos, exageraciones, vaguedades
 
 INSTRUCCIONES DINÁMICAS ADICIONALES (MODOS DETECTADOS):
 ${modeInstructions}
@@ -117,20 +201,58 @@ ${modeInstructions}
     { 
       role: "system", 
       content: `EVENTO A OPTIMIZAR:
-- Año: ${event.year || "No especificado"}
+
+BÁSICO:
 - Marca: ${event.brand}
-- Nombre interno: ${event.title}
+- Cliente: ${event.client || "N/A"}
 - Título actual: ${event.title}
 - Slug actual: ${event.slug || ""}
-- Descripción: ${currentDraft}
-- Highlights: ${(event.highlights || []).join(', ')}
-- Keywords: ${(event.keywords || []).join(', ')}
-- Hashtags: ${(event.hashtags || []).join(', ')}
-- Thumbnail: ${event.image || ""}
-- Video: ${event.video || ""}
-- Imágenes: ${(event.gallery || []).map((g: any) => g.url).join(', ')}
+- Descripción actual: ${currentDraft}
+- Resumen actual: ${event.summary || ""}
+- Categoría: ${event.category || "General"}
+- Subcategoría: ${event.subcategory || "N/A"}
 
-CONTEXTO ADICIONAL: ${event.category || "General"}
+LOCALIZACIÓN & FECHA:
+- Año: ${event.year || "No especificado"}
+- Mes: ${event.month || "N/A"}
+- País: ${event.country || "N/A"}
+- Ciudad: ${event.city || "N/A"}
+- Venue: ${event.venue || "N/A"}
+
+CONTENIDO EDITORIAL ACTUAL:
+- Tono: ${event.tone || "No definido"}
+- Audiencia: ${event.audience || "No definida"}
+- Highlights: ${(event.highlights || []).join(', ') || "No definidos"}
+
+SEO ACTUAL:
+- SEO Title: ${event.seo_title || ""}
+- SEO Description: ${event.seo_description || ""}
+- Keywords: ${(event.keywords || []).join(', ') || "No definidas"}
+- Tags: ${(event.tags || []).join(', ') || "No definidos"}
+- Hashtags: ${(event.hashtags || []).join(', ') || "No definidos"}
+
+SOCIAL MEDIA ACTUAL:
+- Instagram Hook: ${event.instagram_hook || ""}
+- Instagram Body: ${event.instagram_body || ""}
+- Instagram Closing: ${event.instagram_closing || ""}
+- Instagram Hashtags: ${event.instagram_hashtags || ""}
+- LinkedIn Post: ${event.linkedin_post || ""}
+- LinkedIn Article: ${event.linkedin_article || ""}
+
+PERFORMANCE:
+- Alcance: ${event.people_reached || "N/A"}
+- Asistentes: ${event.attendees || "N/A"}
+- Duración (días): ${event.days || "N/A"}
+- Ciudades (gira): ${event.cities || "N/A"}
+- Pantallas: ${event.screens || "N/A"}
+- KPIs actuales: ${(event.kpis || []).join(', ') || "No definidos"}
+- Notas de resultados: ${event.results_notes || ""}
+
+MULTIMEDIA:
+- Imagen principal: ${event.image || ""}
+- Logo: ${event.logo || ""}
+- OG Image: ${event.og_image || ""}
+- Galería: ${(event.gallery || []).map((g: any) => g.url).join(', ')}
 ` 
     },
     ...messages.map(m => ({ role: m.role, content: m.text || m.content }))

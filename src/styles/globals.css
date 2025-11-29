@@ -102,3 +102,26 @@ body, html {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* Custom scrollbar styles para modal text */
+.custom-scroll-modal {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.custom-scroll-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scroll-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.custom-scroll-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

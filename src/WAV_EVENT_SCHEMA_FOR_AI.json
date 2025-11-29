@@ -1,0 +1,709 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WAV Event Schema - Complete Specification for AI Processing",
+  "description": "Este schema define TODOS los campos de un evento WAV BTL, incluyendo reglas de validación, tipos de datos, y estrategia de población con IA. Usa este schema para entender cómo generar contenido optimizado.",
+  
+  "metadata": {
+    "version": "3.0.0",
+    "lastUpdated": "2025-11-29",
+    "purpose": "Guía para Claude Sonnet en la generación automática de contenido para eventos WAV BTL",
+    "context": "We Are Vision es una agencia de marketing experiencial y BTL en Chile/LATAM. Cada evento representa una activación de marca real con fotos, videos, y KPIs medibles."
+  },
+
+  "type": "object",
+  "required": ["id", "title", "description", "client", "category", "event_date"],
+  
+  "properties": {
+    
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID único generado automáticamente por Supabase.",
+      "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "generated_by": "database"
+    },
+    
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "URL-friendly identifier. Formato: {cliente}-{titulo-evento}. Debe ser único. Generado automáticamente al guardar.",
+      "example": "nike-run-club-santiago-2024",
+      "rules": [
+        "Lowercase only",
+        "Hyphens instead of spaces",
+        "Remove special characters",
+        "Max 100 characters",
+        "Must be unique across all events"
+      ],
+      "generated_by": "backend_on_save",
+      "ai_instruction": "No generar. El backend lo creará automáticamente."
+    },
+    
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "published", "archived"],
+      "default": "draft",
+      "description": "Estado del evento en el workflow de publicación.",
+      "rules": [
+        "draft: Evento recién creado, contenido incompleto",
+        "review: Listo para revisión humana (IA completó todo)",
+        "published: Visible en el sitio público",
+        "archived: No visible, guardado para histórico"
+      ],
+      "ai_instruction": "Siempre iniciar en 'draft'. Cambiar a 'review' cuando IA complete todos los campos requeridos."
+    },
+    
+    "title": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 80,
+      "description": "Título principal del evento. Debe ser descriptivo, incluir marca y tipo de activación. Optimizado para SEO y legibilidad.",
+      "example": "Activación Nike Run Club 2024 - Experiencia Inmersiva en Parque Bicentenario",
+      "rules": [
+        "Include brand name",
+        "Include event type (Activación, Lanzamiento, Stand, etc.)",
+        "Include year if relevant",
+        "Include key differentiator",
+        "Max 80 characters (60 ideal)",
+        "Use title case",
+        "No emojis"
+      ],
+      "seo_optimization": {
+        "target_length": "50-60 characters",
+        "include_keywords": ["marca", "tipo de evento", "ubicación o diferenciador"],
+        "tone": "professional but engaging"
+      },
+      "ai_instruction": "Analiza las fotos/videos del evento. Identifica: 1) La marca principal (logos, productos), 2) El tipo de activación (stand, experiencia inmersiva, lanzamiento), 3) Elementos distintivos (tecnología, ubicación, público). Genera un título que combine estos elementos de forma natural y SEO-friendly."
+    },
+    
+    "description": {
+      "type": "string",
+      "minLength": 200,
+      "maxLength": 1000,
+      "description": "Descripción narrativa completa del evento. 2-3 párrafos. Debe contar la historia del evento, objetivos, ejecución y resultados si están disponibles.",
+      "example": "Nike Run Club transformó el Parque Bicentenario en un espacio inmersivo de running durante 3 días. La activación incluyó una pista iluminada con tecnología LED sincronizada, estaciones de hidratación interactivas y una experiencia fotográfica 360° para los participantes.\n\nMás de 5,000 runners experimentaron la marca Nike de forma tangible, conectando con la filosofía 'Just Do It' a través de retos personalizados y coaching en vivo. La tecnología de tracking permitió a cada participante visualizar su desempeño en pantallas gigantes en tiempo real.\n\nLa campaña generó un alcance de 2M de personas en redes sociales, con un engagement 3x superior al promedio de la industria. El evento consolidó a Nike como líder en experiencias deportivas inmersivas en Chile.",
+      "structure": {
+        "paragraph_1": "Descripción general del evento, setup, tecnología/diseño usado",
+        "paragraph_2": "Experiencia del usuario, actividades, interacciones",
+        "paragraph_3": "Resultados, impacto, alcance (si disponible)"
+      },
+      "tone_guidelines": {
+        "voice": "professional, energetic, storytelling",
+        "avoid": ["marketing clichés", "excessive adjectives", "first person"],
+        "focus": ["facts", "unique elements", "measurable outcomes"]
+      },
+      "ai_instruction": "Analiza el contenido visual (fotos/videos) del evento. Identifica: 1) Setup físico (stands, estructuras, tecnología visible), 2) Interacciones de personas (qué están haciendo), 3) Elementos de marca presentes, 4) Momentos destacados (performances, productos, tecnología). Genera una narrativa de 2-3 párrafos que cuente la historia del evento como si estuvieras describiendo lo que ves. Usa lenguaje descriptivo pero profesional. Si no hay suficiente información visual, sé honesto pero creativo."
+    },
+    
+    "summary": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Versión corta de la descripción. 1-2 oraciones. Usada en cards, previews, meta descriptions.",
+      "example": "Experiencia inmersiva de running con tecnología LED y tracking en tiempo real. 5,000 participantes, 2M de alcance en RRSS.",
+      "rules": [
+        "Max 160 characters (ideal for meta description)",
+        "1-2 sentences",
+        "Include key numbers if available",
+        "No period at the end"
+      ],
+      "ai_instruction": "Extrae los 2-3 elementos más impactantes de la descripción completa y condénsalos en 1-2 oraciones. Prioriza números concretos (asistentes, alcance) y tecnología/elementos únicos."
+    },
+    
+    "client": {
+      "type": "string",
+      "description": "Nombre de la marca/cliente principal del evento.",
+      "example": "Nike",
+      "rules": [
+        "Official brand name (no nicknames)",
+        "Proper capitalization",
+        "No 'S.A.' or legal suffixes"
+      ],
+      "ai_instruction": "Analiza logos visibles en fotos/videos. Usa OCR si es necesario. Si hay múltiples marcas, selecciona la más prominente (mayor cantidad de logos, productos, branding). Si no detectas marca clara, usa 'Cliente Confidencial'."
+    },
+    
+    "category": {
+      "type": "string",
+      "description": "Categoría principal del evento según la taxonomía WAV.",
+      "enum": [
+        "Activaciones de Marca",
+        "Eventos Corporativos",
+        "Lanzamientos de Producto",
+        "Experiencias Inmersivas",
+        "Stands & Ferias",
+        "Instalaciones Tecnológicas",
+        "Producción Audiovisual",
+        "Arquitectura Efímera",
+        "Retail & Pop-Ups",
+        "Logística & Operaciones"
+      ],
+      "classification_guide": {
+        "Activaciones de Marca": "Experiencias interactivas en espacios públicos o privados para generar engagement con la marca",
+        "Eventos Corporativos": "Congresos, seminarios, lanzamientos internos, team building",
+        "Lanzamientos de Producto": "Presentación de nuevos productos con experiencia sensorial",
+        "Experiencias Inmersivas": "Instalaciones que sumergen al usuario en un ambiente branded (VR, mapping, sensorial)",
+        "Stands & Ferias": "Diseño y construcción de stands para ferias comerciales",
+        "Instalaciones Tecnológicas": "Proyectos con fuerte componente tech (interactivos, sensores, IA)",
+        "Producción Audiovisual": "Eventos con foco en contenido visual (streaming, grabación, live shows)",
+        "Arquitectura Efímera": "Construcciones temporales, escenografías, espacios branded",
+        "Retail & Pop-Ups": "Tiendas temporales, activaciones en punto de venta",
+        "Logística & Operaciones": "Gestión de eventos complejos, coordinación multisite"
+      },
+      "ai_instruction": "Analiza el contenido visual. Identifica el tipo de evento según estos indicadores: ¿Hay público interactuando? → Activación. ¿Es en feria con stand? → Stands. ¿Hay tecnología inmersiva (VR, mapping)? → Experiencias Inmersivas. ¿Es presentación de producto? → Lanzamiento. Selecciona la categoría más específica. Si hay duda entre 2, prioriza la más específica."
+    },
+    
+    "subcategory": {
+      "type": "string",
+      "description": "Subcategoría que especifica el tipo de evento dentro de la categoría principal.",
+      "example": "Running Experience",
+      "ai_instruction": "Basándote en la categoría seleccionada, identifica un descriptor más específico. Ejemplos: Si es 'Activaciones de Marca' → 'Sampling', 'Road Show', 'Guerrilla'. Si es 'Stands' → 'Tecnológico', 'Minimalista', 'Corporativo'. Máximo 2-3 palabras."
+    },
+    
+    "event_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del evento en formato ISO 8601 (YYYY-MM-DD).",
+      "example": "2024-03-15",
+      "ai_instruction": "Busca indicadores visuales de fecha: banners con fechas, análisis de metadata de archivos (creation date), estación del año visible (verano/invierno). Si no encuentras fecha exacta, usa el año de los archivos subidos."
+    },
+    
+    "year": {
+      "type": "integer",
+      "minimum": 2003,
+      "maximum": 2030,
+      "description": "Año del evento. Extraído de event_date.",
+      "example": 2024,
+      "generated_by": "extracted_from_event_date"
+    },
+    
+    "month": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "Mes del evento (1-12). Extraído de event_date.",
+      "example": 3,
+      "generated_by": "extracted_from_event_date"
+    },
+    
+    "country": {
+      "type": "string",
+      "default": "Chile",
+      "description": "País donde se realizó el evento.",
+      "example": "Chile",
+      "ai_instruction": "Default a 'Chile'. Si detectas banderas, idiomas específicos (portugués→Brasil), monumentos reconocibles, ajusta. Países comunes: Chile, Perú, Colombia, Argentina, México."
+    },
+    
+    "city": {
+      "type": "string",
+      "description": "Ciudad donde se realizó el evento.",
+      "example": "Santiago",
+      "ai_instruction": "Busca indicadores: logos de municipalidades, landmarks reconocibles (Torre Entel→Santiago, Valparaíso por cerros), textos en fotos. Si no detectas, deja vacío."
+    },
+    
+    "venue": {
+      "type": "string",
+      "description": "Lugar específico del evento (mall, parque, centro de eventos, etc.).",
+      "example": "Parque Bicentenario",
+      "ai_instruction": "Busca señalética, logos de venues, arquitectura reconocible. Ejemplos: 'Mall Sport', 'Estadio Nacional', 'Centro Cultural Matucana 100'. Si no detectas, deja vacío."
+    },
+    
+    "tone": {
+      "type": "string",
+      "enum": ["professional", "playful", "luxury", "technical", "youthful", "corporate"],
+      "description": "Tono de comunicación del evento.",
+      "classification_guide": {
+        "professional": "Eventos B2B, corporativos, serios",
+        "playful": "Activaciones juveniles, gamificación, colores vibrantes",
+        "luxury": "Marcas premium, estética minimalista, público selecto",
+        "technical": "Productos tech, demostraciones, público especializado",
+        "youthful": "Target joven, música, influencers",
+        "corporate": "Eventos internos, formal, institucional"
+      },
+      "ai_instruction": "Analiza la estética visual: ¿Colores vibrantes y personas jóvenes? → youthful/playful. ¿Minimalismo, blanco/negro, lighting sofisticado? → luxury. ¿Personas en ropa formal, presentaciones? → corporate/professional. ¿Demos de tecnología? → technical."
+    },
+    
+    "target_audience": {
+      "type": "string",
+      "description": "Audiencia objetivo del evento.",
+      "example": "Runners amateur y semi-profesionales, 18-45 años",
+      "ai_instruction": "Observa el público en fotos/videos: ¿Edad aproximada? ¿Vestimenta (casual/formal/deportiva)? ¿Género predominante? ¿Intereses evidentes (deporte, tech, lujo)? Describe en 1 oración."
+    },
+    
+    "people_reached": {
+      "type": "integer",
+      "description": "Alcance total en redes sociales (impresiones).",
+      "example": 2000000,
+      "ai_instruction": "Si hay pantallas con métricas visibles, extrae el número. Si no, deja vacío. No inventes números."
+    },
+    
+    "attendees": {
+      "type": "integer",
+      "description": "Número de asistentes presenciales al evento.",
+      "example": 5000,
+      "ai_instruction": "Si hay banners tipo 'Gracias a los 5000 participantes', extrae el número. Si ves fotos de multitudes: <100 personas→100, 100-500→300, 500-2000→1000, >2000→estimación conservadora. Si no puedes estimar, deja vacío."
+    },
+    
+    "days_duration": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Duración del evento en días.",
+      "example": 3,
+      "ai_instruction": "Busca banners tipo '3 días de evento'. Si hay fotos de montaje/desmontaje, suma días. Default a 1 si no hay info."
+    },
+    
+    "cities_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Número de ciudades donde se realizó el evento (para road shows).",
+      "example": 1,
+      "ai_instruction": "Si detectas múltiples locations en fotos (diferentes venues/ciudades), cuenta. Default a 1."
+    },
+    
+    "screens_count": {
+      "type": "integer",
+      "description": "Número de pantallas/displays usados en el evento.",
+      "example": 8,
+      "ai_instruction": "Cuenta pantallas visibles en fotos: LEDs, TVs, proyecciones. Si no son claramente contables, deja vacío."
+    },
+    
+    "seo_title": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Título optimizado para SEO. Incluye keywords principales.",
+      "example": "Activación Nike Run Club 2024 Santiago | Marketing Experiencial WAV",
+      "structure": "{Evento} | {Tipo de servicio} {Agencia}",
+      "ai_instruction": "Toma el título principal y agrega ' | Marketing Experiencial WAV' al final. Asegúrate de que no exceda 60 caracteres totales. Si excede, acorta el título principal."
+    },
+    
+    "seo_description": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Meta description para SEO. Versión ultra-condensada del summary.",
+      "example": "Experiencia inmersiva Nike Run Club con tecnología LED y tracking en tiempo real. 5,000 runners, 2M alcance. Activación BTL por We Are Vision.",
+      "ai_instruction": "Usa el summary y agrega ' Activación BTL por We Are Vision' al final. Max 160 chars."
+    },
+    
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 5,
+      "maxItems": 15,
+      "description": "Keywords SEO relevantes para el evento.",
+      "example": [
+        "activación de marca",
+        "marketing experiencial",
+        "Nike Chile",
+        "experiencia inmersiva",
+        "evento deportivo",
+        "BTL Santiago",
+        "running experience",
+        "tecnología LED",
+        "tracking deportivo"
+      ],
+      "ai_instruction": "Genera 10-15 keywords combinando: 1) Marca, 2) Tipo de evento (activación, lanzamiento, etc.), 3) Tecnología usada (LED, VR, interactivo), 4) Industria (deportivo, tech, retail), 5) Ubicación (Chile, Santiago), 6) Términos generales BTL (marketing experiencial, activación de marca, brand experience). Usa lowercase."
+    },
+    
+    "hashtags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^#[A-Za-z0-9]+$"
+      },
+      "maxItems": 10,
+      "description": "Hashtags para redes sociales.",
+      "example": [
+        "#NikeRunClub",
+        "#JustDoIt",
+        "#MarketingExperiencial",
+        "#BTLChile",
+        "#WeAreVision",
+        "#EventosDeportivos"
+      ],
+      "ai_instruction": "Genera 5-8 hashtags: 1) Marca oficial (#Nike), 2) Campaña específica (#NikeRunClub), 3) Slogan si es reconocible (#JustDoIt), 4) Industria (#MarketingExperiencial, #BTL), 5) Ubicación (#Santiago, #Chile), 6) Agencia (#WeAreVision). Usa PascalCase (primera letra de cada palabra en mayúscula)."
+    },
+    
+    "instagram_hook": {
+      "type": "string",
+      "maxLength": 150,
+      "description": "Primera línea del post de Instagram. Debe captar atención inmediata.",
+      "example": "🏃‍♂️✨ 5,000 runners transformaron el Parque Bicentenario en una experiencia Nike inolvidable",
+      "rules": [
+        "Start with emoji relevant to event",
+        "Include impressive number if available",
+        "Create curiosity or excitement",
+        "Max 150 characters"
+      ],
+      "ai_instruction": "Identifica el elemento más impactante del evento (número de asistentes, tecnología única, ubicación icónica). Crea una línea que genere curiosidad. Usa 1-2 emojis relevantes al inicio."
+    },
+    
+    "instagram_body": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Cuerpo principal del post de Instagram. 3-5 líneas descriptivas.",
+      "example": "Durante 3 días, Nike Run Club creó una experiencia inmersiva que combinó tecnología LED de última generación con coaching en vivo y retos personalizados.\n\nCada runner pudo visualizar su desempeño en pantallas gigantes, conectando con la filosofía Just Do It de forma tangible.\n\nMás que un evento, fue una celebración de la comunidad running en Chile 🇨🇱",
+      "structure": {
+        "line_1": "Descripción general con número impactante",
+        "line_2": "Detalle de experiencia o tecnología única",
+        "line_3": "Cierre emocional o comunitario"
+      },
+      "ai_instruction": "Escribe 3-4 líneas cortas (cada una con salto de línea). Enfócate en la experiencia del usuario, no en tecnicismos. Usa lenguaje cercano y emocional. Incluye 1-2 emojis estratégicamente."
+    },
+    
+    "instagram_closing": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Cierre del post con call-to-action.",
+      "example": "📸 Swipe para ver más momentos épicos →\n\n¿Participaste? Etiquétanos en tus stories 👆",
+      "ai_instruction": "Incluye: 1) CTA para ver más contenido (swipe, link in bio), 2) Invitación a interactuar (comentar, compartir, etiquetar). Usa emojis de flechas/manos."
+    },
+    
+    "instagram_hashtags": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Bloque de hashtags para Instagram (separado del texto principal).",
+      "example": "#NikeRunClub #JustDoIt #MarketingExperiencial #BTLChile #WeAreVision #EventosDeportivos #RunningChile #ExperienciaInmersiva #ActivacionDeMarca #ChileCreativo",
+      "rules": [
+        "30 hashtags max (Instagram limit)",
+        "Mix of specific and broad tags",
+        "Separate from main caption"
+      ],
+      "ai_instruction": "Combina los hashtags generados anteriormente + agregar algunos generales (#EventosChile, #MarketingBTL, #ExperiencialMarketing). Separar con espacios. 15-20 hashtags total."
+    },
+    
+    "linkedin_post": {
+      "type": "string",
+      "maxLength": 1300,
+      "description": "Post para LinkedIn. Tono profesional, enfocado en estrategia y resultados.",
+      "example": "𝗡𝗶𝗸𝗲 𝗥𝘂𝗻 𝗖𝗹𝘂𝗯: 𝗖ó𝗺𝗼 𝗰𝗿𝗲𝗮𝗺𝗼𝘀 𝘂𝗻𝗮 𝗲𝘅𝗽𝗲𝗿𝗶𝗲𝗻𝗰𝗶𝗮 𝗶𝗻𝗺𝗲𝗿𝘀𝗶𝘃𝗮 𝗾𝘂𝗲 𝗮𝗹𝗰𝗮𝗻𝘇ó 𝟮𝗠 𝗱𝗲 𝗽𝗲𝗿𝘀𝗼𝗻𝗮𝘀\n\nEl desafío: Conectar con la comunidad running de Chile de forma auténtica y memorable.\n\nLa solución: Una activación de 3 días que transformó el Parque Bicentenario en un espacio donde tecnología y deporte se fusionaron.\n\n𝗞𝗲𝘆 𝗲𝗹𝗲𝗺𝗲𝗻𝘁𝘀:\n• Pista LED sincronizada con el ritmo de cada corredor\n• Sistema de tracking en tiempo real con visualización en pantallas 4K\n• Estaciones de coaching personalizado\n• Experiencia fotográfica 360° para contenido UGC\n\n𝗥𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀:\n→ 5,000 participantes presenciales\n→ 2M de alcance en RRSS\n→ Engagement 3x superior al promedio de la industria\n→ 87% de los asistentes compartieron contenido branded\n\nEn We Are Vision, creemos que el marketing experiencial no es solo sobre hacer eventos, sino sobre crear momentos que las personas quieran vivir y compartir.\n\n¿Qué opinas de las activaciones inmersivas? 💭\n\n#MarketingExperiencial #BTL #BrandExperience #EventMarketing",
+      "structure": {
+        "title": "Título en bold con números/resultados clave",
+        "challenge": "El desafío del cliente",
+        "solution": "Cómo lo resolvimos",
+        "key_elements": "Bullets con elementos técnicos/creativos",
+        "results": "Números concretos con flechas/símbolos",
+        "closing": "Reflexión o pregunta para engagement",
+        "hashtags": "3-5 hashtags profesionales"
+      },
+      "ai_instruction": "Escribe en tono profesional pero accesible. Usa formato: 1) Título bold (𝗧𝗲𝘅𝘁𝗼 en unicode bold), 2) Contexto del desafío, 3) Solución implementada, 4) Bullets con elementos clave, 5) Resultados con números, 6) Cierre con pregunta. Max 1300 caracteres. Incluye saltos de línea para legibilidad."
+    },
+    
+    "linkedin_article": {
+      "type": "string",
+      "maxLength": 3000,
+      "description": "Artículo largo para LinkedIn (opcional). Caso de estudio detallado.",
+      "example": "Case Study: Nike Run Club - Cómo el Marketing Experiencial Generó 2M de Impresiones...",
+      "ai_instruction": "Si hay suficiente información (KPIs, proceso creativo visible), genera un artículo de 500-1000 palabras. Estructura: Introducción, Desafío, Estrategia, Ejecución, Resultados, Aprendizajes. Si no hay suficiente info, deja vacío."
+    },
+    
+    "title_variant_a": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Variante A del título para A/B testing. Enfoque en emoción/experiencia.",
+      "example": "Nike Run Club: La Experiencia Inmersiva que Transformó el Running en Santiago",
+      "ai_instruction": "Genera una variante del título principal con enfoque emocional. Usa palabras como 'transformó', 'revolucionó', 'experiencia única', 'inolvidable'."
+    },
+    
+    "title_variant_b": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Variante B del título para A/B testing. Enfoque en números/resultados.",
+      "example": "Activación Nike Run Club: 5,000 Runners, 2M de Alcance, 3 Días de Innovación",
+      "ai_instruction": "Genera una variante con enfoque en números y datos concretos. Prioriza métricas de impacto."
+    },
+    
+    "description_variant_a": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Variante A del summary para A/B testing.",
+      "example": "Una experiencia inmersiva que fusionó tecnología LED, tracking en tiempo real y la pasión por el running en el corazón de Santiago",
+      "ai_instruction": "Versión emocional del summary. Enfócate en la experiencia y sensaciones."
+    },
+    
+    "description_variant_b": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Variante B del summary para A/B testing.",
+      "example": "Activación de 3 días con tecnología LED, tracking en tiempo real: 5,000 participantes, 2M de alcance, engagement 3x superior",
+      "ai_instruction": "Versión orientada a datos. Incluye todos los números disponibles."
+    },
+    
+    "kpis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Alcance en RRSS"
+          },
+          "value": {
+            "type": "string",
+            "example": "2M"
+          },
+          "unit": {
+            "type": "string",
+            "example": "personas"
+          }
+        }
+      },
+      "description": "KPIs medibles del evento.",
+      "example": [
+        {"name": "Asistentes", "value": "5,000", "unit": "personas"},
+        {"name": "Alcance RRSS", "value": "2M", "unit": "impresiones"},
+        {"name": "Engagement Rate", "value": "8.5", "unit": "%"},
+        {"name": "UGC Generado", "value": "1,200", "unit": "posts"}
+      ],
+      "ai_instruction": "Si detectas números en pantallas, banners, o puedes inferir de la magnitud del evento: genera 3-5 KPIs. Comunes: Asistentes, Alcance, Engagement, Contenido generado, Conversiones, Muestras entregadas. Si no hay info, deja vacío."
+    },
+    
+    "highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 5,
+      "description": "Highlights o momentos clave del evento. Bullets para quick reading.",
+      "example": [
+        "Pista LED sincronizada de 200 metros",
+        "Sistema de tracking individual en tiempo real",
+        "Coaching personalizado con atletas Nike",
+        "Experiencia fotográfica 360° con IA",
+        "Zona de hidratación interactiva"
+      ],
+      "ai_instruction": "Identifica 3-5 elementos únicos/destacables del evento visible en fotos/videos: tecnología especial, elementos arquitectónicos, actividades interactivas, talento/celebridades, diseño innovador. Escribe bullets cortos (max 10 palabras cada uno)."
+    },
+    
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "type": {"type": "string", "enum": ["image", "video", "logo"]},
+          "url": {"type": "string", "format": "uri"},
+          "storage_path": {"type": "string"},
+          "width": {"type": "integer"},
+          "height": {"type": "integer"},
+          "aspect_ratio": {"type": "string"},
+          "is_featured": {"type": "boolean"},
+          "display_order": {"type": "integer"},
+          "ai_detected_objects": {
+            "type": "array",
+            "items": {"type": "string"},
+            "example": ["logo_nike", "people_crowd", "led_screen", "product_shoes"]
+          },
+          "ai_description": {
+            "type": "string",
+            "example": "Vista aérea de la pista LED iluminada con runners en acción. Se observan 8 pantallas LED mostrando métricas en tiempo real. Público numeroso en las gradas laterales."
+          },
+          "ai_quality_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Score de calidad técnica: nitidez, exposición, composición."
+          },
+          "crops": {
+            "type": "object",
+            "description": "Crops sugeridos por IA para diferentes aspect ratios.",
+            "properties": {
+              "square": {"type": "object", "description": "Crop 1:1 para Instagram"},
+              "landscape": {"type": "object", "description": "Crop 16:9 para desktop"},
+              "portrait": {"type": "object", "description": "Crop 4:5 para Instagram"},
+              "ultrawide": {"type": "object", "description": "Crop 21:9 para headers"}
+            },
+            "example": {
+              "square": {"x": 120, "y": 80, "w": 800, "h": 800, "focus": "logo"},
+              "landscape": {"x": 0, "y": 200, "w": 1920, "h": 1080, "focus": "action"}
+            }
+          },
+          "clips": {
+            "type": "array",
+            "description": "Clips sugeridos por IA (solo para videos).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": {"type": "number", "description": "Timestamp inicio (segundos)"},
+                "end": {"type": "number", "description": "Timestamp fin (segundos)"},
+                "description": {"type": "string"},
+                "score": {"type": "number", "description": "Relevance score 0-1"},
+                "detected_elements": {"type": "array", "items": {"type": "string"}}
+              }
+            },
+            "example": [
+              {
+                "start": 5.2,
+                "end": 12.8,
+                "description": "Logo reveal con transición LED",
+                "score": 0.95,
+                "detected_elements": ["logo", "led_animation", "music_peak"]
+              },
+              {
+                "start": 28.5,
+                "end": 35.0,
+                "description": "Toma aérea de multitud interactuando",
+                "score": 0.87,
+                "detected_elements": ["crowd", "aerial_view", "branded_elements"]
+              }
+            ]
+          }
+        }
+      },
+      "description": "Array de todos los archivos multimedia del evento.",
+      "ai_processing_instructions": {
+        "images": [
+          "1. Analyze for object detection (logos, people, products, tech)",
+          "2. Generate descriptive caption",
+          "3. Score technical quality (0-100)",
+          "4. Suggest crops for different aspect ratios (focus on brand elements, faces, or action)",
+          "5. If quality <50, suggest upscaling or reject",
+          "6. Set is_featured=true for best quality image with brand presence"
+        ],
+        "videos": [
+          "1. Transcribe audio (if present)",
+          "2. Detect scene changes",
+          "3. Identify key moments (logo reveals, crowd reactions, product demos)",
+          "4. Suggest 3-5 clips (5-15 seconds each) with highest impact",
+          "5. Score each clip by relevance (brand visibility + action + quality)",
+          "6. Generate thumbnail from best frame of each clip"
+        ]
+      }
+    }
+  },
+  
+  "ai_workflow": {
+    "step_1_visual_analysis": {
+      "description": "Analiza TODAS las fotos y videos del evento",
+      "tasks": [
+        "Detectar logos y marcas (OCR + object detection)",
+        "Identificar tipo de evento (stand, activación, lanzamiento, etc.)",
+        "Contar personas (aproximado)",
+        "Detectar tecnología visible (LEDs, pantallas, VR, etc.)",
+        "Identificar ubicación (landmarks, banderas, señalética)",
+        "Analizar tono/estética (colores, lighting, formal/casual)",
+        "Detectar momentos clave en videos (logo reveals, crowd shots, demos)"
+      ]
+    },
+    "step_2_content_generation": {
+      "description": "Genera TODO el contenido textual basándote en el análisis visual",
+      "tasks": [
+        "Title: Combina marca + tipo de evento + diferenciador único",
+        "Description: Narrativa de 2-3 párrafos sobre lo que VES en el material",
+        "Summary: Condensa lo más impactante en 1-2 oraciones",
+        "Keywords: 10-15 términos SEO combinando marca, industria, tecnología, ubicación",
+        "Hashtags: 5-8 hashtags para RRSS",
+        "Instagram post: Hook emocional + body descriptivo + closing con CTA",
+        "LinkedIn post: Tono profesional con estructura caso de estudio",
+        "Variants A/B: Una emocional, una basada en datos"
+      ]
+    },
+    "step_3_media_processing": {
+      "description": "Procesa cada imagen y video",
+      "tasks": [
+        "Images: Detectar objetos → Generar descripción → Score calidad → Sugerir crops",
+        "Videos: Transcribir → Detectar escenas → Sugerir clips (5-15 seg) → Generar thumbnails",
+        "Set featured image: Mejor calidad + mayor visibilidad de marca",
+        "Order media: Featured first, luego por quality score descendente"
+      ]
+    },
+    "step_4_validation": {
+      "description": "Valida que TODO esté completo antes de marcar como 'review'",
+      "required_fields": [
+        "title", "description", "summary", "client", "category",
+        "event_date", "seo_title", "seo_description",
+        "keywords (min 5)", "hashtags (min 3)",
+        "instagram_hook", "instagram_body", "instagram_closing",
+        "linkedin_post", "title_variant_a", "title_variant_b",
+        "media (min 1 featured image)"
+      ],
+      "quality_checks": [
+        "Title length: 10-80 chars",
+        "Description length: 200-1000 chars",
+        "No placeholder text ('Lorem ipsum', 'TBD', etc.)",
+        "At least 1 featured image with quality_score > 60",
+        "Client name detected (not 'Unknown' or 'Cliente Confidencial' unless truly undetectable)",
+        "Category assigned (not null)"
+      ]
+    }
+  },
+  
+  "human_review_process": {
+    "description": "Después de que IA complete todos los campos, un humano revisa",
+    "review_checklist": [
+      "Verify client name is correct (IA puede confundir logos)",
+      "Check event date is realistic",
+      "Review title for grammar and SEO optimization",
+      "Approve or reject suggested image crops",
+      "Approve or reject suggested video clips",
+      "Adjust tone if needed (IA puede no captar matices culturales)",
+      "Add manual KPIs if IA no pudo detectar",
+      "Approve final media selection (delete low quality, reorder)"
+    ],
+    "status_transitions": [
+      "draft → review (when IA completes all required fields)",
+      "review → published (when human approves)",
+      "review → draft (if human requests changes)",
+      "published → archived (when event is old)"
+    ]
+  },
+  
+  "examples": {
+    "full_event_example": {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "slug": "nike-run-club-santiago-2024",
+      "status": "published",
+      "title": "Activación Nike Run Club 2024 - Experiencia Inmersiva en Parque Bicentenario",
+      "description": "Nike Run Club transformó el Parque Bicentenario en un espacio inmersivo de running durante 3 días. La activación incluyó una pista iluminada con tecnología LED sincronizada, estaciones de hidratación interactivas y una experiencia fotográfica 360° para los participantes.\n\nMás de 5,000 runners experimentaron la marca Nike de forma tangible, conectando con la filosofía 'Just Do It' a través de retos personalizados y coaching en vivo. La tecnología de tracking permitió a cada participante visualizar su desempeño en pantallas gigantes en tiempo real.\n\nLa campaña generó un alcance de 2M de personas en redes sociales, con un engagement 3x superior al promedio de la industria.",
+      "summary": "Experiencia inmersiva de running con tecnología LED y tracking en tiempo real. 5,000 participantes, 2M de alcance en RRSS",
+      "client": "Nike",
+      "category": "Activaciones de Marca",
+      "subcategory": "Running Experience",
+      "event_date": "2024-03-15",
+      "year": 2024,
+      "month": 3,
+      "country": "Chile",
+      "city": "Santiago",
+      "venue": "Parque Bicentenario",
+      "tone": "youthful",
+      "target_audience": "Runners amateur y semi-profesionales, 18-45 años",
+      "people_reached": 2000000,
+      "attendees": 5000,
+      "days_duration": 3,
+      "cities_count": 1,
+      "screens_count": 8,
+      "seo_title": "Activación Nike Run Club 2024 Santiago | Marketing Experiencial WAV",
+      "seo_description": "Experiencia inmersiva Nike con tecnología LED y tracking en tiempo real. 5,000 runners, 2M alcance. Activación BTL por We Are Vision.",
+      "keywords": [
+        "activación de marca",
+        "marketing experiencial",
+        "Nike Chile",
+        "experiencia inmersiva",
+        "evento deportivo",
+        "BTL Santiago",
+        "running experience",
+        "tecnología LED"
+      ],
+      "hashtags": [
+        "#NikeRunClub",
+        "#JustDoIt",
+        "#MarketingExperiencial",
+        "#BTLChile",
+        "#WeAreVision"
+      ],
+      "instagram_hook": "🏃‍♂️✨ 5,000 runners transformaron el Parque Bicentenario en una experiencia Nike inolvidable",
+      "instagram_body": "Durante 3 días, Nike Run Club creó una experiencia inmersiva que combinó tecnología LED con coaching en vivo.\n\nCada runner visualizó su desempeño en pantallas gigantes 📊\n\nMás que un evento, fue una celebración de la comunidad running 🇨🇱",
+      "instagram_closing": "📸 Swipe para ver más →\n\n¿Participaste? Etiquétanos 👆",
+      "linkedin_post": "𝗡𝗶𝗸𝗲 𝗥𝘂𝗻 𝗖𝗹𝘂𝗯: 𝗖ó𝗺𝗼 𝗰𝗿𝗲𝗮𝗺𝗼𝘀 𝘂𝗻𝗮 𝗲𝘅𝗽𝗲𝗿𝗶𝗲𝗻𝗰𝗶𝗮 𝗾𝘂𝗲 𝗮𝗹𝗰𝗮𝗻𝘇ó 𝟮𝗠 𝗱𝗲 𝗽𝗲𝗿𝘀𝗼𝗻𝗮𝘀\n\nEl desafío: Conectar con la comunidad running de forma auténtica.\n\n𝗞𝗲𝘆 𝗲𝗹𝗲𝗺𝗲𝗻𝘁𝘀:\n• Pista LED sincronizada\n• Tracking en tiempo real\n• Coaching personalizado\n\n𝗥𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀:\n→ 5,000 participantes\n→ 2M alcance RRSS\n→ Engagement 3x superior\n\n¿Qué opinas de las activaciones inmersivas? 💭",
+      "kpis": [
+        {"name": "Asistentes", "value": "5,000", "unit": "personas"},
+        {"name": "Alcance RRSS", "value": "2M", "unit": "impresiones"}
+      ],
+      "highlights": [
+        "Pista LED sincronizada de 200 metros",
+        "Sistema de tracking en tiempo real",
+        "Coaching con atletas Nike",
+        "Experiencia fotográfica 360°"
+      ]
+    }
+  }
+}

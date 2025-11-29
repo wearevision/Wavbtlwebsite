@@ -62,25 +62,46 @@ export const useAdminAIChat = (
       // Update draft state
       if (aiResult.draft) setAiDraft(aiResult.draft);
       
-      // Prepare updated state
+      // Prepare updated state with ALL new fields
       const updatedFormState = {
         ...aiFormState,
+        // Core fields
         description: aiResult.draft || aiFormState.description,
         summary: aiResult.summary || aiFormState.summary,
         title: aiResult.title || aiFormState.title,
         slug: aiResult.slug || aiFormState.slug,
+        
+        // Content Editorial
+        tone: aiResult.tone || aiFormState.tone,
+        audience: aiResult.audience || aiFormState.audience,
         highlights: aiResult.highlights || aiFormState.highlights,
+        
+        // SEO & Metadata
+        seo_title: aiResult.seo_title || aiFormState.seo_title,
+        seo_description: aiResult.seo_description || aiFormState.seo_description,
         keywords: aiResult.keywords || aiFormState.keywords,
         hashtags: aiResult.hashtags || aiFormState.hashtags,
+        tags: aiResult.tags || aiFormState.tags,
+        
+        // Social Media - Instagram
         instagram_hook: aiResult.instagram_hook || aiFormState.instagram_hook,
         instagram_body: aiResult.instagram_body || aiFormState.instagram_body,
         instagram_closing: aiResult.instagram_closing || aiFormState.instagram_closing,
         instagram_hashtags: aiResult.instagram_hashtags || aiFormState.instagram_hashtags,
+        alt_instagram: aiResult.alt_instagram || aiFormState.alt_instagram,
+        
+        // Social Media - LinkedIn
         linkedin_post: aiResult.linkedin_post || aiFormState.linkedin_post,
         linkedin_article: aiResult.linkedin_article || aiFormState.linkedin_article,
+        
+        // A/B Testing
         alt_title_1: aiResult.alt_title_1 || aiFormState.alt_title_1,
         alt_title_2: aiResult.alt_title_2 || aiFormState.alt_title_2,
-        alt_instagram: aiResult.alt_instagram || aiFormState.alt_instagram,
+        alt_summary_1: aiResult.alt_summary_1 || aiFormState.alt_summary_1,
+        alt_summary_2: aiResult.alt_summary_2 || aiFormState.alt_summary_2,
+        
+        // Performance
+        kpis: aiResult.kpis || aiFormState.kpis,
       };
 
       // Update form state

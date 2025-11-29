@@ -6,6 +6,7 @@ import { generateRefinement } from "./ai.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 import * as categories from "./categories.ts";
 import { optimizeAllEvents } from "./optimize.ts";
+import { auditAllEvents } from "./auditAll.ts";
 
 /**
  * WAV BTL Server
@@ -1315,6 +1316,203 @@ app.post(`${BASE_PATH}/optimize-all-events`, async (c) => {
     });
   } catch (e) {
     console.error('[POST /optimize-all-events] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /audit-single-event
+ * 
+ * MEGA AUDIT for a single event by title (Unprotected for testing)
+ * 
+ * Body: { "title": "Event Title" }
+ * 
+ * - Finds event by title
+ * - Runs MEGA AUDIT on that event only
+ * - Updates event in database
+ * - Returns optimized event
+ * 
+ * NOTE: Unprotected for easy testing. Remove this note and add auth in production.
+ */
+app.post(`${BASE_PATH}/audit-single-event`, async (c) => {
+  // Auth temporarily disabled for testing
+  // if (!await verifyAuth(c)) {
+  //   return c.json({ error: "Unauthorized" }, 401);
+  // }
+
+  try {
+    const body = await c.req.json();
+    const { title } = body;
+
+    if (!title) {
+      return c.json({ error: "Missing 'title' in request body" }, 400);
+    }
+
+    console.log(`[POST /audit-single-event] Auditing event: "${title}"`);
+
+    // Get all events (kv.get returns JS object directly, not JSON string)
+    const events = (await kv.get("wav_events")) || [];
+
+    // Find event by title (case-insensitive partial match)
+    const eventIndex = events.findIndex((e: any) => 
+      e.title && e.title.toLowerCase().includes(title.toLowerCase())
+    );
+
+    if (eventIndex === -1) {
+      return c.json({ 
+        error: `Event not found with title containing: "${title}"`,
+        suggestion: "Try a partial match or check spelling"
+      }, 404);
+    }
+
+    const eventToAudit = events[eventIndex];
+    console.log(`[POST /audit-single-event] Found event at index ${eventIndex}: "${eventToAudit.title}"`);
+
+    // Import and run audit
+    const auditModule = await import("./auditAll.ts");
+    const optimizedEvent = await auditModule.auditSingleEvent(eventToAudit);
+    
+    // Replace event in array
+    events[eventIndex] = optimizedEvent;
+
+    // Save back to database (kv.set handles JS objects directly)
+    await kv.set("wav_events", events);
+    console.log(`[POST /audit-single-event] Saved optimized event: "${optimizedEvent.title}"`);
+
+    return c.json({
+      success: true,
+      message: `Event "${optimizedEvent.title}" successfully audited and saved`,
+      optimizedEvent
+    });
+
+  } catch (e: any) {
+    console.error('[POST /audit-single-event] Error:', e);
+    return c.json({ error: e.message || String(e) }, 500);
+  }
+});
+
+/**
+ * POST /audit-all-events
+ * 
+ * MEGA AUDIT: AI-powered complete optimization of all events (Unprotected for testing)
+ * 
+ * - Reads ALL events from database
+ * - For each event, uses GPT-4o to:
+ *   * Fill missing fields (inferring from context)
+ *   * Optimize SEO (title, description, keywords)
+ *   * Generate social media content (Instagram, LinkedIn)
+ *   * Create A/B testing variants
+ *   * Infer realistic KPIs and metrics
+ *   * Apply best practices from top event producers
+ * - Updates events with optimized content
+ * - Returns audit summary with score improvements
+ * 
+ * NOTE: Unprotected for easy testing. Remove this note and add auth in production.
+ */
+app.post(`${BASE_PATH}/audit-all-events`, async (c) => {
+  // Auth temporarily disabled for testing
+  // if (!await verifyAuth(c)) {
+  //   return c.json({ error: "Unauthorized" }, 401);
+  // }
+
+  try {
+    console.log('[POST /audit-all-events] Starting MEGA AUDIT...');
+    
+    // Get all events (kv.get returns JS object directly, not JSON string)
+    const events = (await kv.get("wav_events")) || [];
+    
+    if (events.length === 0) {
+      return c.json({
+        success: true,
+        message: 'No events to audit',
+        total: 0,
+        processed: 0
+      });
+    }
+    
+    console.log(`[POST /audit-all-events] Found ${events.length} events to audit`);
+    
+    // Run mega audit on all events
+    const result = await auditAllEvents(events);
+    
+    // Save optimized events back to KV (kv.set handles JS objects directly)
+    if (result.optimizedEvents.length > 0) {
+      await kv.set("wav_events", result.optimizedEvents);
+      console.log(`[POST /audit-all-events] Saved ${result.optimizedEvents.length} optimized events`);
+    }
+    
+    console.log(`[POST /audit-all-events] Complete. Processed: ${result.processed}, Failed: ${result.failed}`);
+    
+    return c.json({
+      success: true,
+      total: result.total,
+      processed: result.processed,
+      failed: result.failed,
+      errors: result.errors,
+      message: `Mega audit complete. ${result.processed}/${result.total} events optimized successfully.`
+    });
+  } catch (e: any) {
+    console.error('[POST /audit-all-events] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /seed-events
+ * 
+ * Seeds the database with initial test events (Unprotected for testing)
+ * 
+ * - Loads events from hardcoded seed data
+ * - Converts simple events to WavEvent schema
+ * - Saves to KV store
+ * 
+ * NOTE: Temporary route for testing. Remove before production.
+ */
+app.post(`${BASE_PATH}/seed-events`, async (c) => {
+  try {
+    console.log('[POST /seed-events] Loading seed data...');
+    
+    // Hardcoded seed data (from /data/events.ts)
+    const seedEvents = [
+      {
+        "brand": "Cencosud",
+        "title": "Cumbre Creativa Cencosud",
+        "description": "Cencosud buscaba reposicionar sus marcas en torno a la creatividad latinoamericana. El desafío fue unificar diversas categorías en una experiencia coherente. La innovación estuvo en diseñar micro-espacios interactivos que representaban cada vertical con experiencias inmersivas.",
+        "image": "https://images.unsplash.com/photo-1633248869117-573d5bcc3bde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+      },
+      {
+        "brand": "Banco de Chile",
+        "title": "Neón Corporativo Banco Chile",
+        "description": "El Banco de Chile buscaba renovar su vínculo con audiencias jóvenes mediante una experiencia inmersiva basada en luz y sonido. El desafío fue transformar un evento tradicional en una narrativa sensorial de marca. La innovación estuvo en integrar elementos de síntesis visual reactiva a métricas de percepción del público.",
+        "image": "https://images.unsplash.com/photo-1639323250828-8dc3d4386661?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+      }
+    ];
+
+    // Convert to WavEvent format (minimal fields for testing)
+    const wavEvents = seedEvents.map((event, index) => ({
+      id: `seed-${Date.now()}-${index}`,
+      title: event.title,
+      brand: event.brand,
+      description: event.description,
+      imageUrl: event.image,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      // SEO Score will be low (need audit to improve)
+      seoScore: 12
+    }));
+
+    // Save to KV store
+    await kv.set("wav_events", wavEvents);
+    console.log(`[POST /seed-events] Seeded ${wavEvents.length} events`);
+
+    return c.json({
+      success: true,
+      message: `Successfully seeded ${wavEvents.length} events`,
+      events: wavEvents
+    });
+
+  } catch (e: any) {
+    console.error('[POST /seed-events] Error:', e);
     return c.json({ error: e.message }, 500);
   }
 });

@@ -490,7 +490,7 @@ export default function App() {
               className="fixed top-8 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 flex items-center gap-3"
             >
               <span className="text-white/80 text-sm font-bold uppercase tracking-wider">
-                {categories.find(c => c.id === selectedCategory)?.label}
+                {categories.find(c => c.label === selectedCategory)?.label || selectedCategory}
               </span>
               <span className="text-white/40 text-xs">
                 {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''}
