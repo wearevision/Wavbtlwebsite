@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
+import { optimizeForTile, generateSrcSet } from '../../utils/imageOptimizer';
 
 interface TileProps {
   id: string;
@@ -9,9 +10,11 @@ interface TileProps {
   brand?: string;
   index: number;
   onSelect: () => void;
+  priority?: boolean;
+  isLoading?: boolean;
 }
 
-export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSelect }) => {
+export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSelect, priority = false, isLoading = false }) => {
   // Geometry Update:
   // "Left side same angle as right side" -> Parallelogram ( / / )
   // "Top/Bottom parallel to render" -> Horizontal top/bottom edges
@@ -21,51 +24,42 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
   
   const textRef = useRef<HTMLHeadingElement>(null);
   const [scale, setScale] = useState(1);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  useEffect(() => {
-    const checkFit = () => {
-      const el = textRef.current;
-      if (!el) return;
-      
-      const wrapper = el.parentElement;
-      const overlay = wrapper?.parentElement; // The absolute inset-0 container
-      
-      if (!wrapper || !overlay) return;
+  // OPTIMIZATION: Only calculate text fitting on hover to save CPU.
+  // The text is hidden (opacity-0) by default, so we don't need to calc it until required.
+  const handleMouseEnter = () => {
+    if (isLoading) return;
+    const el = textRef.current;
+    if (!el) return;
+    
+    const wrapper = el.parentElement;
+    const overlay = wrapper?.parentElement; 
+    
+    if (!wrapper || !overlay) return;
 
-      const availableWidth = wrapper.offsetWidth;
-      const availableHeight = overlay.offsetHeight;
-      
-      const contentWidth = el.scrollWidth;
-      const contentHeight = el.scrollHeight;
+    const availableWidth = wrapper.offsetWidth;
+    const availableHeight = overlay.offsetHeight;
+    
+    const contentWidth = el.scrollWidth;
+    const contentHeight = el.scrollHeight;
 
-      let newScale = 1;
+    let newScale = 1;
 
-      // Check Width
-      if (contentWidth > availableWidth && availableWidth > 0) {
-         newScale = availableWidth / contentWidth;
-      }
-      
-      // Check Height (with some padding safety)
-      const safeHeight = availableHeight * 0.9;
-      if (contentHeight > safeHeight && safeHeight > 0) {
-         const hScale = safeHeight / contentHeight;
-         newScale = Math.min(newScale, hScale);
-      }
-
-      setScale(newScale);
-    };
-
-    // Run immediately
-    checkFit();
-
-    // Observe resize
-    const resizeObserver = new ResizeObserver(checkFit);
-    if (textRef.current?.parentElement) {
-      resizeObserver.observe(textRef.current.parentElement);
+    // Check Width
+    if (contentWidth > availableWidth && availableWidth > 0) {
+        newScale = availableWidth / contentWidth;
     }
     
-    return () => resizeObserver.disconnect();
-  }, [brand]);
+    // Check Height (with some padding safety)
+    const safeHeight = availableHeight * 0.9;
+    if (contentHeight > safeHeight && safeHeight > 0) {
+        const hScale = safeHeight / contentHeight;
+        newScale = Math.min(newScale, hScale);
+    }
+
+    setScale(newScale);
+  };
 
   // Font sizing logic based on brand text length to ensure it fits within 90% width
   // We use a memoized class name calculation to avoid unnecessary calculations on render
@@ -85,23 +79,33 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
     }
   }, [brand]);
 
+  if (isLoading) {
+    return (
+      <div 
+        className="relative w-full aspect-[1.6/1] bg-neutral-900/50 overflow-hidden"
+        style={{ clipPath }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_1.5s_infinite]" />
+        <div className="absolute inset-0 border-[2px] border-black/80 pointer-events-none" />
+      </div>
+    );
+  }
+
   return (
     <motion.div
       layoutId={`tile-${id}`}
-      className="relative group cursor-pointer w-full"
+      className="relative group cursor-pointer w-full aspect-[1.6/1]"
       style={{ 
-        // 3x Larger visual appearance = standard aspect ratio but grid column is wider.
-        // Keeping 16:9 or similar cinematic ratio looks good for "larger" cards.
-        aspectRatio: '1.6 / 1',
-        clipPath: clipPath, // Moved clipPath here to fix hit-testing on overlapping tiles
+        clipPath: clipPath, 
       }}
       whileHover={{ 
-        scale: 1.05, 
         zIndex: 50,
         transition: { duration: 0.2, ease: "easeOut" }
       }}
+      onMouseEnter={handleMouseEnter}
       onClick={onSelect}
       role="button"
+      aria-label={`Ver proyecto ${title} para la marca ${brand || 'Desconocida'}`}
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -110,53 +114,55 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
         }
       }}
     >
-      {/* Shape Container */}
-      <div 
-        className="w-full h-full relative overflow-hidden bg-neutral-900"
-        // clipPath removed from here
-      >
-        {/* Image */}
-        <img 
-          loading="lazy"
-          src={`${image}${image.includes('?') ? '&' : '?'}width=400&quality=80&format=webp`}
-          alt={title}
-          className="w-full h-full object-cover transition-all duration-500 grayscale"
-        />
+      {/* Image */}
+      <motion.img
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        // @ts-ignore - fetchPriority is standard but React types might lag. Lowercase required by React DOM.
+        fetchpriority={priority ? "high" : "low"}
+        src={optimizeForTile(image, 'medium')}
+        srcSet={generateSrcSet(image, 'tile')}
+        // OPTIMIZATION: More accurate sizes to prevent loading overly large images.
+        // Mobile: 180vw / 3 cols ≈ 60vw.
+        // Desktop: 130vw / 6 cols ≈ 22vw.
+        sizes="(max-width: 768px) 60vw, 25vw"
+        alt={title}
+        className={clsx(
+          "absolute inset-0 w-full h-full object-cover grayscale bg-neutral-900 transition-opacity duration-500",
+          imageLoaded ? "opacity-100" : "opacity-0"
+        )}
+        onLoad={() => setImageLoaded(true)}
+        initial={{ scale: 1 }}
+        whileHover={{ scale: 1.1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
+      />
 
-        {/* Hover Gradient Overlay - Monochrome mode only */}
-        <div 
-          className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255,0,168,0.85) 0%, rgba(155,0,255,0.85) 50%, rgba(0,68,255,0.85) 100%)'
-          }}
-        >
-          {/* Brand Text */}
-          {brand && (
-            <div className="px-2 text-center w-full max-w-[65%] flex items-center justify-center overflow-hidden"> 
-               <h3 
-                 ref={textRef}
-                 className={clsx(
-                   "text-white font-black tracking-widest uppercase drop-shadow-md whitespace-pre-wrap break-words leading-tight origin-center text-center font-['Outfit']",
-                   textSizeClass
-                 )}
-                 style={{
-                   transform: `scale(${scale})`
-                 }}
-               >
-                 {brand}
-               </h3>
-            </div>
-          )}
-        </div>
-        
-        {/* Stroke/Border Simulation */}
-        <div 
-          className="absolute inset-0 pointer-events-none border-[2px]"
-          style={{
-             borderColor: 'rgba(0,0,0,0.8)',
-          }}
-        />
+      {/* Hover Gradient Overlay - Monochrome mode only */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center bg-brand-gradient-strong"
+      >
+        {/* Brand Text */}
+        {brand && (
+          <div className="px-2 text-center w-full max-w-[65%] flex items-center justify-center overflow-hidden"> 
+             <h3 
+               ref={textRef}
+               className={clsx(
+                 "text-white font-black tracking-widest uppercase drop-shadow-md whitespace-pre-wrap break-words leading-tight origin-center text-center font-sans",
+                 textSizeClass
+               )}
+               style={{
+                 transform: `scale(${scale})`
+               }}
+             >
+               {brand}
+             </h3>
+          </div>
+        )}
       </div>
+      
+      {/* Stroke/Border Simulation */}
+      <div 
+        className="absolute inset-0 pointer-events-none border-[2px] border-black/80"
+      />
     </motion.div>
   );
 };

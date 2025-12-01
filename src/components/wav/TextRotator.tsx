@@ -70,7 +70,7 @@ export function TextRotator() {
          h-[150px] for mobile, h-[300px] for desktop.
          This ensures the Logo (which is flex-centered with this container) stays in a fixed vertical position.
       */}
-      <div className="relative h-[150px] md:h-[300px] flex items-start justify-center w-full perspective-lg">
+      <div className="relative h-[100px] md:h-[200px] flex items-start justify-center w-full perspective-lg">
         <AnimatePresence mode="wait">
           <motion.h1
             key={index}
@@ -78,7 +78,7 @@ export function TextRotator() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex flex-wrap justify-center max-w-4xl text-center font-['Outfit'] font-black text-4xl md:text-6xl lg:text-8xl tracking-tighter text-[#FD019C] drop-shadow-2xl leading-[0.85] absolute top-0 left-0 right-0 mx-auto"
+            className="flex flex-wrap justify-center max-w-4xl text-center font-sans font-black text-2xl md:text-4xl lg:text-6xl tracking-tighter text-brand-pink drop-shadow-2xl leading-[0.85] absolute top-0 left-0 right-0 mx-auto"
           >
             {words.map((word, wordIndex) => (
               <span 

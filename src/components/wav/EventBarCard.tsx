@@ -7,32 +7,25 @@
 
 import React from 'react';
 import { WavEvent } from '../../src/types';
-import { EventCategory } from '../../utils/contentRules';
 import { ImageIcon } from 'lucide-react';
-import { TrapezoidBadge } from './TrapezoidBadge';
+import { optimizeForThumbnail } from '../../utils/imageOptimizer';
 
 interface EventBarCardProps {
   event: WavEvent;
   onClick: () => void;
   isSelected?: boolean;
   showSkeleton?: boolean;
-  categories?: EventCategory[]; // Pass categories to look up label
 }
 
 export const EventBarCard: React.FC<EventBarCardProps> = ({
   event,
   onClick,
   isSelected = false,
-  showSkeleton = false,
-  categories = []
+  showSkeleton = false
 }) => {
   // Detectar si el evento está vacío o incompleto
   const isEmpty = !event.title || !event.description || !event.image;
   const shouldShowSkeleton = showSkeleton || isEmpty;
-
-  // Obtener label de categoría
-  // event.category contiene directamente el label (no el id)
-  const categoryLabel = event.category || 'Sin categoría';
 
   if (shouldShowSkeleton) {
     return (
@@ -74,7 +67,7 @@ export const EventBarCard: React.FC<EventBarCardProps> = ({
         <div className="w-20 h-20 bg-neutral-800 rounded overflow-hidden flex-shrink-0 relative group-hover:scale-105 transition-transform">
           {event.image ? (
             <img
-              src={event.image}
+              src={optimizeForThumbnail(event.image)}
               alt={event.title}
               className="w-full h-full object-cover"
             />
@@ -102,16 +95,6 @@ export const EventBarCard: React.FC<EventBarCardProps> = ({
             {event.summary || event.description?.substring(0, 160) || 'Sin descripción disponible'}
           </p>
         </div>
-
-        {/* Category Badge */}
-        <div className="flex-shrink-0 hidden md:block">
-          <TrapezoidBadge label={categoryLabel} size="sm" variant="solid" />
-        </div>
-      </div>
-
-      {/* Mobile Category (shown below in mobile) */}
-      <div className="md:hidden px-4 pb-3">
-        <TrapezoidBadge label={categoryLabel} size="sm" variant="solid" />
       </div>
     </button>
   );

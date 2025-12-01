@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { WavMedia } from '../../types';
 import { Volume2, VolumeX } from 'lucide-react';
 import { clsx } from 'clsx';
+import { optimizeForModal, generateSrcSet } from '../../utils/imageOptimizer';
 
 interface MediaGalleryProps {
   gallery: WavMedia[];
@@ -88,9 +89,15 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ gallery, className, 
           ) : (
              <div className="relative w-full h-full">
                 <img 
-                  src={currentMedia.url} 
+                  src={optimizeForModal(currentMedia.url, 'desktop')} 
+                  srcSet={generateSrcSet(currentMedia.url, 'modal')}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   alt="Gallery" 
                   className={imageClasses}
+                  loading="eager"
+                  decoding="async"
+                  // @ts-ignore - fetchPriority is standard but React types might lag
+                  fetchpriority="high"
                 />
              </div>
           )}

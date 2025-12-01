@@ -5,7 +5,7 @@ import * as kv from "./kv_store.tsx";
 import { generateRefinement } from "./ai.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 import * as categories from "./categories.ts";
-import { optimizeAllEvents } from "./optimize.ts";
+import { optimizeAllEvents, optimizeEventById } from "./optimize.ts";
 import { auditAllEvents } from "./auditAll.ts";
 
 /**
@@ -264,8 +264,9 @@ const normalizeEvent = (rawEvent: any): any => {
   
   // Ensure we have a valid image URL or fallback
   if (!image || typeof image !== 'string' || image.trim() === '') {
-    image = 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80';
-    console.warn(`[Normalize] Event ${id} has no valid image, using fallback.`);
+    // Fallback placeholder - gray SVG with "Sin Imagen" text
+    image = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23171717'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23525252'%3ESin Imagen%3C/text%3E%3C/svg%3E";
+    console.warn(`[Normalize] Event ${id} has no valid image, using fallback placeholder.`);
   }
 
   // 3. Normalize brand (max 50 characters)
@@ -370,7 +371,36 @@ const normalizeEvent = (rawEvent: any): any => {
     
     alt_title_1: rawEvent.alt_title_1 || '',
     alt_title_2: rawEvent.alt_title_2 || '',
-    alt_instagram: rawEvent.alt_instagram || ''
+    alt_instagram: rawEvent.alt_instagram || '',
+    alt_summary_1: rawEvent.alt_summary_1 || '',
+    alt_summary_2: rawEvent.alt_summary_2 || '',
+
+    // Editorial Content
+    tone: rawEvent.tone || '',
+    audience: rawEvent.audience || '',
+
+    // SEO Extended
+    seo_title: rawEvent.seo_title || '',
+    seo_description: rawEvent.seo_description || '',
+    tags: Array.isArray(rawEvent.tags) ? rawEvent.tags : [],
+    
+    // Performance (ensure numbers are strings if coming from raw)
+    people_reached: rawEvent.people_reached ? String(rawEvent.people_reached) : '',
+    attendees: rawEvent.attendees ? String(rawEvent.attendees) : '',
+    days: rawEvent.days ? String(rawEvent.days) : '',
+    cities: rawEvent.cities ? String(rawEvent.cities) : '',
+    screens: rawEvent.screens ? String(rawEvent.screens) : '',
+    kpis: Array.isArray(rawEvent.kpis) ? rawEvent.kpis : [],
+    results_notes: rawEvent.results_notes || '',
+    
+    // Identification
+    client: rawEvent.client || '',
+    year: rawEvent.year ? String(rawEvent.year) : '',
+    month: rawEvent.month ? String(rawEvent.month) : '',
+    country: rawEvent.country || '',
+    city: rawEvent.city || '',
+    venue: rawEvent.venue || '',
+    subcategory: rawEvent.subcategory || '',
   };
 
   // Log if we're removing fields
@@ -380,7 +410,10 @@ const normalizeEvent = (rawEvent: any): any => {
     'highlights', 'keywords', 'hashtags',
     'instagram_hook', 'instagram_body', 'instagram_closing', 'instagram_hashtags',
     'linkedin_post', 'linkedin_article',
-    'alt_title_1', 'alt_title_2', 'alt_instagram'
+    'alt_title_1', 'alt_title_2', 'alt_instagram', 'alt_summary_1', 'alt_summary_2',
+    'tone', 'audience', 'seo_title', 'seo_description', 'tags',
+    'people_reached', 'attendees', 'days', 'cities', 'screens', 'kpis', 'results_notes',
+    'client', 'year', 'month', 'country', 'city', 'venue', 'subcategory'
   ];
   const removedFields = Object.keys(rawEvent).filter(key => !allowedFields.includes(key));
   if (removedFields.length > 0) {
@@ -392,9 +425,15 @@ const normalizeEvent = (rawEvent: any): any => {
 
 // --- Routes ---
 
-// Health check endpoint
+// Health check endpoint - Also verifies OpenAI configuration
 app.get(`${BASE_PATH}/health`, (c) => {
-  return c.json({ status: "ok" });
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  
+  return c.json({ 
+    status: "ok",
+    openai: !!openaiKey, // true if configured, false if not
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Test endpoint - Completely public, no auth required
@@ -438,6 +477,22 @@ app.get(`${BASE_PATH}/test-categories`, (c) => {
   });
 });
 
+// POST /optimize-event - Optimize a single event
+app.post(`${BASE_PATH}/optimize-event`, async (c) => {
+  if (!await verifyAuth(c)) return c.text("Unauthorized", 401);
+
+  try {
+    const { eventId } = await c.req.json();
+    if (!eventId) return c.json({ error: "Missing eventId" }, 400);
+
+    const result = await optimizeEventById(eventId);
+    return c.json(result);
+  } catch (e) {
+    console.error("Error optimizing event:", e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
 /**
  * GET /events
  * 
@@ -452,8 +507,12 @@ app.get(`${BASE_PATH}/events`, async (c) => {
   try {
     const events = await kv.get("wav_events") || [];
 
+    // ✅ NORMALIZE ALL EVENTS BEFORE RETURNING
+    // This ensures any events with missing fields are automatically fixed
+    const normalizedEvents = events.map((event: any) => normalizeEvent(event));
+
     // Generate signed URLs for images and gallery media
-    const eventsWithUrls = await Promise.all(events.map(async (event: any) => {
+    const eventsWithUrls = await Promise.all(normalizedEvents.map(async (event: any) => {
       let imageUrl = event.imageUrl || event.image; // fallback
       let logoUrl = event.logoUrl || event.logo; // fallback
       let gallery = event.gallery || [];
@@ -701,6 +760,27 @@ app.post(`${BASE_PATH}/update-event-description`, async (c) => {
         updateIfProvided('alt_title_1');
         updateIfProvided('alt_title_2');
         updateIfProvided('alt_instagram');
+        updateIfProvided('alt_summary_1');
+        updateIfProvided('alt_summary_2');
+        updateIfProvided('tone');
+        updateIfProvided('audience');
+        updateIfProvided('seo_title');
+        updateIfProvided('seo_description');
+        updateIfProvided('tags');
+        updateIfProvided('people_reached');
+        updateIfProvided('attendees');
+        updateIfProvided('days');
+        updateIfProvided('cities');
+        updateIfProvided('screens');
+        updateIfProvided('kpis');
+        updateIfProvided('results_notes');
+        updateIfProvided('client');
+        updateIfProvided('year');
+        updateIfProvided('month');
+        updateIfProvided('country');
+        updateIfProvided('city');
+        updateIfProvided('venue');
+        updateIfProvided('subcategory');
 
         await kv.set("wav_events", events);
         
@@ -1418,10 +1498,15 @@ app.post(`${BASE_PATH}/audit-all-events`, async (c) => {
   try {
     console.log('[POST /audit-all-events] Starting MEGA AUDIT...');
     
-    // Get all events (kv.get returns JS object directly, not JSON string)
-    const events = (await kv.get("wav_events")) || [];
+    // Get batch parameters from request
+    const body = await c.req.json().catch(() => ({}));
+    const batchSize = body.batchSize || 2; // Process 2 events at a time (safe for timeouts)
+    const startIndex = body.startIndex || 0;
     
-    if (events.length === 0) {
+    // Get all events (kv.get returns JS object directly, not JSON string)
+    const allEvents = (await kv.get("wav_events")) || [];
+    
+    if (allEvents.length === 0) {
       return c.json({
         success: true,
         message: 'No events to audit',
@@ -1430,29 +1515,96 @@ app.post(`${BASE_PATH}/audit-all-events`, async (c) => {
       });
     }
     
-    console.log(`[POST /audit-all-events] Found ${events.length} events to audit`);
+    console.log(`[POST /audit-all-events] Total events: ${allEvents.length}, Processing batch from ${startIndex} (batch size: ${batchSize})`);
     
-    // Run mega audit on all events
-    const result = await auditAllEvents(events);
+    // Get batch to process
+    const eventBatch = allEvents.slice(startIndex, startIndex + batchSize);
     
-    // Save optimized events back to KV (kv.set handles JS objects directly)
-    if (result.optimizedEvents.length > 0) {
-      await kv.set("wav_events", result.optimizedEvents);
-      console.log(`[POST /audit-all-events] Saved ${result.optimizedEvents.length} optimized events`);
+    if (eventBatch.length === 0) {
+      return c.json({
+        success: true,
+        message: 'Batch complete - no more events to process',
+        total: allEvents.length,
+        processed: allEvents.length,
+        isComplete: true
+      });
     }
     
-    console.log(`[POST /audit-all-events] Complete. Processed: ${result.processed}, Failed: ${result.failed}`);
+    console.log(`[POST /audit-all-events] Processing ${eventBatch.length} events in this batch`);
+    
+    // Run audit on batch
+    const result = await auditAllEvents(eventBatch);
+    
+    // Merge optimized events back into full array
+    const updatedEvents = [...allEvents];
+    result.optimizedEvents.forEach((optimizedEvent: any, idx: number) => {
+      const actualIndex = startIndex + idx;
+      updatedEvents[actualIndex] = optimizedEvent;
+    });
+    
+    // Save updated events back to KV
+    await kv.set("wav_events", updatedEvents);
+    console.log(`[POST /audit-all-events] Saved batch. Progress: ${startIndex + result.processed}/${allEvents.length}`);
+    
+    const isComplete = (startIndex + batchSize) >= allEvents.length;
+    const nextIndex = startIndex + batchSize;
+    
+    console.log(`[POST /audit-all-events] Batch complete. Processed: ${result.processed}, Failed: ${result.failed}, Is Complete: ${isComplete}`);
     
     return c.json({
       success: true,
-      total: result.total,
+      total: allEvents.length,
       processed: result.processed,
       failed: result.failed,
       errors: result.errors,
-      message: `Mega audit complete. ${result.processed}/${result.total} events optimized successfully.`
+      currentProgress: startIndex + result.processed,
+      isComplete: isComplete,
+      nextIndex: isComplete ? null : nextIndex,
+      message: isComplete 
+        ? `Mega audit complete! ${startIndex + result.processed}/${allEvents.length} events optimized.`
+        : `Batch ${Math.floor(startIndex / batchSize) + 1} complete. ${startIndex + result.processed}/${allEvents.length} processed. Continue with next batch.`
     });
   } catch (e: any) {
     console.error('[POST /audit-all-events] Error:', e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+/**
+ * POST /batch-update-events
+ * 
+ * Batch update all events (Used by Claude Optimizer)
+ * 
+ * - Receives array of optimized events
+ * - Replaces all events in KV store
+ * - Returns success confirmation
+ * 
+ * NOTE: Unprotected for testing. Add auth in production.
+ */
+app.post(`${BASE_PATH}/batch-update-events`, async (c) => {
+  try {
+    const body = await c.req.json();
+    const { events } = body;
+
+    if (!events || !Array.isArray(events)) {
+      return c.json({ error: 'Missing or invalid events array' }, 400);
+    }
+
+    console.log(`[POST /batch-update-events] Updating ${events.length} events...`);
+
+    // Save all events to KV store
+    await kv.set("wav_events", events);
+    
+    console.log(`[POST /batch-update-events] Successfully saved ${events.length} events`);
+
+    return c.json({
+      success: true,
+      message: `Successfully updated ${events.length} events`,
+      count: events.length
+    });
+
+  } catch (e: any) {
+    console.error('[POST /batch-update-events] Error:', e);
     return c.json({ error: e.message }, 500);
   }
 });
@@ -1472,19 +1624,20 @@ app.post(`${BASE_PATH}/seed-events`, async (c) => {
   try {
     console.log('[POST /seed-events] Loading seed data...');
     
-    // Hardcoded seed data (from /data/events.ts)
+    // Hardcoded seed data (Placeholder events for testing)
+    // NOTE: Replace images with real Supabase Storage URLs in production
     const seedEvents = [
       {
         "brand": "Cencosud",
         "title": "Cumbre Creativa Cencosud",
         "description": "Cencosud buscaba reposicionar sus marcas en torno a la creatividad latinoamericana. El desafío fue unificar diversas categorías en una experiencia coherente. La innovación estuvo en diseñar micro-espacios interactivos que representaban cada vertical con experiencias inmersivas.",
-        "image": "https://images.unsplash.com/photo-1633248869117-573d5bcc3bde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+        "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23171717'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23525252'%3ESin Imagen%3C/text%3E%3C/svg%3E"
       },
       {
         "brand": "Banco de Chile",
         "title": "Neón Corporativo Banco Chile",
         "description": "El Banco de Chile buscaba renovar su vínculo con audiencias jóvenes mediante una experiencia inmersiva basada en luz y sonido. El desafío fue transformar un evento tradicional en una narrativa sensorial de marca. La innovación estuvo en integrar elementos de síntesis visual reactiva a métricas de percepción del público.",
-        "image": "https://images.unsplash.com/photo-1639323250828-8dc3d4386661?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+        "image": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23171717'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23525252'%3ESin Imagen%3C/text%3E%3C/svg%3E"
       }
     ];
 
@@ -1535,5 +1688,407 @@ app.get(`${BASE_PATH}/health`, (c) => {
     }
   });
 });
+
+/**
+ * GET /og-preview
+ * 
+ * Serves pre-rendered HTML for social media crawlers (LinkedIn, Facebook, Twitter, WhatsApp).
+ * This ensures that when a link is shared, the correct Open Graph meta tags are visible.
+ * 
+ * Query params:
+ * - evento: Event slug
+ * 
+ * Response:
+ * - For crawlers: HTML with event-specific Open Graph meta tags
+ * - For browsers: Redirect to main app
+ */
+app.get(`${BASE_PATH}/og-preview`, async (c) => {
+  const userAgent = c.req.header('user-agent') || '';
+  const eventSlug = c.req.query('evento');
+  
+  console.log(`[OG Preview] User-Agent: ${userAgent}, Slug: ${eventSlug}`);
+  
+  // List of known crawler user agents
+  const crawlerPatterns = [
+    'facebookexternalhit',
+    'LinkedInBot',
+    'linkedin',
+    'Twitterbot',
+    'WhatsApp',
+    'TelegramBot',
+    'Slackbot',
+    'discordbot',
+    'facebot',
+    'ia_archiver',
+    'axios', // LinkedIn Post Inspector sometimes uses axios
+    'curl',
+    'wget',
+    'python-requests',
+    'postman',
+  ];
+  
+  const isCrawler = crawlerPatterns.some(bot => 
+    userAgent.toLowerCase().includes(bot.toLowerCase())
+  );
+  
+  // Fetch events from KV store first (before crawler check)
+  try {
+    const eventsData = await kv.get('wav_events');
+    
+    if (!eventsData) {
+      console.error('[OG Preview] No events found in KV store');
+      return c.redirect('https://btl.wearevision.cl', 302);
+    }
+    
+    const events = eventsData;
+    
+    // If no event slug provided, redirect to home
+    if (!eventSlug) {
+      console.log('[OG Preview] No event slug provided');
+      return c.redirect('https://btl.wearevision.cl', 302);
+    }
+    
+    // Find event by slug
+    const event = events.find((e: any) => {
+      const slug = e.slug || slugify(e.title);
+      return slug === eventSlug;
+    });
+    
+    if (!event) {
+      console.error(`[OG Preview] Event not found for slug: ${eventSlug}`);
+      return c.redirect('https://btl.wearevision.cl', 302);
+    }
+    
+    // IMPORTANT: Always serve HTML with OG tags if event exists
+    // Regular browsers will auto-redirect via meta refresh and JS
+    // Crawlers will parse the OG tags before the redirect
+    console.log(`[OG Preview] Serving OG HTML for: ${event.title} (Crawler: ${isCrawler})`);
+    
+    // Generate signed URL with 1 year expiration for reliable OG sharing
+    let imageUrl = event.image;
+    
+    if (event.imagePath) {
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(event.imagePath, 31536000); // 1 year = 365 days
+      
+      if (!signedError && signedData) {
+        imageUrl = signedData.signedUrl;
+        console.log(`[OG Preview] Generated signed URL for image: ${event.imagePath}`);
+      } else {
+        console.error(`[OG Preview] Failed to generate signed URL:`, signedError);
+      }
+    }
+    
+    // Generate Open Graph HTML
+    const fullUrl = `https://btl.wearevision.cl?evento=${eventSlug}`;
+    const title = `${event.title} | We Are Vision`;
+    const description = event.description || `Activación de marca para ${event.brand} - Marketing Experiencial BTL`;
+    const image = imageUrl;
+    
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>${title}</title>
+  <meta name="title" content="${title}">
+  <meta name="description" content="${description}">
+  
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="We Are Vision (WAV)">
+  <meta property="og:url" content="${fullUrl}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${image}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="800">
+  <meta property="og:image:alt" content="${event.title} - ${event.brand}">
+  <meta property="og:locale" content="es_CL">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${fullUrl}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${image}">
+  
+  <!-- Schema.org for Social -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "${event.title}",
+    "description": "${description}",
+    "image": "${image}",
+    "author": {
+      "@type": "Organization",
+      "name": "We Are Vision (WAV)"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "We Are Vision (WAV)",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://btl.wearevision.cl/logo.png"
+      }
+    },
+    "datePublished": "${event.date || new Date().toISOString()}"
+  }
+  </script>
+  
+  <!-- Canonical Link -->
+  <link rel="canonical" href="${fullUrl}">
+  
+  <!-- Redirect non-crawlers to React app -->
+  <meta http-equiv="refresh" content="0; url=${fullUrl}">
+  <script>
+    // If JavaScript is enabled and not a crawler, redirect immediately
+    if (!navigator.userAgent.match(/facebookexternalhit|LinkedInBot|Twitterbot|WhatsApp/i)) {
+      window.location.href = '${fullUrl}';
+    }
+  </script>
+</head>
+<body style="font-family: system-ui; padding: 40px; background: #000; color: #fff;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    <h1>${event.title}</h1>
+    <p><strong>Marca:</strong> ${event.brand}</p>
+    <p><strong>Categoría:</strong> ${event.category || 'Marketing Experiencial'}</p>
+    <p>${description}</p>
+    <img src="${image}" alt="${event.title}" style="width: 100%; height: auto; margin: 20px 0; border-radius: 8px;">
+    <p style="margin-top: 40px; color: #666;">
+      <a href="https://btl.wearevision.cl" style="color: #FF00A8;">← Volver a We Are Vision</a>
+    </p>
+  </div>
+  
+  <noscript>
+    <p>Este sitio requiere JavaScript para funcionar correctamente.</p>
+    <p><a href="${fullUrl}">Ver ${event.title}</a></p>
+  </noscript>
+</body>
+</html>`;
+    
+    return c.html(html, 200, {
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    });
+    
+  } catch (error) {
+    console.error('[OG Preview] Error:', error);
+    return c.redirect('https://btl.wearevision.cl', 302);
+  }
+});
+
+/**
+ * GET /s/:code
+ * 
+ * Short URL redirect endpoint.
+ * Redirects short codes to the og-preview endpoint with the correct event slug.
+ * 
+ * Example:
+ * - /s/abc123 → /og-preview?evento=skyy-vodka-electriza-bolivia-exito-en-patrocinio-de-evento-2014
+ * 
+ * This allows for shorter, more shareable URLs that still work with Open Graph.
+ */
+app.get(`${BASE_PATH}/s/:code`, async (c) => {
+  const code = c.req.param('code');
+  
+  console.log(`[Shortlink] Looking up code: ${code}`);
+  
+  try {
+    // Fetch shortlink from KV store
+    const shortlink = await kv.get(`shortlink_${code}`);
+    
+    if (!shortlink) {
+      console.error(`[Shortlink] Code not found: ${code}`);
+      return c.redirect('https://btl.wearevision.cl', 302);
+    }
+    
+    // Redirect to OG preview endpoint
+    const ogUrl = `${supabaseUrl}/functions/v1${BASE_PATH}/og-preview?evento=${shortlink.slug}`;
+    console.log(`[Shortlink] Redirecting to: ${ogUrl}`);
+    
+    return c.redirect(ogUrl, 302);
+    
+  } catch (error) {
+    console.error('[Shortlink] Error:', error);
+    return c.redirect('https://btl.wearevision.cl', 302);
+  }
+});
+
+/**
+ * POST /shortlinks
+ * 
+ * Create or update shortlinks for events.
+ * This endpoint generates short codes and stores them in the KV store.
+ * 
+ * Request body:
+ * {
+ *   "eventId": "evt-001",
+ *   "slug": "skyy-vodka-electriza-bolivia-exito-en-patrocinio-de-evento-2014",
+ *   "customCode": "skyy2014" // Optional - if not provided, generates random code
+ * }
+ * 
+ * Response:
+ * {
+ *   "code": "skyy2014",
+ *   "shortUrl": "https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/make-server-c4bb2206/s/skyy2014",
+ *   "ogUrl": "https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/make-server-c4bb2206/og-preview?evento=skyy-vodka-electriza-bolivia-exito-en-patrocinio-de-evento-2014"
+ * }
+ */
+app.post(`${BASE_PATH}/shortlinks`, async (c) => {
+  // Verify authorization
+  const isAuthorized = await verifyAuth(c);
+  if (!isAuthorized) {
+    return c.json({ error: 'Unauthorized. Please provide a valid Bearer token.' }, 401);
+  }
+  
+  try {
+    const body = await c.req.json();
+    const { eventId, slug, customCode } = body;
+    
+    if (!eventId || !slug) {
+      return c.json({ error: 'Missing required fields: eventId, slug' }, 400);
+    }
+    
+    // Generate or use custom code
+    const code = customCode || generateShortCode();
+    
+    // Check if code already exists
+    const existing = await kv.get(`shortlink_${code}`);
+    if (existing && !customCode) {
+      // If auto-generated code exists, try again
+      return c.json({ error: 'Code collision, please retry' }, 409);
+    }
+    
+    // Store shortlink
+    await kv.set(`shortlink_${code}`, {
+      eventId,
+      slug,
+      createdAt: new Date().toISOString(),
+    });
+    
+    const shortUrl = `${supabaseUrl}/functions/v1${BASE_PATH}/s/${code}`;
+    const ogUrl = `${supabaseUrl}/functions/v1${BASE_PATH}/og-preview?evento=${slug}`;
+    
+    console.log(`[Shortlink] Created: ${code} → ${slug}`);
+    
+    return c.json({
+      code,
+      shortUrl,
+      ogUrl,
+      eventId,
+      slug,
+    });
+    
+  } catch (error) {
+    console.error('[Shortlink] Error creating shortlink:', error);
+    return c.json({ error: 'Failed to create shortlink' }, 500);
+  }
+});
+
+/**
+ * POST /shortlinks/bulk
+ * 
+ * Auto-generate shortlinks for all events.
+ * This is useful for batch processing after uploading multiple events.
+ * 
+ * Response:
+ * {
+ *   "generated": 10,
+ *   "shortlinks": [
+ *     { "eventId": "evt-001", "code": "abc123", "shortUrl": "..." },
+ *     ...
+ *   ]
+ * }
+ */
+app.post(`${BASE_PATH}/shortlinks/bulk`, async (c) => {
+  // Verify authorization
+  const isAuthorized = await verifyAuth(c);
+  if (!isAuthorized) {
+    return c.json({ error: 'Unauthorized. Please provide a valid Bearer token.' }, 401);
+  }
+  
+  try {
+    const eventsData = await kv.get('wav_events');
+    
+    if (!eventsData) {
+      return c.json({ error: 'No events found' }, 404);
+    }
+    
+    const events = eventsData;
+    const generated = [];
+    
+    for (const event of events) {
+      const slug = event.slug || slugify(event.title);
+      const code = generateShortCodeFromSlug(slug);
+      
+      // Store shortlink
+      await kv.set(`shortlink_${code}`, {
+        eventId: event.id,
+        slug,
+        createdAt: new Date().toISOString(),
+      });
+      
+      const shortUrl = `${supabaseUrl}/functions/v1${BASE_PATH}/s/${code}`;
+      
+      generated.push({
+        eventId: event.id,
+        title: event.title,
+        code,
+        shortUrl,
+      });
+    }
+    
+    console.log(`[Shortlink] Bulk generated ${generated.length} shortlinks`);
+    
+    return c.json({
+      generated: generated.length,
+      shortlinks: generated,
+    });
+    
+  } catch (error) {
+    console.error('[Shortlink] Error in bulk generation:', error);
+    return c.json({ error: 'Failed to generate shortlinks' }, 500);
+  }
+});
+
+/**
+ * Helper: Generate random short code (6 chars)
+ */
+function generateShortCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+/**
+ * Helper: Generate deterministic short code from slug
+ * Takes first letters of each word + hash
+ */
+function generateShortCodeFromSlug(slug: string): string {
+  const words = slug.split('-');
+  const initials = words.slice(0, 3).map(w => w[0]).join('');
+  const hash = simpleHash(slug).toString(36).slice(0, 4);
+  return (initials + hash).toLowerCase();
+}
+
+/**
+ * Helper: Simple hash function
+ */
+function simpleHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
 
 Deno.serve(app.fetch);

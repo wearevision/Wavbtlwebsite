@@ -48,6 +48,35 @@ export interface WavEvent {
   alt_title_1?: string;
   alt_title_2?: string;
   alt_instagram?: string;
+  alt_summary_1?: string;
+  alt_summary_2?: string;
+
+  // Editorial
+  tone?: string;
+  audience?: string;
+
+  // SEO Extended
+  seo_title?: string;
+  seo_description?: string;
+  tags?: string[];
+
+  // Identification & Location
+  client?: string;
+  year?: string | number;
+  month?: string | number;
+  country?: string;
+  city?: string;
+  venue?: string;
+  subcategory?: string;
+
+  // Performance
+  people_reached?: string;
+  attendees?: string;
+  days?: string | number;
+  cities?: string | number;
+  screens?: string | number;
+  kpis?: string[];
+  results_notes?: string;
 
   category?: string;
   [key: string]: any;

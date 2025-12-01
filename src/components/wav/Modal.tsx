@@ -1,72 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import clsx from 'clsx';
 
-// IMPORT CORRECTO (named export)
 import { MediaGallery } from './MediaGallery';
 import { TrapezoidBadge } from './TrapezoidBadge';
+import { CircularNavButton } from './CircularNavButton';
 
 import { WavEvent, WavMedia } from '../../types';
 import { useFocusTrap } from '../../src/hooks/useFocusTrap';
+import { useSwipe } from '../../src/hooks/useSwipe';
+import { useKeyboardNav } from '../../src/hooks/useKeyboardNav';
 import { Z_INDEX } from '../../lib/constants/zIndex';
-import { SAFE_AREAS } from '../../lib/constants/safeAreas';
-import { MOTION_VARIANTS } from '../../lib/constants/animations';
 
 /* -------------------------------------------------------------------------- */
 /*                                   VARIANTS                                 */
 /* -------------------------------------------------------------------------- */
 
-// Local variants específicos del modal (los globales vienen de MOTION_VARIANTS)
-const titleVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+const modalContainerVariants = {
+  hidden: { opacity: 0, scale: 1.05 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+  },
+  exit: { 
+    opacity: 0, 
+    scale: 0.95,
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } 
+  }
 };
 
-/* -------------------------------------------------------------------------- */
-/*                          ANIMATED TITLE + TEXT                             */
-/* -------------------------------------------------------------------------- */
-
-const AnimatedTitle: React.FC<{ text: string; className?: string }> = ({ text, className }) => (
-  <motion.h1
-    variants={titleVariants}
-    initial="hidden"
-    animate="visible"
-    exit="exit"
-    className={clsx(
-      'uppercase tracking-tight font-extrabold text-balance',
-      // Ancho aumentado 1.5×
-      'max-w-[95ch]',
-      className
-    )}
-  >
-    {text}
-  </motion.h1>
-);
-
-const AnimatedText: React.FC<{ text: string; className?: string }> = ({ text, className }) => (
-  <motion.div
-    variants={MOTION_VARIANTS.slideUp}
-    initial="hidden"
-    animate="visible"
-    exit="exit"
-    className={clsx(
-      'leading-relaxed text-neutral-300',
-      // Ancho aumentado 1.5× (de 65ch a ~95ch)
-      'max-w-[95ch]',
-      // SCROLL SOLO EN DESCRIPCIÓN con scrollbar personalizado
-      'overflow-y-auto custom-scroll-modal',
-      // Max-height dinámico para mobile/tablet, sin límite en desktop
-      'max-h-[40vh] md:max-h-[45vh] lg:max-h-[50vh]',
-      // Padding right para el scrollbar
-      'pr-3',
-      className
-    )}
-  >
-    {text}
-  </motion.div>
-);
+const contentVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] } },
+  exit: { opacity: 0, y: 20, transition: { duration: 0.3 } }
+};
 
 /* -------------------------------------------------------------------------- */
 /*                                   MODAL                                    */
@@ -76,9 +45,11 @@ interface ModalProps {
   event: WavEvent;
   onClose: () => void;
   isMobile: boolean;
+  onNext?: () => void;
+  onPrev?: () => void;
 }
 
-export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
+export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, onPrev }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -90,157 +61,231 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile }) => {
 
   useEffect(() => setGalleryIndex(0), [event]);
   useFocusTrap(containerRef, onClose);
+  
+  // Swipe gestures for mobile navigation
+  useSwipe(containerRef, { 
+    onSwipeLeft: onNext,
+    onSwipeRight: onPrev 
+  });
 
-  const nextImg = () => setGalleryIndex((p) => (p + 1) % safeGallery.length);
+  // Keyboard navigation (Arrow keys + Escape) with visual feedback
+  const keyPressed = useKeyboardNav({
+    onNext,
+    onPrev,
+    onClose,
+    enabled: true
+  });
+
+  // Body Scroll Lock
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
+  const nextImg = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setGalleryIndex((p) => (p + 1) % safeGallery.length);
+  };
 
   return (
     <motion.div
-      ref={containerRef}
       className={clsx(
-        "fixed inset-0 flex items-center justify-center",
-        // Margen balanceado para centrado óptimo
-        "p-6 md:p-16 lg:p-24",
-        Z_INDEX.MODAL_CONTENT
+        "fixed inset-0 flex flex-col",
+        Z_INDEX.MODAL_CONTENT,
+        // Mobile/Tablet: Allow scroll on the overlay itself
+        "overflow-y-auto",
+        // Desktop: Hide overlay scroll (internal scroll takes over)
+        "lg:overflow-hidden lg:items-center lg:justify-center"
       )}
-      variants={MOTION_VARIANTS.fade}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, pointerEvents: 'none' }}
+      transition={{ duration: 0.4 }}
+      style={{ pointerEvents: 'auto' }}
     >
-      {/* BACKDROP */}
+      {/* BACKDROP - Subtle overlay + economic blur ONLY on mosaic wall */}
       <motion.div
-        className="absolute inset-0 bg-black/65 backdrop-blur-xl"
+        className={clsx(
+          "fixed inset-0 bg-black/30 backdrop-blur-md",
+          Z_INDEX.MODAL_BACKDROP
+        )}
         onClick={onClose}
-        variants={MOTION_VARIANTS.fade}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0, pointerEvents: 'none' }}
+        style={{ pointerEvents: 'auto' }}
       />
 
-      {/* CARD */}
-      <div
+      {/* CARD CONTAINER - 1/5 smaller on desktop */}
+      <motion.div
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="modal-title"
         className={clsx(
-          'relative pointer-events-auto',
-          'overflow-hidden',
-          // Modal optimizado para layout centrado
-          'w-full max-w-xl md:max-w-2xl lg:max-w-5xl',
-          // Desktop: flex-row con items-center para centrar verticalmente foto y contenido
-          'flex flex-col lg:flex-row lg:items-center',
-          'z-10'
+          "relative w-full bg-black",
+          // Mobile: Min-height screen to allow scrolling
+          "min-h-screen lg:min-h-0",
+          // Desktop: Fixed size centered card - REDUCED SIZE (was lg:max-w-6xl lg:h-[85vh])
+          "lg:max-w-5xl lg:h-[70vh] lg:overflow-hidden lg:flex lg:flex-row",
+          Z_INDEX.MODAL_CONTENT
         )}
+        variants={modalContainerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
-        {/* LEFT (Visual) */}
-        <motion.div
+        
+        {/* CLOSE BUTTON - Optimized positioning to avoid header collision */}
+        <button
+          onClick={onClose}
           className={clsx(
-            'relative w-full lg:w-1/2',
-            // Aspect ratio 3:2 (3 de alto, 2 de ancho) = más ancha y menos rectangular
-            'h-[45vh] md:h-[50vh] lg:aspect-[2/3]',
-            // Padding reducido para diseño más compacto
-            'p-4 md:p-6 lg:p-6',
-            // Flex-shrink para evitar que se comprima
-            'lg:flex-shrink-0'
+            "z-[70] p-2.5 bg-black/50 backdrop-blur-md rounded-full text-white border border-white/10 hover:bg-white hover:text-black transition-colors",
+            // Mobile: Fixed top-right, visible over content
+            "fixed top-6 right-6",
+            // Desktop: Absolute, smaller, top-right of modal card with generous spacing
+            "lg:absolute lg:top-6 lg:right-6 lg:p-2"
           )}
-          variants={isMobile ? MOTION_VARIANTS.slideUp : MOTION_VARIANTS.fade}
+          aria-label="Close modal"
         >
-          {/* Clip container */}
-          <motion.div
-            initial={{ clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)' }}
-            animate={{ 
-              clipPath: 'polygon(18% 0%, 100% 0%, 82% 100%, 0% 100%)',
-              transition: { duration: 0.6, ease: [0.19, 1, 0.22, 1] }
-            }}
-            exit={{ 
-              clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
-              transition: { duration: 0.4, ease: [0.19, 1, 0.22, 1] }
-            }}
-            className="w-full h-full overflow-hidden bg-neutral-900 transform-gpu"
-            style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
-          >
-            <MediaGallery
-              gallery={safeGallery}
-              className="w-full h-full"
-              currentIndex={galleryIndex}
-              onIndexChange={setGalleryIndex}
-            />
-          </motion.div>
+          <X size={isMobile ? 24 : 20} />
+        </button>
 
-          {/* Next */}
-          {safeGallery.length > 1 && (
-            <button
-              onClick={nextImg}
-              className="absolute top-1/2 -translate-y-1/2 right-4 p-2 text-white opacity-90 hover:opacity-100 transition"
+          {/* LEFT COLUMN: VISUALS */}
+          <div className={clsx(
+            "relative w-full shrink-0 bg-neutral-900 overflow-hidden",
+            // Mobile: 4:5 Aspect Ratio, Diagonal Bottom Cut
+            "aspect-[4/5] md:h-[45vh] md:aspect-auto",
+            isMobile ? "clip-trapezoid-mobile" : "lg:clip-trapezoid-left",
+            // Desktop: Full height, 45% width
+            "lg:w-[45%] lg:h-full"
+          )}>
+             <MediaGallery
+               gallery={safeGallery}
+               className="w-full h-full"
+               currentIndex={galleryIndex}
+               onIndexChange={setGalleryIndex}
+             />
+
+             {/* Gallery Navigation (Overlay) */}
+             {safeGallery.length > 1 && (
+               <button
+                 onClick={nextImg}
+                 className="absolute top-1/2 -translate-y-1/2 right-2 lg:right-8 p-2 text-white/80 hover:text-white hover:scale-110 transition-all drop-shadow-lg z-20"
+               >
+                 <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+               </button>
+             )}
+          </div>
+
+          {/* RIGHT COLUMN: CONTENT - INCREASED PADDING & SPACING */}
+          <div className={clsx(
+            "relative w-full flex flex-col",
+            // Mobile: Flow content, padding, dark background to cover mosaic - INCREASED
+            "bg-black/90 p-8 pb-32",
+            // Desktop: Full height, Scrollable internal area, Generous Padding
+            "lg:w-[55%] lg:h-full lg:bg-transparent lg:p-12 lg:overflow-y-auto lg:custom-scroll-modal"
+          )}>
+            <motion.div 
+              variants={contentVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-8 md:gap-10 lg:gap-12"
             >
-              <ChevronRight className="w-8 h-8" />
-            </button>
-          )}
-        </motion.div>
+              {/* HEADER: Brand & Category - OPTIMIZED LAYOUT WITH PROPER SPACING */}
+              <div className={clsx(
+                "flex flex-col gap-4 pb-6 relative border-b border-white/10",
+                // Desktop: Horizontal layout with space between, padding-right for close button
+                "lg:flex-row lg:items-start lg:justify-between lg:gap-6 lg:pr-12"
+              )}>
+                 {/* Logo Container */}
+                 <div className="flex-shrink-0">
+                  {event.logo ? (
+                    <img 
+                      src={event.logo} 
+                      alt={`${event.brand} Logo`} 
+                      className="h-10 md:h-12 lg:h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+                    />
+                  ) : (
+                    <span className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-widest text-white">
+                      {event.brand}
+                    </span>
+                  )}
+                 </div>
 
-        {/* RIGHT (Content) */}
-        <motion.div
-          className={clsx(
-            'w-full lg:w-1/2',
-            // Padding interior reducido
-            'p-6 md:p-6 lg:p-10',
-            'flex flex-col gap-5',
-            // Padding bottom grande para evitar overlap con botones (máscara)
-            'pb-32 md:pb-36',
-            // SIN overflow - el scroll está solo en la descripción
-            'overflow-visible'
-          )}
-          variants={isMobile ? MOTION_VARIANTS.slideUp : MOTION_VARIANTS.fade}
-        >
-          {/* BRAND LOGO + CATEGORY BADGE */}
-          <motion.div 
-            variants={titleVariants}
-            className="flex items-center justify-between gap-4"
-          >
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              {event.logo ? (
-                <img 
-                  src={event.logo} 
-                  alt={`${event.brand} Logo`} 
-                  className="h-6 md:h-8 lg:h-10 w-auto object-contain opacity-90 grayscale hover:grayscale-0 transition-all duration-300"
-                />
-              ) : (
-                <div className="h-6 md:h-8 lg:h-10 w-20 md:w-24 border border-dashed border-white/20 bg-white/5 rounded flex items-center justify-center group">
-                  <span className="text-[9px] uppercase tracking-widest text-white/40 group-hover:text-white/70 transition-colors">
-                    {event.brand || "Brand"}
-                  </span>
-                </div>
-              )}
-            </div>
+                 {/* Category Badge - Trapezoidal with proper spacing */}
+                 {event.category && (
+                   <div className="flex-shrink-0 lg:ml-auto">
+                     <TrapezoidBadge
+                       label={event.category}
+                       size="sm"
+                       variant="white"
+                     />
+                   </div>
+                 )}
+              </div>
 
-            {/* Category Badge a la derecha */}
-            {event.category && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <TrapezoidBadge
-                  label={event.category}
-                  size="xs"
-                  variant="white"
-                  className="shadow-lg"
-                />
-              </motion.div>
-            )}
-          </motion.div>
+              {/* TITLE - INCREASED LINE HEIGHT */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[1.0] text-balance text-white">
+                {event.title}
+              </h1>
 
-          {/* TITLE - Tipografía más pequeña y compacta */}
-          <AnimatedTitle
-            text={event.title}
-            className="text-2xl md:text-3xl lg:text-3xl leading-[0.95]"
+              {/* BODY TEXT - OPTIMIZED READING MEASURE */}
+              <div className="prose prose-invert prose-base lg:prose-lg max-w-[60ch] text-neutral-300 leading-relaxed font-light">
+                 <h2 className="sr-only">Descripción del Proyecto</h2>
+                 <p className="whitespace-pre-wrap">{event.description}</p>
+              </div>
+              
+              {/* METADATA GRID - INCREASED SPACING */}
+              <div className="grid grid-cols-2 gap-6 lg:gap-8 pt-8 lg:pt-10 relative border-t border-white/10">
+                 <h2 className="sr-only">Detalles del Evento</h2>
+                 <div>
+                   <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Cliente</h3>
+                   <span className="text-sm lg:text-base text-white font-light">{event.brand}</span>
+                 </div>
+                 <div>
+                   <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Año</h3>
+                   <span className="text-sm lg:text-base text-white font-light">2024</span>
+                 </div>
+              </div>
+
+            </motion.div>
+          </div>
+
+      </motion.div>
+
+      {/* NAVIGATION ARROWS - Desktop & Mobile - CIRCULAR BUTTONS WITH GRADIENT LOADING + KEYBOARD FEEDBACK */}
+      {onNext && onPrev && (
+        <>
+          {/* Previous Button */}
+          <CircularNavButton
+            direction="prev"
+            position="left"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrev();
+            }}
+            ariaLabel="Previous event"
+            isActive={keyPressed === 'left'}
+            className={isMobile ? "" : ""}
           />
 
-          {/* TEXT - Tipografía reducida para mejor lectura */}
-          <AnimatedText
-            text={event.description}
-            className="text-sm md:text-sm lg:text-base"
+          {/* Next Button */}
+          <CircularNavButton
+            direction="next"
+            position="right"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            ariaLabel="Next event"
+            isActive={keyPressed === 'right'}
+            className={isMobile ? "" : ""}
           />
-        </motion.div>
-      </div>
+        </>
+      )}
     </motion.div>
   );
 };

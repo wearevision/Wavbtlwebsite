@@ -17,41 +17,45 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
-       // Set hasMounted to true after initial loading is complete.
+    if (!isLoading && events.length > 0) {
+       // Set hasMounted to true after initial loading is complete AND events are available.
        // This prevents staggered animations on subsequent re-renders (e.g., closing a modal).
        setHasMounted(true);
     }
-  }, [isLoading]);
+  }, [isLoading, events.length]);
 
   // 1. Infinite Wall logic
-  // Mobile: 12 rows, 5 cols. (Increased density for vertical coverage)
-  // Desktop: 24 rows, 12 cols. (Increased for infinite feel on larger screens)
-  const ROWS = isMobile ? 12 : 24; 
-  const COLS = isMobile ? 5 : 12; 
+  // Mobile: 10 rows, 3 cols. (Reduced density for performance)
+  // Desktop: 12 rows, 6 cols. (Reduced from 16x8 -> 72 tiles)
+  // This significantly reduces DOM nodes while maintaining the "infinite" feel.
+  const ROWS = isMobile ? 10 : 12; 
+  const COLS = isMobile ? 3 : 6; 
   
   const tiles = useMemo(() => {
-    if (!events || events.length === 0) return [];
+    // While loading, if no events, generate placeholder tiles for skeletons
+    const sourceEvents = (events && events.length > 0) ? events : (isLoading ? Array(10).fill({ id: 'skeleton', image: '', title: '', brand: '' }) : []);
+    
+    if (sourceEvents.length === 0) return [];
     
     return Array.from({ length: ROWS * COLS }).map((_, i) => {
       // Use a large prime multiplier to scatter the events pseudo-randomly
       // This prevents visual clusters and makes the repetition less obvious pattern-wise
       const SCATTER_PRIME = 37; 
-      const eventIndex = (i * SCATTER_PRIME) % events.length;
-      const eventData = events[eventIndex];
+      const eventIndex = (i * SCATTER_PRIME) % sourceEvents.length;
+      const eventData = sourceEvents[eventIndex];
       
       return {
-        id: `tile-${i}-${eventIndex}`, // Critical: Must be unique for React key. 'i' ensures uniqueness in grid, 'eventIndex' tracks data.
-        // We construct a selection ID that matches App.tsx's parsing logic: "tile-{index}"
-        // App.tsx uses: events[parseInt(id.split('-')[1]) % events.length]
-        // So we must pass the EXACT eventIndex we calculated above.
-        eventId: `tile-${eventIndex}`, 
+        // id: used for the React key in Wall.tsx (now unused for key, but good for debugging)
+        id: `tile-${i}-${eventIndex}`, 
+        // eventId: The ACTUAL unique identifier for the event content.
+        // We use eventData.id (UUID) if available, fallback to index logic only if necessary.
+        eventId: eventData.id || `tile-${eventIndex}`, 
         image: eventData.image, 
         title: eventData.title,
         brand: eventData.brand,
       };
     });
-  }, [events, ROWS, COLS]);
+  }, [events, ROWS, COLS, isLoading]);
 
   const springConfig = { damping: 40, stiffness: 150 };
   
@@ -84,14 +88,12 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
   const smoothY = useSpring(yShift, springConfig);
 
   // Create a stable key based on events to trigger fade transition on filter change
-  const eventsKey = useMemo(() => {
-    return events.map(e => e.id || e.title).join('-');
-  }, [events]);
+  // REMOVED: The key causing full re-mounts on filter change.
+  // Instead, we rely on Tile components updating their props.
 
   return (
     <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black perspective-lg">
       <motion.div
-        key={eventsKey}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -105,70 +107,30 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
       >
         {/* 
            Grid Container
-           - Mobile: w-[160vw]. Reduced to improve vertical fit logic.
-           - Desktop: w-[140vw]. Expanded.
         */}
         <div 
-          className="grid gap-y-1 gap-x-0 w-[160vw] md:w-[160vw]"
+          className="grid gap-y-1 gap-x-0 w-[180vw] md:w-[130vw]"
           style={{
             gridTemplateColumns: `repeat(${COLS}, 1fr)`,
           }}
         >
           {tiles.map((tile, i) => {
             const row = Math.floor(i / COLS);
-            const isEvenRow = row % 2 === 0;
-            const shouldExplode = !isMobile; // Disable heavy layout animation on mobile
+            const col = i % COLS;
+            
+            // Critical Path Optimization
+            const isCenterRow = row >= (ROWS / 2) - 2 && row <= (ROWS / 2) + 2;
+            const isCenterCol = col >= (COLS / 2) - 1 && col <= (COLS / 2) + 1;
+            const isCritical = isCenterRow && isCenterCol;
+
+            const shouldExplode = !isMobile;
             const useDelay = !hasMounted && !isLoading && shouldExplode;
 
             return (
               <motion.div 
-                // Removed layout={shouldExplode} to prevent disappearing tiles bug during parent transforms
-                key={tile.id} 
+                key={`grid-pos-${i}`} 
                 initial={false}
-                animate={isLoading ? (
-                  shouldExplode ? { 
-                    position: "absolute", 
-                    top: "50%", 
-                    left: "50%", 
-                    x: "-50%", 
-                    y: "-50%", 
-                    scale: 0,
-                    zIndex: 0,
-                    opacity: 0
-                  } : {
-                    // Mobile Loading: Fully rendered behind the loader (static)
-                    // CRITICAL: Explicitly set position relative to override potential 'absolute' from initial desktop render
-                    position: "relative",
-                    top: "auto",
-                    left: "auto",
-                    opacity: 1,
-                    scale: 1,
-                    x: 0, 
-                    y: 0,
-                    zIndex: 1
-                  }
-                ) : (
-                  shouldExplode ? { 
-                    position: "relative", 
-                    top: "auto", 
-                    left: "auto", 
-                    x: 0, 
-                    y: 0, 
-                    scale: 1,
-                    zIndex: 1,
-                    opacity: 1
-                  } : {
-                    // Mobile Loaded: Stays the same (static)
-                    position: "relative",
-                    top: "auto",
-                    left: "auto",
-                    opacity: 1,
-                    scale: 1,
-                    x: 0,
-                    y: 0,
-                    zIndex: 1
-                  }
-                )}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ 
                   type: "tween", 
                   ease: "easeInOut", 
@@ -176,17 +138,16 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
                   delay: useDelay ? Math.min(i * 0.02, 2.0) : 0
                 }}
                 className={clsx(
-                   "relative", // Removed conflicting transition-transform duration-500 which fights with Framer Motion
-                   
-                   // Width Override for Slant Overlap:
-                   "w-[calc(125%-4px)]"
+                   "relative w-[calc(125%-4px)] z-10"
                 )}
               >
                 <Tile 
                   {...tile} 
-                  id={tile.eventId} // Pass the REAL event ID to the Tile component
+                  id={tile.eventId} 
                   index={i}
-                  onSelect={() => onSelect(tile.eventId)} // Pass real ID on click
+                  onSelect={() => onSelect(tile.eventId)}
+                  priority={isCritical}
+                  isLoading={isLoading}
                 />
               </motion.div>
             );

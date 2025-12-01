@@ -4,6 +4,7 @@ import {
   AlertTriangle, ChevronRight, ChevronDown 
 } from 'lucide-react';
 import { FormField } from './FormField';
+import { ShareLinkButton } from './ShareLinkButton';
 import { getCharCount } from '../../utils/validation';
 import { WavEvent } from '../../src/types';
 import { FIELD_TOOLTIPS } from '../../utils/validation';
@@ -343,6 +344,15 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
                           </p>
                         </div>
                       </div>
+                    )}
+
+                    {/* Share Links */}
+                    {validation?.slug && event.image && (
+                      <ShareLinkButton 
+                        eventSlug={validation.slug}
+                        eventTitle={event.title}
+                        variant="card"
+                      />
                     )}
 
                     {/* Description */}

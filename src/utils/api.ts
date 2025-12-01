@@ -6,18 +6,49 @@ import { EventCategory } from './contentRules';
 
 const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206`;
 
-// Fallback data for robustness
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80";
+// Fallback image - Placeholder gris simple (data URI)
+// Cuando el usuario suba una imagen real a Supabase, esta se reemplaza automáticamente
+const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23171717'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23525252'%3ESin Imagen%3C/text%3E%3C/svg%3E";
 
-const optimizeUrl = (url: string): string => {
-  if (!url) return FALLBACK_IMAGE;
-  if (url.includes('images.unsplash.com')) {
-    // Ensure WebP format and appropriate size if not already set
-    if (!url.includes('fm=')) url += '&fm=webp';
-    if (!url.includes('w=')) url += '&w=1080';
-    if (!url.includes('q=')) url += '&q=80';
+// PHASE 9: Retry configuration for Supabase timeouts
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+/**
+ * PHASE 9: Retry utility function with exponential backoff
+ */
+const fetchWithRetry = async (
+  url: string,
+  options: RequestInit,
+  retries = MAX_RETRIES
+): Promise<Response> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok && retries > 0 && response.status >= 500) {
+      // Retry on server errors
+      console.warn(`⚠️ Fetch failed with ${response.status}, retrying... (${retries} attempts left)`);
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries + 1)));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    
+    return response;
+  } catch (error: any) {
+    if (retries > 0 && (error.name === 'AbortError' || error.message?.includes('fetch'))) {
+      console.warn(`⚠️ Fetch timeout/error, retrying... (${retries} attempts left)`);
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries + 1)));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw error;
   }
-  return url;
 };
 
 /**
@@ -185,7 +216,7 @@ export const getEvents = async (): Promise<WavEvent[]> => {
   console.group("🌊 [API] getEvents()");
   try {
     console.log(`Fetching from: ${BASE_URL}/events`);
-    const response = await fetch(`${BASE_URL}/events`, {
+    const response = await fetchWithRetry(`${BASE_URL}/events`, {
       headers: {
         'Authorization': `Bearer ${publicAnonKey}`
       }

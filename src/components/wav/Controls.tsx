@@ -48,6 +48,23 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <>
+      {/* Menu Backdrop - ONLY Darken, NO blur (blur applied to wall is preserved) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className={clsx(
+              "fixed inset-0 bg-black/40",
+              Z_INDEX.MENU_BACKDROP
+            )}
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Combined Controls (Desktop & Mobile) - Centered Bottom Container */}
       <div 
         className={clsx(
@@ -86,7 +103,7 @@ export const Controls: React.FC<ControlsProps> = ({
         </motion.div>
       </div>
 
-      {/* Menu Overlay */}
+      {/* Menu Overlay - Blur applied ONLY to panel (economical) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -95,7 +112,8 @@ export const Controls: React.FC<ControlsProps> = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={clsx(
-              "fixed bottom-24 left-1/2 -translate-x-1/2 w-72 max-w-[90vw] bg-black border border-white/10 flex flex-col shadow-2xl",
+              "fixed bottom-24 left-1/2 -translate-x-1/2 w-72 max-w-[90vw]",
+              "bg-black/50 backdrop-blur-md border border-white/10 flex flex-col shadow-2xl",
               Z_INDEX.MENU_DROPDOWN
             )}
           >
@@ -106,18 +124,19 @@ export const Controls: React.FC<ControlsProps> = ({
                   onSelectCategory(null);
                   setIsOpen(false);
                 }}
+                aria-label="Mostrar todos los eventos"
                 className={clsx(
-                  "w-full px-4 py-3 text-sm font-bold uppercase tracking-wider flex items-center justify-between transition-colors",
+                  "relative w-full px-4 py-3 text-sm font-bold uppercase tracking-wider flex items-center justify-between transition-colors overflow-hidden",
                   selectedCategory === null 
-                    ? "bg-white text-black" 
+                    ? "text-white bg-brand-gradient" 
                     : "bg-zinc-900 text-white hover:bg-zinc-800"
                 )}
               >
-                <span>TODAS</span>
+                <span className="relative z-10">TODOS</span>
                 <span className={clsx(
-                  "flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold",
+                  "relative z-10 flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold",
                   selectedCategory === null 
-                    ? "bg-zinc-300 text-black" 
+                    ? "bg-black/30 text-white" 
                     : "bg-black text-white"
                 )}>
                   {events.length}
@@ -135,18 +154,34 @@ export const Controls: React.FC<ControlsProps> = ({
                   <button
                     key={category.id}
                     onClick={() => handleCategoryClick(category.label)}
+                    aria-label={`Filtrar por categoría: ${category.label}`}
                     className={clsx(
-                      "w-full py-2.5 text-xs font-bold uppercase tracking-wide transition-colors flex items-center justify-between text-left group",
+                      "relative w-full py-2.5 text-xs font-bold uppercase tracking-wide transition-colors flex items-center justify-between text-left group overflow-hidden",
                       selectedCategory === category.label 
-                        ? "text-brand-pink" // Highlight active category text
+                        ? "text-white bg-brand-gradient" 
                         : "text-neutral-300 hover:text-white"
                     )}
                   >
-                    <span className="w-[80%] leading-tight">{category.label}</span>
+                    {/* Gradient Background - Hover effect for non-active items */}
+                    {selectedCategory !== category.label && (
+                      <>
+                        <div 
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out bg-brand-gradient-faint"
+                          style={{
+                            transform: 'translateX(-100%)',
+                          }}
+                        />
+                        <div 
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-75 bg-brand-gradient-faint"
+                        />
+                      </>
+                    )}
+                    
+                    <span className="relative z-10 w-[80%] leading-tight">{category.label}</span>
                     <span className={clsx(
-                      "flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-[10px] font-bold transition-colors",
+                      "relative z-10 flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-[10px] font-bold transition-colors",
                       selectedCategory === category.label 
-                        ? "bg-brand-pink text-white" 
+                        ? "bg-black/30 text-white" 
                         : "bg-zinc-800 text-neutral-500 group-hover:bg-zinc-700 group-hover:text-white"
                     )}>
                       {categoryCounts[category.id] || 0}
@@ -159,6 +194,7 @@ export const Controls: React.FC<ControlsProps> = ({
               <div className="w-full h-px bg-white/10 mb-4" />
               <a
                 href="mailto:federico@wearevision.cl"
+                aria-label="Enviar correo a federico@wearevision.cl"
                 className="w-full py-2 text-sm font-bold uppercase tracking-widest text-center transition-colors text-white hover:text-neutral-300 flex items-center justify-center gap-3"
               >
                 <Mail size={18} />

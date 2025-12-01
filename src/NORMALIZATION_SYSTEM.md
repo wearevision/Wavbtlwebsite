@@ -17,7 +17,7 @@ Detecta y renombra campos de imagen automáticamente:
 - `imageUrl` → `image`
 - `imgURL` → `image`
 
-Si no hay imagen válida, se usa un **fallback** de Unsplash.
+Si no hay imagen válida, se usa un **fallback SVG placeholder** (gris con texto "Sin Imagen").
 
 ### 3. **Generación de Slug**
 - Si falta `slug` → Se genera automáticamente desde el `title` en formato **kebab-case**
@@ -152,7 +152,7 @@ interface WavEvent {
   brand: string;        // Nombre de marca
   title: string;        // Título del evento
   description: string;  // Descripción completa
-  image: string;        // URL de imagen principal
+  image: string;        // URL de imagen principal (Supabase Storage)
   slug: string;         // URL-friendly slug (kebab-case)
   gallery: WavMedia[];  // Array de media (puede estar vacío)
 

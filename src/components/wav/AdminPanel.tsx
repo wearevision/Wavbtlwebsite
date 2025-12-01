@@ -11,6 +11,9 @@ import { useAdminEvents } from '../../src/hooks/useAdminEvents';
 import { useEventValidation } from '../../src/hooks/useEventValidation';
 import { FormField } from './FormField';
 import { EventListView } from './EventListView';
+import { ShareLinkButton } from './ShareLinkButton';
+import { OpenAIStatusIndicator } from './OpenAIStatusIndicator';
+import { ClaudeOptimizer } from './ClaudeOptimizer';
 import { FIELD_TOOLTIPS, getCharCount, validateEvent } from '../../utils/validation';
 import { EventCategory } from '../../utils/contentRules';
 import { Progress } from '../ui/progress';
@@ -147,18 +150,23 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
             textArea.select();
             const successful = document.execCommand('copy');
             document.body.removeChild(textArea);
-            if (successful) alert("Copiado");
-            else alert("No se pudo copiar. Por favor selecciona el texto manualmente.");
+            if (!successful) {
+                alert("No se pudo copiar. Por favor selecciona el texto manualmente.");
+            }
         } catch (err) {
             console.error("Fallback copy failed", err);
             alert("Error al copiar.");
         }
     };
 
+    // Try Clipboard API with proper error handling
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text)
-            .then(() => alert("Copiado"))
-            .catch(err => {
+            .then(() => {
+                // Success - no alert needed
+            })
+            .catch(() => {
+                // Silently fallback - this is expected in some environments
                 fallbackCopy(text);
             });
     } else {
@@ -226,7 +234,13 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
     try {
       console.log('[Mega Audit] Starting audit for', events.length, 'events');
 
-      // Call the audit-all endpoint
+      // Call the audit-all endpoint with extended timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.error('[Mega Audit] Request timeout after 5 minutes');
+      }, 300000); // 5 minute timeout for mega audit
+
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/audit-all-events`,
         {
@@ -234,13 +248,16 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${publicAnonKey}`
-          }
+          },
+          signal: controller.signal
         }
       );
 
+      clearTimeout(timeoutId);
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to audit events');
+        const errorData = await res.json().catch(() => ({ error: 'Error desconocido del servidor' }));
+        throw new Error(errorData.error || `Server error: ${res.status}`);
       }
 
       const result = await res.json();
@@ -272,13 +289,54 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
 
     } catch (error: any) {
       console.error('[Mega Audit] Error:', error);
+      
+      // Determinar el tipo de error para dar mejor feedback
+      let errorMessage = error.message || 'Error desconocido';
+      let helpText = '';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Timeout: La operación tardó más de 5 minutos';
+        helpText = 
+          `El Mega Audit tiene demasiados eventos para procesar en una sola operación.\n\n` +
+          `Soluciones:\n` +
+          `• Usa "Optimizar Todo" en eventos individuales\n` +
+          `• Procesa eventos en grupos más pequeños\n` +
+          `• Contacta soporte si el problema persiste`;
+      } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+        errorMessage = 'No se pudo conectar con el servidor';
+        helpText = 
+          `Posibles causas:\n` +
+          `• Verifica tu conexión a internet\n` +
+          `• El servidor de Supabase puede estar temporalmente inaccesible\n` +
+          `• El proceso puede haber tardado más de 5 minutos (timeout)\n` +
+          `• Firewall o proxy bloqueando la conexión\n\n` +
+          `Solución: Intenta procesar menos eventos a la vez usando "Optimizar Todo" individual.`;
+      } else if (errorMessage.includes('OPENAI_API_KEY')) {
+        helpText = 
+          `La API key de OpenAI no está configurada.\n\n` +
+          `Para configurarla:\n` +
+          `1. Ve a Supabase Dashboard\n` +
+          `2. Settings → Edge Functions → Environment Variables\n` +
+          `3. Agrega: OPENAI_API_KEY = tu_api_key\n` +
+          `4. Redeploy las Edge Functions`;
+      } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
+        helpText = 
+          `Error de autenticación.\n\n` +
+          `Verifica que la API key de OpenAI sea válida:\n` +
+          `• Debe comenzar con "sk-"\n` +
+          `• Debe tener permisos activos\n` +
+          `• No debe estar expirada`;
+      } else if (errorMessage.includes('429')) {
+        helpText = 
+          `Límite de rate limit alcanzado.\n\n` +
+          `OpenAI tiene límites de requests por minuto.\n` +
+          `Espera unos minutos e intenta nuevamente.`;
+      }
+      
       alert(
         `❌ ERROR EN MEGA AUDIT\n\n` +
-        `${error.message}\n\n` +
-        `Por favor verifica:\n` +
-        `• Conexión a internet\n` +
-        `• API key de OpenAI configurada\n` +
-        `• Logs del servidor para más detalles`
+        `${errorMessage}\n\n` +
+        (helpText || `Detalles técnicos:\n• Revisa los logs del navegador (F12)\n• Revisa los logs del servidor en Supabase\n• Verifica la configuración de OpenAI API`)
       );
       setIsSyncing(false);
       setSyncProgress(0);
@@ -409,6 +467,9 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
           </div>
         </div>
 
+        {/* OpenAI Status Indicator */}
+        <OpenAIStatusIndicator />
+
         {/* Actions Bar */}
         <div className="flex items-center justify-between">
           <div className="flex gap-3">
@@ -474,6 +535,14 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
             <Progress value={syncProgress} className="h-1" />
           </div>
         )}
+
+        {/* Claude Optimizer */}
+        <div className="mt-6">
+          <ClaudeOptimizer 
+            events={events} 
+            onComplete={loadData}
+          />
+        </div>
       </div>
 
       {/* Main Content - Split View */}
@@ -985,16 +1054,32 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-neutral-300">
+          <label className="block text-sm font-medium text-neutral-300 flex items-center gap-2">
             OG Image (Open Graph para compartir en redes)
+            {event.image && (
+              <span className="text-xs text-green-400 font-normal">
+                ✓ Detectada automáticamente
+              </span>
+            )}
           </label>
-          <FormField
-            value={event.og_image || ''}
-            onChange={(value) => updateEvent(eventIndex, 'og_image', value)}
-            tooltip={FIELD_TOOLTIPS.og_image}
-            placeholder="https://..."
-          />
+          <div className="bg-neutral-900 border border-neutral-800 rounded-md px-3 py-2 text-sm text-neutral-400 font-mono truncate">
+            {event.og_image || event.image || 'No hay imagen configurada'}
+          </div>
+          <p className="text-xs text-neutral-500 italic">
+            💡 El sistema usa automáticamente la imagen principal del evento para compartir en redes sociales.
+          </p>
         </div>
+
+        {/* Share Links for Social Media */}
+        {validation?.slug && event.image && (
+          <div className="mt-6">
+            <ShareLinkButton 
+              eventSlug={validation.slug}
+              eventTitle={event.title}
+              variant="card"
+            />
+          </div>
+        )}
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-neutral-300">

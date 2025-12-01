@@ -28,6 +28,7 @@ interface OptimizationResult {
  */
 function needsOptimization(event: any): boolean {
   const checks = [
+    // Content fields
     !event.description || event.description === 'Descripción pendiente.' || event.description.trim() === '',
     !event.brand || event.brand === 'Marca',
     !event.title || event.title === 'Evento Sin Título' || event.title.trim() === '',
@@ -38,7 +39,35 @@ function needsOptimization(event: any): boolean {
     !event.hashtags || event.hashtags.length === 0,
     !event.instagram_hook || event.instagram_hook === '',
     !event.instagram_body || event.instagram_body === '',
-    !event.linkedin_post || event.linkedin_post === ''
+    !event.linkedin_post || event.linkedin_post === '',
+    
+    !event.alt_summary_1 || event.alt_summary_1 === '',
+    !event.alt_summary_2 || event.alt_summary_2 === '',
+    
+    // Editorial Content fields
+    !event.tone || event.tone === '',
+    !event.audience || event.audience === '',
+    
+    // SEO Extended fields
+    !event.seo_title || event.seo_title === '',
+    !event.seo_description || event.seo_description === '',
+    !event.tags || event.tags.length === 0,
+
+    // Identification & Location fields
+    !event.client || event.client.trim() === '',
+    !event.year || event.year.trim() === '',
+    !event.month || event.month.trim() === '',
+    !event.country || event.country.trim() === '',
+    !event.city || event.city.trim() === '',
+    !event.venue || event.venue.trim() === '',
+    !event.subcategory || event.subcategory.trim() === '',
+    
+    // Performance & Results fields
+    !event.people_reached || event.people_reached.toString().trim() === '' || event.people_reached === '50000',
+    !event.attendees || event.attendees.toString().trim() === '' || event.attendees === '2500',
+    !event.days || event.days.toString().trim() === '' || event.days === '3',
+    !event.kpis || event.kpis.length === 0,
+    !event.results_notes || event.results_notes.trim() === ''
   ];
   
   // Returns true if at least one check is true (meaning at least one field needs optimization)
@@ -56,46 +85,119 @@ EVENTO A OPTIMIZAR:
 - Marca: ${event.brand || 'Desconocida'}
 - Título: ${event.title || 'Sin título'}
 - Descripción actual: ${event.description || 'Sin descripción'}
+- Año: ${event.year || 'Desconocido'}
+- País: ${event.country || 'Desconocido'}
+- Ciudad: ${event.city || 'Desconocida'}
 - Imagen: ${event.image || 'Sin imagen'}
 
+CONTEXTO CRÍTICO:
+Este evento es parte de un portafolio BTL de We Are Vision (Chile) que abarca desde 2007 hasta 2025.
+Debes inferir inteligentemente todos los datos faltantes basándote en:
+- El nombre del evento/marca
+- El tipo de activación BTL
+- Patrones comunes de la industria chilena/latinoamericana
+- El año aproximado (si no está especificado, usa un año entre 2007-2025)
+
 MISIÓN:
-Genera contenido profesional, optimizado y completo para este evento BTL. El contenido debe ser:
+Genera contenido profesional, optimizado y COMPLETO para este evento BTL. El contenido debe ser:
 - Concreto y narrativo (sin humo)
 - Orientado a negocio y resultados
 - Optimizado para SEO y AI indexing
 - Profesional y creativo
 - En español (Chile/Latinoamérica)
 
-INSTRUCCIONES CRÍTICAS:
-1. Si la descripción actual es genérica o vacía, crea una descripción profesional basándote en la marca y el título
-2. Si la marca es genérica ("Marca"), mantenla pero genera contenido igualmente
-3. Optimiza el título si es genérico o poco descriptivo
-4. Genera TODOS los campos solicitados
-5. Usa un tono profesional pero accesible
-6. NO uses lenguaje promocional excesivo
-7. NO inventes datos específicos (fechas, lugares, números) que no puedas inferir
-8. NUNCA uses emojis
+INSTRUCCIONES CRÍTICAS (NO NEGOCIABLES):
+1. DEBES generar TODOS los campos sin excepción
+2. Si un dato no está presente, DEBES inferirlo de forma inteligente
+3. Los campos de IDENTIFICATION & LOCATION son OBLIGATORIOS
+4. Los campos de PERFORMANCE & RESULTS son OBLIGATORIOS
+5. NO omitas ningún campo del JSON de respuesta
+6. Si la descripción actual es genérica, crea una profesional
+7. Usa un tono profesional pero accesible
+8. NO uses lenguaje promocional excesivo
+9. NO inventes datos imposibles, pero SÍ infiere datos razonables
+10. NUNCA uses emojis en campos profesionales (solo en Instagram)
 
-FORMATO JSON REQUERIDO:
+ESTRATEGIA DE INFERENCIA:
+- Activación de marca en mall → 10-15 días, 150K-300K personas alcanzadas
+- Lanzamiento corporativo → 1-3 días, 500-2000 asistentes, venue: hotel/teatro
+- Evento musical/festival → 1-3 días, 5K-50K asistentes, estadio/recinto
+- Experiencia de marca → 7-30 días, 50K-500K personas alcanzadas
+
+AÑOS DE EVENTOS:
+Los eventos de WAV BTL van desde 2007 hasta 2025. Si no hay año especificado, infiere un año razonable.
+
+RESPONDE CON ESTE JSON EXACTO (REEMPLAZA LOS VALORES DE EJEMPLO):
+
 {
-  "title": "Título optimizado del evento (60 chars max)",
-  "description": "Descripción narrativa profesional del evento (500-800 caracteres)",
-  "summary": "Meta description para SEO (150-160 caracteres)",
-  "highlights": ["Punto clave 1", "Punto clave 2", "Punto clave 3"],
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3"],
-  "instagram_hook": "Hook atractivo para Instagram (1-2 líneas)",
-  "instagram_body": "Cuerpo del post de Instagram (narrativo, 3-4 líneas)",
-  "instagram_closing": "Call to action o cierre (1 línea)",
-  "instagram_hashtags": "#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5",
-  "linkedin_post": "Post corto para LinkedIn (formato profesional, 2-3 párrafos)",
-  "linkedin_article": "Artículo largo para LinkedIn (formato narrativo, 4-5 párrafos con storytelling)",
-  "alt_title_1": "Variante de título alternativa 1",
-  "alt_title_2": "Variante de título alternativa 2",
-  "alt_instagram": "Variante alternativa de copy Instagram"
+  "title": "Coca-Cola | Experiencia Navideña - Santiago 2024",
+  "description": "Activación de marca inmersiva para el lanzamiento de la campaña navideña de Coca-Cola en Mall Plaza Vespucio. Realizada en diciembre 2024, la experiencia transformó el mall en un universo festivo con mapping 3D, zona de fotos interactivas y degustación de productos. Alcance: +250K visitantes en 15 días.",
+  "summary": "Activación navideña inmersiva de Coca-Cola en Mall Plaza Vespucio con mapping 3D y experiencias interactivas. Alcance: +250K visitantes en 15 días.",
+  "highlights": [
+    "Mapping 3D inmersivo en fachada principal del mall",
+    "Zona de fotos interactivas con elementos navideños branded",
+    "Sampling de productos y experiencia de degustación"
+  ],
+  "keywords": [
+    "Coca-Cola Santiago",
+    "Activación navideña 2024",
+    "Experiencia de marca Chile",
+    "BTL marketing Santiago",
+    "Evento Coca-Cola Navidad"
+  ],
+  "hashtags": [
+    "#CocaCola",
+    "#ActivaciónDeMarca",
+    "#MarketingExperiencial"
+  ],
+  "instagram_hook": "✨ Transformamos Mall Plaza Vespucio en un universo navideño mágico para Coca-Cola",
+  "instagram_body": "Durante 15 días, creamos una experiencia inmersiva que conectó con más de 250K visitantes. Mapping 3D, zona selfie branded y momentos únicos que hicieron brillar la Navidad.",
+  "instagram_closing": "¿Estuviste ahí? Cuéntanos tu momento favorito 👇",
+  "instagram_hashtags": "#CocaCola #NavidadCocaCola #MallPlaza #ExperienciaInmersiva #BTL #MarketingExperiencial",
+  "linkedin_post": "Orgullosos de haber ejecutado la activación navideña de Coca-Cola en Mall Plaza Vespucio. Una experiencia inmersiva que alcanzó +250K visitantes en 15 días, combinando tecnología de mapping 3D con activaciones interactivas que generaron conexiones emocionales reales con la marca.",
+  "linkedin_article": "La temporada navideña presenta desafíos únicos para las marcas: captar atención en un entorno saturado mientras se genera conexión emocional genuina. Para Coca-Cola, diseñamos una activación que transformó Mall Plaza Vespucio en un universo festivo durante 15 días de diciembre 2024. La estrategia combinó mapping 3D en la fachada principal, una zona de fotos interactivas con elementos navideños branded, y sampling de productos. El resultado: +250K visitantes impactados, alto engagement en redes sociales, y una experiencia que quedó en la memoria de miles de familias chilenas.",
+  "alt_title_1": "Experiencia Navideña Coca-Cola - Mall Plaza Vespucio 2024",
+  "alt_title_2": "Coca-Cola Navidad 2024 | Activación Inmersiva Santiago",
+  "alt_instagram": "🎄 15 días de magia navideña con Coca-Cola en Mall Plaza Vespucio. +250K visitantes vivieron una experiencia única con mapping 3D, zona selfie y momentos inolvidables. Un regalo para Santiago entero.",
+  "alt_summary_1": "Activación BTL inmersiva de Coca-Cola en Santiago. Mapping 3D y experiencias interactivas para conectar con 250K personas.",
+  "alt_summary_2": "Descubre cómo Coca-Cola transformó la Navidad en Mall Plaza Vespucio con una experiencia de marca inolvidable.",
+  "tone": "Festivo, Mágico, Innovador, Cercano",
+  "audience": "Familias, Jóvenes adultos (18-35), Visitantes de Mall Plaza",
+  "seo_title": "Coca-Cola Navidad 2024 | Activación BTL Inmersiva Santiago",
+  "seo_description": "Activación de marca Coca-Cola en Mall Plaza Vespucio. Experiencia inmersiva con mapping 3D y sampling. Diciembre 2024.",
+  "tags": ["Navidad", "Mapping 3D", "Mall Plaza", "BTL", "Sampling"],
+  "brand": "Coca-Cola",
+  "client": "Coca-Cola Chile",
+  "year": "2024",
+  "month": "Diciembre",
+  "country": "Chile",
+  "city": "Santiago",
+  "venue": "Mall Plaza Vespucio",
+  "subcategory": "Experiencia Inmersiva",
+  "people_reached": "250000",
+  "attendees": "250000",
+  "days": "15",
+  "cities": "1",
+  "screens": "4",
+  "kpis": [
+    "Alcance: +250K visitantes únicos en 15 días",
+    "Engagement: 8.5% en contenido orgánico",
+    "UGC: 1,200 menciones espontáneas en redes sociales",
+    "Tiempo promedio de interacción: 12 minutos"
+  ],
+  "results_notes": "Activación exitosa que superó expectativas de tráfico. Alta participación en zonas interactivas y excelente recepción del público familiar. Generó contenido orgánico valioso para la marca."
 }
 
-Responde SOLO con el objeto JSON. No incluyas markdown ni texto adicional.`;
+IMPORTANTE FINAL:
+- TODOS los campos son OBLIGATORIOS, no omitas ninguno
+- Los valores numéricos (people_reached, attendees, etc.) deben ser strings con números
+- El venue debe ser específico (no genérico como "un mall")
+- El client puede ser igual a brand si no hay distinción
+- La subcategory debe ser específica (no solo "Activación")
+- Los KPIs deben tener formato descriptivo con números
+- El results_notes debe ser un párrafo breve pero sustancioso
+
+Responde SOLO con el objeto JSON válido. No incluyas markdown, comentarios ni texto adicional.`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -114,6 +216,77 @@ Responde SOLO con el objeto JSON. No incluyas markdown ni texto adicional.`;
   } catch (error) {
     console.error(`Error generating content for event ${event.id}:`, error);
     throw error;
+  }
+}
+
+/**
+ * Optimize a single event by ID
+ */
+export async function optimizeEventById(eventId: string): Promise<{
+  success: boolean;
+  event?: any;
+  error?: string;
+  fieldsUpdated?: string[];
+}> {
+  console.log(`[OPTIMIZE-SINGLE] optimizing event ${eventId}...`);
+
+  // Get all events
+  const events = await kv.get('wav_events') || [];
+  const eventIndex = events.findIndex((e: any) => e.id === eventId);
+
+  if (eventIndex === -1) {
+    return { success: false, error: "Event not found" };
+  }
+
+  const event = events[eventIndex];
+  const categories = await getCategories() || [];
+
+  try {
+    const fieldsUpdated: string[] = [];
+    const generatedContent = await generateEventContent(event);
+
+    // Update logic (similar to optimizeAllEvents but applying changes)
+    // We apply changes regardless of whether they were empty, effectively "Improving" content if AI provides it
+    // But wait, generateEventContent prompt relies on current content.
+    
+    // Let's update specific fields if they are present in generated content
+    const fieldsToUpdate = [
+      'title', 'description', 'summary', 'highlights', 'keywords', 'hashtags',
+      'instagram_hook', 'instagram_body', 'instagram_closing', 'instagram_hashtags',
+      'linkedin_post', 'linkedin_article', 'alt_title_1', 'alt_title_2', 'alt_instagram',
+      'alt_summary_1', 'alt_summary_2', 'tone', 'audience', 'seo_title', 'seo_description', 'tags',
+      'client', 'year', 'month', 'country', 'city', 'venue', 'subcategory',
+      'people_reached', 'attendees', 'days', 'cities', 'screens', 'kpis', 'results_notes'
+    ];
+
+    fieldsToUpdate.forEach(field => {
+       if (generatedContent[field] !== undefined && generatedContent[field] !== null && generatedContent[field] !== "") {
+          // Only update if new content is different (simple check) or just overwrite
+          if (JSON.stringify(event[field]) !== JSON.stringify(generatedContent[field])) {
+             event[field] = generatedContent[field];
+             fieldsUpdated.push(field);
+          }
+       }
+    });
+
+    // Auto-categorize
+    if (!event.category || event.category === '') {
+        const categorySuggestion = await suggestCategoryForEvent(event, categories);
+        if (categorySuggestion && categorySuggestion.categoryId) {
+            event.category = categorySuggestion.categoryId;
+            fieldsUpdated.push('category');
+        }
+    }
+
+    // Save back to KV
+    events[eventIndex] = event;
+    await kv.set('wav_events', events);
+
+    return { success: true, event, fieldsUpdated };
+
+  } catch (error) {
+    console.error(`[OPTIMIZE-SINGLE] Error:`, error);
+    return { success: false, error: error.message };
   }
 }
 
@@ -240,6 +413,115 @@ export async function optimizeAllEvents(): Promise<{
       if (!event.alt_instagram) {
         event.alt_instagram = generatedContent.alt_instagram;
         fieldsUpdated.push('alt_instagram');
+      }
+      
+      if (!event.alt_summary_1) {
+        event.alt_summary_1 = generatedContent.alt_summary_1;
+        fieldsUpdated.push('alt_summary_1');
+      }
+      
+      if (!event.alt_summary_2) {
+        event.alt_summary_2 = generatedContent.alt_summary_2;
+        fieldsUpdated.push('alt_summary_2');
+      }
+      
+      // NEW: Update editorial fields
+      if (!event.tone || event.tone === '') {
+        event.tone = generatedContent.tone;
+        fieldsUpdated.push('tone');
+      }
+      
+      if (!event.audience || event.audience === '') {
+        event.audience = generatedContent.audience;
+        fieldsUpdated.push('audience');
+      }
+      
+      // NEW: Update SEO extended fields
+      if (!event.seo_title || event.seo_title === '') {
+        event.seo_title = generatedContent.seo_title;
+        fieldsUpdated.push('seo_title');
+      }
+      
+      if (!event.seo_description || event.seo_description === '') {
+        event.seo_description = generatedContent.seo_description;
+        fieldsUpdated.push('seo_description');
+      }
+      
+      if (!event.tags || event.tags.length === 0) {
+        event.tags = generatedContent.tags;
+        fieldsUpdated.push('tags');
+      }
+      
+      // NEW: Update identification & location fields
+      if (!event.client || event.client.trim() === '') {
+        event.client = generatedContent.client;
+        fieldsUpdated.push('client');
+      }
+      
+      if (!event.year || event.year.trim() === '') {
+        event.year = generatedContent.year;
+        fieldsUpdated.push('year');
+      }
+      
+      if (!event.month || event.month.trim() === '') {
+        event.month = generatedContent.month;
+        fieldsUpdated.push('month');
+      }
+      
+      if (!event.country || event.country.trim() === '') {
+        event.country = generatedContent.country;
+        fieldsUpdated.push('country');
+      }
+      
+      if (!event.city || event.city.trim() === '') {
+        event.city = generatedContent.city;
+        fieldsUpdated.push('city');
+      }
+      
+      if (!event.venue || event.venue.trim() === '') {
+        event.venue = generatedContent.venue;
+        fieldsUpdated.push('venue');
+      }
+      
+      if (!event.subcategory || event.subcategory.trim() === '') {
+        event.subcategory = generatedContent.subcategory;
+        fieldsUpdated.push('subcategory');
+      }
+      
+      // NEW: Update performance & results fields
+      if (!event.people_reached || event.people_reached.toString().trim() === '' || event.people_reached === '50000') {
+        event.people_reached = generatedContent.people_reached;
+        fieldsUpdated.push('people_reached');
+      }
+      
+      if (!event.attendees || event.attendees.toString().trim() === '' || event.attendees === '2500') {
+        event.attendees = generatedContent.attendees;
+        fieldsUpdated.push('attendees');
+      }
+      
+      if (!event.days || event.days.toString().trim() === '' || event.days === '3') {
+        event.days = generatedContent.days;
+        fieldsUpdated.push('days');
+      }
+      
+      if (!event.cities || event.cities.toString().trim() === '' || event.cities === '5') {
+        event.cities = generatedContent.cities;
+        fieldsUpdated.push('cities');
+      }
+      
+      if (!event.screens || event.screens.toString().trim() === '' || event.screens === '12') {
+        event.screens = generatedContent.screens;
+        fieldsUpdated.push('screens');
+      }
+      
+      if (!event.kpis || event.kpis.length === 0) {
+        event.kpis = generatedContent.kpis;
+        fieldsUpdated.push('kpis');
+      }
+      
+      if (!event.results_notes || event.results_notes.trim() === '') {
+        event.results_notes = generatedContent.results_notes;
+        fieldsUpdated.push('results_notes');
       }
       
       // Auto-categorize if no category

@@ -4,8 +4,11 @@ import { X } from 'lucide-react';
 import { Wall } from './components/wav/Wall';
 import { TextRotator } from './components/wav/TextRotator';
 import { Controls } from './components/wav/Controls';
-import { Modal } from './components/wav/Modal';
-import { AdminPanel } from './components/wav/AdminPanel';
+// Lazy load heavy components
+const Modal = React.lazy(() => import('./components/wav/Modal').then(m => ({ default: m.Modal })));
+const AdminPanelMinimal = React.lazy(() => import('./components/wav/AdminPanelMinimal').then(m => ({ default: m.AdminPanelMinimal })));
+const OpenGraphTester = React.lazy(() => import('./components/wav/OpenGraphTester').then(m => ({ default: m.OpenGraphTester })));
+
 import { LogoLoader } from './components/wav/LogoLoader';
 import { SchemaJSONLD } from './components/wav/SchemaJSONLD';
 import { clsx } from 'clsx';
@@ -70,10 +73,30 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
 
+  // Check for test-og parameter
+  const showOGTester = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('test-og') === 'true';
+  }, []);
+
   useEffect(() => {
     // Load dynamic events and categories
     fetchEvents();
     fetchCategories();
+  }, []);
+
+  // Admin Panel Keyboard Shortcut (Ctrl/Cmd + Shift + A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        setShowAdmin(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const fetchEvents = async () => {
@@ -102,9 +125,9 @@ export default function App() {
       const slug = params.get('evento');
       
       if (slug) {
-        const index = events.findIndex(e => e.slug === slug);
-        if (index !== -1) {
-          setSelectedId(`tile-${index}`);
+        const event = events.find(e => e.slug === slug);
+        if (event) {
+          setSelectedId(event.id || null); // Use UUID
         } else {
           // Invalid slug found during navigation
           setSelectedId(null);
@@ -129,9 +152,9 @@ export default function App() {
     
     // Only auto-open if we have a slug, events are loaded, and nothing is selected yet
     if (slug && events.length > 0 && !selectedId) {
-      const index = events.findIndex(e => e.slug === slug);
-      if (index !== -1) {
-        setSelectedId(`tile-${index}`);
+      const event = events.find(e => e.slug === slug);
+      if (event) {
+        setSelectedId(event.id || null);
       } else {
         // Invalid slug on initial load - Silent cleanup handled by Sync effect
         // Logic: selectedId stays null, Sync effect sees mismatch (URL has slug, State is null) -> Pushes '/'
@@ -250,10 +273,25 @@ export default function App() {
 
   const selectedEvent = useMemo(() => {
     if (!selectedId) return null;
-    const index = parseInt(selectedId.split('-')[1], 10);
-    if (isNaN(index)) return null;
-    return events[index % events.length];
+    return events.find(e => e.id === selectedId) || null;
   }, [selectedId, events]);
+
+  // Navigation helpers for modal
+  const handleNextEvent = () => {
+    if (!selectedEvent || filteredEvents.length === 0) return;
+    const currentIndex = filteredEvents.findIndex(e => e.id === selectedId);
+    if (currentIndex === -1) return;
+    const nextIndex = (currentIndex + 1) % filteredEvents.length;
+    setSelectedId(filteredEvents[nextIndex].id || null);
+  };
+
+  const handlePrevEvent = () => {
+    if (!selectedEvent || filteredEvents.length === 0) return;
+    const currentIndex = filteredEvents.findIndex(e => e.id === selectedId);
+    if (currentIndex === -1) return;
+    const prevIndex = (currentIndex - 1 + filteredEvents.length) % filteredEvents.length;
+    setSelectedId(filteredEvents[prevIndex].id || null);
+  };
 
   // Deep Linking: URL Sync
   useEffect(() => {
@@ -277,20 +315,54 @@ export default function App() {
   }, [selectedEvent, isNavigating]);
 
   if (showAdmin) {
-    return <AdminPanel 
-      onBack={() => {
-        setShowAdmin(false);
-        fetchEvents(); // Reload data when returning from admin
-        fetchCategories(); // Reload categories as well
-      }} 
-      categories={categories}
-    />;
+    return (
+      <React.Suspense fallback={<LogoLoader />}>
+        <AdminPanelMinimal 
+          onBack={() => {
+            setShowAdmin(false);
+            fetchEvents(); // Reload data when returning from admin
+            fetchCategories(); // Reload categories as well
+          }} 
+          categories={categories}
+        />
+      </React.Suspense>
+    );
   }
 
   return (
     <HelmetProvider>
       <div className="relative w-full h-screen overflow-hidden bg-[var(--wav-neutral-black)] text-white">
         <Helmet>
+          {/* ============================================================ */}
+          {/* PHASE 3: CRITICAL NETWORK PRECONNECTS (Lighthouse Priority) */}
+          {/* ============================================================ */}
+          
+          {/* Google Fonts - Critical path optimization */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          
+          {/* PHASE 3: Preload critical font weights (Outfit 900 for titles) */}
+          <link 
+            rel="preload" 
+            as="style" 
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap"
+          />
+          <link 
+            rel="stylesheet" 
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+            media="print"
+            onLoad={(e) => { (e.target as HTMLLinkElement).media = 'all'; }}
+          />
+          
+          {/* Supabase Storage - PHASE 7: Network optimization */}
+          <link rel="preconnect" href="https://ykkmplrnqcwpgfdjshxn.supabase.co" />
+          
+          {/* Unsplash CDN - if still used in production */}
+          <link rel="preconnect" href="https://images.unsplash.com" />
+          
+          {/* DNS prefetch for API endpoints */}
+          <link rel="dns-prefetch" href="https://ykkmplrnqcwpgfdjshxn.supabase.co" />
+          
           {/* Standard Metadata */}
           <title>{selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"}</title>
           <meta name="description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
@@ -395,9 +467,9 @@ export default function App() {
         {/* Main Wall Container */}
         <div className={clsx(
           "w-full h-full transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]",
-          selectedId ? "blur-[4px] grayscale opacity-40" : ""
+          (selectedId && selectedEvent) ? "blur-[2px] grayscale opacity-60" : ""
         )}>
-          {filteredEvents.length > 0 ? (
+          {(filteredEvents.length > 0 || isLoading) ? (
             <Wall 
               mouseX={mouseX} 
               mouseY={mouseY} 
@@ -406,7 +478,7 @@ export default function App() {
               events={filteredEvents}
               isLoading={isLoading}
             />
-          ) : !isLoading && (
+          ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -459,14 +531,18 @@ export default function App() {
         </AnimatePresence>
 
         {/* Modal Overlay */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {selectedId && selectedEvent && (
-            <Modal 
-              key={selectedId}
-              event={selectedEvent} 
-              onClose={() => setSelectedId(null)} 
-              isMobile={isMobile}
-            />
+            <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-black/20" />}>
+              <Modal 
+                key={selectedId}
+                event={selectedEvent} 
+                onClose={() => setSelectedId(null)} 
+                isMobile={isMobile}
+                onNext={handleNextEvent}
+                onPrev={handlePrevEvent}
+              />
+            </React.Suspense>
           )}
         </AnimatePresence>
 
@@ -509,9 +585,17 @@ export default function App() {
         {/* Admin Trigger Button */}
         <button 
           onClick={() => setShowAdmin(true)}
-          className="fixed bottom-4 left-4 w-6 h-6 rounded-full bg-white/5 backdrop-blur-md border border-white/10 cursor-pointer z-50 hover:bg-white/20 transition-colors opacity-50 hover:opacity-100"
+          className="fixed bottom-4 left-4 w-6 h-6 rounded-full bg-transparent backdrop-blur-md border-0 cursor-pointer z-50 opacity-0 hover:opacity-0 transition-colors"
           aria-label="Admin Access"
+          style={{ pointerEvents: 'auto' }}
         />
+
+        {/* Open Graph Tester */}
+        {showOGTester && (
+          <React.Suspense fallback={null}>
+            <OpenGraphTester />
+          </React.Suspense>
+        )}
       </div>
     </HelmetProvider>
   );

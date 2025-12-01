@@ -35,7 +35,7 @@ export const TrapezoidBadge: React.FC<TrapezoidBadgeProps> = ({
     solid: 'bg-neutral-800 text-white border-neutral-700',
     outline: 'bg-transparent text-neutral-300 border-neutral-700',
     ghost: 'bg-neutral-900/50 text-neutral-400 border-neutral-800',
-    white: 'bg-white text-black border-white' // White variant for category badges
+    white: 'bg-white/95 text-black border-white backdrop-blur-sm' // White variant with slight transparency
   };
 
   // Clip-path for 17° trapezoid angle

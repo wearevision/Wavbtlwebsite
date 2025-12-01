@@ -466,6 +466,22 @@ export const useAdminEvents = () => {
     handleApprove,
     handleCleanupEvents,
     handleClearAllEvents,
-    handleOptimizeAll
+    handleOptimizeAll,
+    optimizeSingleEvent: async (eventId: string) => {
+        const token = await getAdminToken();
+        const response = await fetch(
+            `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/optimize-event`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ eventId })
+            }
+        );
+        if (!response.ok) throw new Error(await response.text());
+        return await response.json();
+    }
   };
 };

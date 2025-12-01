@@ -1,9 +1,25 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap");
+/* CRITICAL: Removed blocking @import - fonts now loaded via preconnect + preload in App.tsx */
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "sans-serif";
+  --font-sans: "Outfit", "sans-serif";
   --font-mono: "JetBrains Mono", "monospace";
+  
+  --color-brand-pink: var(--wav-brand-pink);
+  --color-brand-purple: var(--wav-brand-purple);
+  --color-brand-blue: var(--wav-brand-blue);
+  
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+  
+  @keyframes caret-blink {
+    0%,70%,100% { opacity: 1; }
+    20%,50% { opacity: 0; }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }
 
 :root {
@@ -23,6 +39,38 @@
   --tile-overlay-opacity: 0.65;
   --tile-stroke: var(--wav-neutral-black);
   --img-filter: grayscale(100%);
+  
+  /* Tokens */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  --spacing-gap: 2px;
+}
+
+/* Utility Classes */
+.clip-trapezoid-left {
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+}
+
+.clip-trapezoid-mobile {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, rgba(255,0,168,1) 0%, rgba(155,0,255,1) 50%, rgba(0,68,255,1) 100%);
+}
+
+.bg-brand-gradient-faint {
+  background: linear-gradient(135deg, rgba(255,0,168,0.2) 0%, rgba(155,0,255,0.2) 50%, rgba(0,68,255,0.2) 100%);
+}
+
+.bg-brand-gradient-strong {
+  background: linear-gradient(135deg, rgba(255,0,168,0.85) 0%, rgba(155,0,255,0.85) 50%, rgba(0,68,255,0.85) 100%);
+}
+
+.text-balance {
+  text-wrap: balance;
 }
 
 /* B. Alternate Color Modes */
@@ -106,11 +154,11 @@ body, html {
 /* Custom scrollbar styles para modal text */
 .custom-scroll-modal {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .custom-scroll-modal::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .custom-scroll-modal::-webkit-scrollbar-track {
@@ -118,10 +166,34 @@ body, html {
 }
 
 .custom-scroll-modal::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
 .custom-scroll-modal::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom scrollbar for menu dropdown */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }

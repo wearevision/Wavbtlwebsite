@@ -21,15 +21,17 @@ export const Z_INDEX = {
   
   // Modal
   MODAL_CONTENT: 'z-50',
+  MODAL_NAV_BUTTONS: 'z-[60]',
+  MODAL_CLOSE_BUTTON: 'z-[70]',
   
-  // Navigation (según Guidelines.md debe ser z-55, NO z-60)
-  CONTROLS: 'z-55',
-  MENU_DROPDOWN: 'z-55',
-  CLOSE_BUTTON: 'z-55',
+  // Menu System (ALWAYS ON TOP - Above Modal)
+  MENU_BACKDROP: 'z-[90]',
+  MENU_DROPDOWN: 'z-[100]',
+  CONTROLS: 'z-[110]',  // Buttons always accessible
   
   // System
-  LOADER: 'z-100',
-  TOAST: 'z-100',
+  LOADER: 'z-[200]',
+  TOAST: 'z-[200]',
 } as const;
 
 // Numeric values (para Motion z prop si es necesario)
@@ -40,11 +42,13 @@ export const Z_INDEX_NUMERIC = {
   MODAL_BACKDROP: 40,
   BLUR_OVERLAY: 40,
   MODAL_CONTENT: 50,
-  CONTROLS: 55,
-  MENU_DROPDOWN: 55,
-  CLOSE_BUTTON: 55,
-  LOADER: 100,
-  TOAST: 100,
+  MODAL_NAV_BUTTONS: 60,
+  MODAL_CLOSE_BUTTON: 70,
+  MENU_BACKDROP: 90,
+  MENU_DROPDOWN: 100,
+  CONTROLS: 110,
+  LOADER: 200,
+  TOAST: 200,
 } as const;
 
 export type ZIndexToken = keyof typeof Z_INDEX;

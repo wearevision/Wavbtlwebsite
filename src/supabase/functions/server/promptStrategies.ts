@@ -501,114 +501,100 @@ INFIERE métricas realistas basándote en:
 
 ## FORMATO DE RESPUESTA
 
-SIEMPRE responde con un JSON válido que contenga TODOS los campos (aunque algunos queden vacíos si realmente no se puede inferir).
+SIEMPRE responde con un JSON válido que contenga TODOS los campos.
+NO uses placeholders como "...", debes generar valores reales para CADA campo.
+
+EJEMPLO DE RESPUESTA ESPERADA (USA ESTE FORMATO EXACTO):
 
 \`\`\`json
 {
-  "title": "...",
-  "slug": "...",
-  "description": "...",
-  "summary": "...",
-  
-  "tone": "...",
-  "audience": "...",
-  "highlights": ["...", "...", "..."],
-  
-  "seo_title": "...",
-  "seo_description": "...",
-  "keywords": ["...", "...", "..."],
-  "hashtags": ["#...", "#...", "#..."],
-  "tags": ["...", "...", "..."],
-  
-  "instagram_hook": "...",
-  "instagram_body": "...",
-  "instagram_closing": "...",
-  "instagram_hashtags": "#... #... #...",
-  "alt_instagram": "...",
-  
-  "linkedin_post": "...",
-  "linkedin_article": "...",
-  
-  "alt_title_1": "...",
-  "alt_title_2": "...",
-  "alt_summary_1": "...",
-  "alt_summary_2": "...",
-  
-  "brand": "...",
-  "client": "...",
-  "year": "...",
-  "month": "...",
-  "country": "...",
-  "city": "...",
-  "venue": "...",
-  "category": "...",
-  "subcategory": "...",
-  
-  "people_reached": "...",
-  "attendees": "...",
-  "days": "...",
-  "cities": "...",
-  "screens": "...",
-  "kpis": ["...", "...", "..."],
-  "results_notes": "...",
-  
-  "audit_summary": "Resumen de los cambios realizados y score de mejora (ej: 'SEO Score: 35 → 92. Optimizado title, keywords, y generado contenido social completo.')",
-  "chat_response": "Mensaje conversacional sobre la auditoría realizada (puede usar markdown)"
-}
-\`\`\`
-
----
-
-## ESTRATEGIAS ESPECÍFICAS
-
-${SEO_BEST_PRACTICES}
-
----
-
-## EJEMPLOS DE INFERENCIA
-
-### Caso 1: Evento Muy Incompleto
-**Input:**
-\`\`\`json
-{
-  "title": "Evento Coca Cola",
-  "description": "Hicimos algo lindo en un mall",
-  "brand": "Coca-Cola"
-}
-\`\`\`
-
-**Output esperado:**
-\`\`\`json
-{
-  "title": "Coca-Cola | Activación de Marca - Santiago 2024",
-  "slug": "coca-cola-activacion-marca-santiago-2024",
-  "description": "Activación de marca inmersiva para Coca-Cola en Mall Plaza Vespucio, Santiago. Durante 15 días en diciembre 2024, transformamos el espacio comercial en una experiencia navideña interactiva con mapping 3D, zona selfie branded y sampling de productos. La campaña alcanzó +200K visitantes únicos, generando 1,000+ menciones orgánicas en redes sociales.",
+  "title": "Coca-Cola | Experiencia Navideña - Santiago 2024",
+  "slug": "coca-cola-experiencia-navidena-santiago-2024",
+  "description": "Activación de marca inmersiva para el lanzamiento de la campaña navideña de Coca-Cola en Mall Plaza Vespucio. Realizada en diciembre 2024, la experiencia transformó el mall en un universo festivo con mapping 3D, zona de fotos interactivas y degustación de productos. Alcance: +250K visitantes en 15 días, generando 1,200 menciones orgánicas en redes sociales con un engagement rate del 8.5%.",
+  "summary": "Activación navideña inmersiva de Coca-Cola en Mall Plaza Vespucio con mapping 3D y experiencias interactivas. Alcance: +250K visitantes en 15 días.",
   
   "tone": "Festivo, Familiar",
   "audience": "Familias, Millennials 25-40, shoppers de mall",
-  "city": "Santiago",
-  "country": "Chile",
-  "venue": "Mall Plaza Vespucio (inferido - mall típico para activaciones Coca-Cola)",
-  "category": "Activaciones de Marca",
-  "subcategory": "Experiencias Interactivas",
-  "year": "2024",
-  "month": "Diciembre",
-  
-  "people_reached": "200000",
-  "attendees": "200000",
-  "days": "15",
-  "kpis": [
-    "Alcance: +200K visitantes únicos",
-    "Sampling: 15K productos distribuidos",
-    "UGC: 1,000+ menciones orgánicas",
-    "Tiempo promedio: 8 min de interacción"
+  "highlights": [
+    "Mapping 3D inmersivo en fachada principal del mall",
+    "Zona de fotos interactivas con elementos navideños branded",
+    "Sampling de productos y experiencia de degustación",
+    "Generación de 1,200+ menciones orgánicas en redes sociales"
   ],
   
-  "audit_summary": "SEO Score: 15 → 88. Completado 95% de campos faltantes mediante inferencia inteligente basada en patrones de activaciones retail de Coca-Cola."
+  "seo_title": "Coca-Cola Navidad 2024 | Activación Inmersiva Mall Plaza Santiago",
+  "seo_description": "Experiencia navideña Coca-Cola en Mall Plaza Vespucio. Mapping 3D, activaciones interactivas y momentos únicos. +250K visitantes en 15 días.",
+  "keywords": [
+    "Coca-Cola Santiago",
+    "Activación navideña 2024",
+    "Experiencia de marca Chile",
+    "BTL marketing Santiago",
+    "Evento Coca-Cola Navidad",
+    "Marketing experiencial retail",
+    "Activación Mall Plaza Vespucio",
+    "Campaña navideña interactiva"
+  ],
+  "hashtags": [
+    "#CocaCola",
+    "#NavidadCocaCola",
+    "#MallPlaza",
+    "#ExperienciaInmersiva",
+    "#BTLMarketing",
+    "#MarketingExperiencial",
+    "#SantiagoEventos",
+    "#ChileMarketing"
+  ],
+  "tags": ["Retail", "Navidad", "Experiencial", "Sampling"],
+  
+  "instagram_hook": "✨ Transformamos Mall Plaza Vespucio en un universo navideño mágico para Coca-Cola",
+  "instagram_body": "Durante 15 días, creamos una experiencia inmersiva que conectó con más de 250K visitantes. Mapping 3D, zona selfie branded y momentos únicos que hicieron brillar la Navidad. Cada rincón fue diseñado para generar recuerdos y compartir la magia de estar juntos.",
+  "instagram_closing": "¿Estuviste ahí? Cuéntanos tu momento favorito 👇",
+  "instagram_hashtags": "#CocaCola #NavidadCocaCola #MallPlaza #ExperienciaInmersiva #BTL #MarketingExperiencial #SantiagoChile #Navidad2024",
+  "alt_instagram": "🎄 15 días de magia navideña con Coca-Cola en Mall Plaza Vespucio. +250K visitantes vivieron una experiencia única con mapping 3D, zona selfie y momentos inolvidables. Un regalo para Santiago entero.",
+  
+  "linkedin_post": "Orgullosos de haber ejecutado la activación navideña de Coca-Cola en Mall Plaza Vespucio. Una experiencia inmersiva que alcanzó +250K visitantes en 15 días, combinando tecnología de mapping 3D con activaciones interactivas que generaron conexiones emocionales reales con la marca. Un proyecto que demuestra cómo el marketing experiencial puede crear momentos memorables y medibles.",
+  "linkedin_article": "La temporada navideña presenta desafíos únicos para las marcas: captar atención en un entorno saturado mientras se genera conexión emocional genuina. Para Coca-Cola, diseñamos una activación que transformó Mall Plaza Vespucio en un universo festivo durante 15 días de diciembre 2024. La estrategia combinó mapping 3D en la fachada principal, una zona de fotos interactivas con elementos navideños branded, y sampling de productos. El resultado: +250K visitantes impactados, 1,200+ menciones orgánicas, engagement rate del 8.5%, y una experiencia que quedó en la memoria de miles de familias chilenas. Este caso demuestra que el BTL bien ejecutado no solo genera tráfico, sino que construye equity de marca de largo plazo.",
+  
+  "alt_title_1": "Experiencia Navideña Coca-Cola - Mall Plaza Vespucio 2024",
+  "alt_title_2": "Coca-Cola Navidad 2024 | Activación Inmersiva Santiago",
+  "alt_summary_1": "Coca-Cola transformó Mall Plaza Vespucio con una experiencia navideña inmersiva de 15 días. Mapping 3D, activaciones interactivas y +250K visitantes.",
+  "alt_summary_2": "Activación BTL navideña para Coca-Cola con tecnología de mapping 3D y experiencias branded. Alcance: +250K personas en Santiago.",
+  
+  "brand": "Coca-Cola",
+  "client": "Coca-Cola Chile",
+  "year": "2024",
+  "month": "Diciembre",
+  "country": "Chile",
+  "city": "Santiago",
+  "venue": "Mall Plaza Vespucio",
+  "category": "Activaciones de Marca",
+  "subcategory": "Experiencia Inmersiva",
+  
+  "people_reached": "250000",
+  "attendees": "250000",
+  "days": "15",
+  "cities": "1",
+  "screens": "4",
+  "kpis": [
+    "Alcance: +250K visitantes únicos en 15 días",
+    "Engagement: 8.5% en contenido orgánico (2.3x benchmark)",
+    "UGC: 1,200 menciones espontáneas en redes sociales",
+    "Tiempo promedio de interacción: 12 minutos",
+    "Brand lift: +18% en awareness post-campaña"
+  ],
+  "results_notes": "Activación exitosa que superó expectativas de tráfico y engagement. Alta participación en zonas interactivas y excelente recepción del público familiar. Generó contenido orgánico valioso para la marca y estableció un nuevo benchmark para activaciones navideñas en retail.",
+  
+  "audit_summary": "SEO Score: 35 → 92. Optimizado title con keywords adelante, generado contenido social completo, inferido datos de localización y performance. Aplicadas mejores prácticas de Live Nation y Eventbrite.",
+  "chat_response": "He completado la auditoría y optimización del evento. **Cambios principales:** Restructuré el título con formato SEO-first ({Brand} | {Type} - {Location} {Year}), generé descripción narrativa con estructura W4 (What, When, Where, Why), creé 8 keywords long-tail específicas, desarrollé contenido completo para Instagram y LinkedIn, e inferí métricas realistas basadas en patrones de activaciones retail similares. El evento pasó de un SEO score de 35 a 92/100."
 }
 \`\`\`
 
----
-
-Ahora procesa el evento que te enviaré y devuélveme el JSON completo optimizado.
+IMPORTANTE CRÍTICO:
+- TODOS los campos del JSON deben tener valores reales (NO usar "...", "TBD", o placeholders)
+- Los campos numéricos (people_reached, attendees, days, cities, screens) deben ser strings con números
+- Si un dato no existe, DEBES inferirlo inteligentemente basándote en el contexto
+- El venue debe ser específico (ej: "Mall Plaza Vespucio", NO "un mall" o "...")
+- La subcategory debe ser específica (ej: "Experiencia Inmersiva", NO "Activación" o "...")
+- Los KPIs deben tener formato descriptivo con números concretos
+- El results_notes debe ser un párrafo sustancioso (150-250 caracteres mínimo)
 `;
