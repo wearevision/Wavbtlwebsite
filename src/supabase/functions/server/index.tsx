@@ -5,7 +5,7 @@ import * as kv from "./kv_store.tsx";
 import { generateRefinement } from "./ai.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 import * as categories from "./categories.ts";
-import { optimizeAllEvents, optimizeEventById } from "./optimize.ts";
+import { optimizeAllEvents, optimizeEventById, optimizeBatch } from "./optimize.ts";
 import { auditAllEvents } from "./auditAll.ts";
 
 /**
@@ -489,6 +489,23 @@ app.post(`${BASE_PATH}/optimize-event`, async (c) => {
     return c.json(result);
   } catch (e) {
     console.error("Error optimizing event:", e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+// POST /optimize-batch - Process a batch of events (Auto-Ingest)
+app.post(`${BASE_PATH}/optimize-batch`, async (c) => {
+  if (!await verifyAuth(c)) return c.text("Unauthorized", 401);
+
+  try {
+    // Default to 5 events per batch to avoid timeouts
+    const body = await c.req.json().catch(() => ({}));
+    const batchSize = body.batchSize || 5;
+    
+    const result = await optimizeBatch(batchSize);
+    return c.json(result);
+  } catch (e) {
+    console.error("Error in batch optimization:", e);
     return c.json({ error: e.message }, 500);
   }
 });

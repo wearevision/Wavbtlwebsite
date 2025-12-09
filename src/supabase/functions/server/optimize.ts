@@ -583,3 +583,126 @@ export async function optimizeAllEvents(): Promise<{
     results
   };
 }
+
+/**
+ * Optimize a batch of events (for bulk processing without timeouts)
+ */
+export async function optimizeBatch(batchSize: number = 5): Promise<{
+  processed: number;
+  remaining: number;
+  totalEvents: number;
+  results: OptimizationResult[];
+  errors: number;
+}> {
+  console.log(`[OPTIMIZE-BATCH] Starting batch optimization (size: ${batchSize})...`);
+  
+  // Get all events
+  const events = await kv.get('wav_events') || [];
+  const categories = await getCategories() || [];
+  
+  // Find candidates for optimization
+  const candidates: number[] = [];
+  
+  for (let i = 0; i < events.length; i++) {
+    if (needsOptimization(events[i])) {
+      candidates.push(i);
+    }
+  }
+  
+  const remainingTotal = candidates.length;
+  console.log(`[OPTIMIZE-BATCH] Found ${remainingTotal} events needing optimization.`);
+  
+  if (candidates.length === 0) {
+    return {
+      processed: 0,
+      remaining: 0,
+      totalEvents: events.length,
+      results: [],
+      errors: 0
+    };
+  }
+  
+  // Take only the batch size
+  const batchIndices = candidates.slice(0, batchSize);
+  const results: OptimizationResult[] = [];
+  let errors = 0;
+  
+  // Process in parallel
+  await Promise.all(batchIndices.map(async (index) => {
+    const event = events[index];
+    try {
+      console.log(`[OPTIMIZE-BATCH] Generating content for event ${event.id}...`);
+      const generatedContent = await generateEventContent(event);
+      const fieldsUpdated: string[] = [];
+      
+      // Update fields
+      const updateField = (field: string) => {
+        if (!event[field] || event[field] === '' || event[field] === 'Descripción pendiente.' || 
+            event[field] === 'Evento Sin Título' || (Array.isArray(event[field]) && event[field].length === 0)) {
+          if (generatedContent[field]) {
+            event[field] = generatedContent[field];
+            fieldsUpdated.push(field);
+          }
+        }
+      };
+      
+      // List of fields to attempt to update
+      const fields = [
+        'title', 'description', 'summary', 'highlights', 'keywords', 'hashtags',
+        'instagram_hook', 'instagram_body', 'instagram_closing', 'instagram_hashtags',
+        'linkedin_post', 'linkedin_article', 'alt_title_1', 'alt_title_2', 'alt_instagram',
+        'alt_summary_1', 'alt_summary_2', 'tone', 'audience', 'seo_title', 'seo_description', 'tags',
+        'client', 'year', 'month', 'country', 'city', 'venue', 'subcategory',
+        'people_reached', 'attendees', 'days', 'cities', 'screens', 'kpis', 'results_notes'
+      ];
+      
+      fields.forEach(f => updateField(f));
+      
+      // Auto-categorize
+      if (!event.category || event.category === '') {
+        try {
+          const categorySuggestion = await suggestCategoryForEvent(event, categories);
+          if (categorySuggestion && categorySuggestion.categoryId) {
+            event.category = categorySuggestion.categoryId;
+            fieldsUpdated.push('category');
+          }
+        } catch (e) {
+          console.error(`[OPTIMIZE-BATCH] Category error for ${event.id}`, e);
+        }
+      }
+      
+      results.push({
+        eventId: event.id,
+        brand: event.brand,
+        title: event.title,
+        fieldsUpdated,
+        category: event.category
+      });
+      
+    } catch (error) {
+      console.error(`[OPTIMIZE-BATCH] Error processing event ${event.id}:`, error);
+      errors++;
+      results.push({
+        eventId: event.id,
+        brand: event.brand,
+        title: event.title,
+        fieldsUpdated: [],
+        error: error.message
+      });
+    }
+  }));
+  
+  // Save updated events
+  if (results.length > 0) {
+    console.log('[OPTIMIZE-BATCH] Saving updated batch to database...');
+    await kv.set('wav_events', events);
+  }
+  
+  return {
+    processed: results.length,
+    remaining: remainingTotal - results.length,
+    totalEvents: events.length,
+    results,
+    errors
+  };
+}

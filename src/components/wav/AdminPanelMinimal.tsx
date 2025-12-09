@@ -119,16 +119,14 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
     }
   };
 
-  const handleMegaAudit = async () => {
+  const handleMassIngest = async () => {
     if (!confirm(
-      `⚠️ MEGA AUDIT\n\n` +
-      `Procesará ${events.length} eventos con OpenAI.\n` +
-      `Batches: ${Math.ceil(events.length / 2)} (2 eventos por batch)\n` +
-      `Timeout por evento: 60 segundos\n` +
-      `Timeout por batch: 3 minutos\n` +
-      `Tiempo estimado: ~${Math.ceil(events.length / 2 * 2.5)} minutos\n` +
-      `Costo: ~$${(events.length * 0.01).toFixed(2)} (gpt-4o-mini)\n\n` +
-      `¿Continuar?`
+      `⚠️ INGESTA MASIVA DE IA\n\n` +
+      `Procesará TODOS los eventos incompletos con OpenAI.\n` +
+      `Batch Size: 5 eventos por ciclo\n` +
+      `Esta operación puede tardar varios minutos.\n` +
+      `La IA generará textos SEO, técnicos y editoriales.\n\n` +
+      `¿Comenzar Ingesta?`
     )) {
       return;
     }
@@ -138,67 +136,44 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
     setSyncProgress(0);
 
     try {
-      console.log('[Mega Audit] Starting audit for', events.length, 'events');
-
-      const batchSize = 2; // Process 2 at a time (safe for timeouts)
-      let currentIndex = 0;
-      let totalProcessed = 0;
-      let allErrors: any[] = [];
-
-      while (currentIndex < events.length) {
-        console.log(`[Mega Audit] Processing batch starting at ${currentIndex}/${events.length}`);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          controller.abort();
-          console.error('[Mega Audit] Request timeout after 3 minutes');
-        }, 180000); // 3 minute timeout per batch
-
+      console.log('[Mass Ingest] Starting ingestion...');
+      let processedTotal = 0;
+      let errorsTotal = 0;
+      
+      while (true) {
         const res = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/audit-all-events`,
+          `https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/optimize-batch`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${publicAnonKey}`
             },
-            body: JSON.stringify({
-              batchSize: batchSize,
-              startIndex: currentIndex
-            }),
-            signal: controller.signal
+            body: JSON.stringify({ batchSize: 5 })
           }
         );
 
-        clearTimeout(timeoutId);
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(errData.error || `Server error: ${res.status}`);
-        }
-
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        
         const result = await res.json();
-        console.log('[Mega Audit] Batch result:', result);
+        console.log('[Mass Ingest] Batch result:', result);
         
-        totalProcessed += result.processed;
-        if (result.errors && result.errors.length > 0) {
-          allErrors = [...allErrors, ...result.errors];
+        processedTotal += result.processed;
+        errorsTotal += result.errors;
+        
+        // Update progress visual (approximate)
+        if (result.totalEvents > 0) {
+           const percent = Math.round(((result.totalEvents - result.remaining) / result.totalEvents) * 100);
+           setSyncProgress(percent);
         }
 
-        // Update progress
-        const progress = Math.min(100, Math.round((result.currentProgress / events.length) * 100));
-        setSyncProgress(progress);
-
-        if (result.isComplete) {
-          console.log('[Mega Audit] All batches complete!');
-          break;
+        if (result.remaining === 0 || result.processed === 0) {
+           console.log('[Mass Ingest] Complete!');
+           break;
         }
-
-        // Move to next batch
-        currentIndex = result.nextIndex || (currentIndex + batchSize);
         
-        // Small delay between batches to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Short delay
+        await new Promise(r => setTimeout(r, 1000));
       }
 
       setSyncProgress(100);
@@ -209,20 +184,29 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
 
       await loadData();
       
-      const errorMessage = allErrors.length > 0 
-        ? `\n\nErrores: ${allErrors.length} eventos fallaron` 
-        : '';
-      
       alert(
-        `✅ MEGA AUDIT COMPLETADO\n\n` +
-        `${totalProcessed}/${events.length} eventos optimizados${errorMessage}`
+        `✅ INGESTA COMPLETADA\n\n` +
+        `Eventos procesados: ${processedTotal}\n` +
+        `Errores: ${errorsTotal}`
       );
     } catch (error: any) {
-      console.error('[Mega Audit] Error:', error);
-      alert(`Error en Mega Audit: ${error.message}`);
+      console.error('[Mass Ingest] Error:', error);
+      alert(`Error en Ingesta: ${error.message}`);
       setIsSyncing(false);
       setSyncProgress(0);
     }
+  };
+
+  const handleDownloadEventsTs = () => {
+    const content = `import { WavEvent } from '../types';\n\nexport const events: WavEvent[] = ${JSON.stringify(events, null, 2)};`;
+    const blob = new Blob([content], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'events.ts';
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("Archivo 'events.ts' descargado.\n\nReemplaza tu archivo '/data/events.ts' local con este archivo.");
   };
 
   const handleExportEvents = () => {
@@ -359,16 +343,24 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
             />
             <MenuButton
               icon={<Download size={16} />}
-              label="Pull desde Supabase"
+              label="Sincronizar Todo (Pull)"
               onClick={handlePullFromSupabase}
               disabled={saving || isSyncing}
+              variant="primary"
             />
+            {/*
             <MenuButton
               icon={<Sparkles size={16} />}
-              label="Llenado y Auditado Masivo"
-              onClick={handleMegaAudit}
+              label="Ingesta Masiva AI"
+              onClick={handleMassIngest}
               disabled={saving || isSyncing}
               variant="gradient"
+            />
+            */}
+            <MenuButton
+              icon={<Download size={16} />}
+              label="Descargar events.ts"
+              onClick={handleDownloadEventsTs}
             />
             <MenuButton
               icon={<Download size={16} />}

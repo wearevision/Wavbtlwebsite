@@ -8,6 +8,7 @@ import { Controls } from './components/wav/Controls';
 const Modal = React.lazy(() => import('./components/wav/Modal').then(m => ({ default: m.Modal })));
 const AdminPanelMinimal = React.lazy(() => import('./components/wav/AdminPanelMinimal').then(m => ({ default: m.AdminPanelMinimal })));
 const OpenGraphTester = React.lazy(() => import('./components/wav/OpenGraphTester').then(m => ({ default: m.OpenGraphTester })));
+const SyncHelper = React.lazy(() => import('./components/wav/SyncHelper').then(m => ({ default: m.SyncHelper })));
 
 import { LogoLoader } from './components/wav/LogoLoader';
 import { SchemaJSONLD } from './components/wav/SchemaJSONLD';
@@ -83,6 +84,12 @@ export default function App() {
     if (typeof window === 'undefined') return false;
     const params = new URLSearchParams(window.location.search);
     return params.get('test-og') === 'true';
+  }, []);
+
+  const showSyncHelper = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('sync-helper') === 'true';
   }, []);
 
   useEffect(() => {
@@ -334,6 +341,14 @@ export default function App() {
     );
   }
 
+  if (showSyncHelper) {
+    return (
+      <React.Suspense fallback={<LogoLoader />}>
+        <SyncHelper />
+      </React.Suspense>
+    );
+  }
+
   return (
     <HelmetProvider>
       <div className="relative w-full h-screen overflow-hidden bg-[var(--wav-neutral-black)] text-white">
@@ -354,6 +369,7 @@ export default function App() {
           />
           <link 
             rel="stylesheet" 
+            crossOrigin="anonymous"
             href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
             media="print"
             onLoad={(e) => { (e.target as HTMLLinkElement).media = 'all'; }}
