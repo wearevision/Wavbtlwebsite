@@ -59,6 +59,9 @@ const ensureUniqueSlugs = (events: WavEvent[]): WavEvent[] => {
   });
 };
 
+console.log("📢 SYSTEM CHECK: V1.1.0 IS LIVE");
+console.log("🕒 Build Time: " + new Date().toISOString());
+
 export default function App() {
   // Debug Version
   useEffect(() => {
