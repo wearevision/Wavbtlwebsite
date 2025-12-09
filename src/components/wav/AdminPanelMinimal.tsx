@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, Plus, Save, Download, Sparkles, LogOut, 
   Loader2, ChevronDown, ChevronUp, Trash2, Upload, AlertCircle,
-  Image as ImageIcon, Film, Wand2, ClipboardCheck, ArrowLeft
+  Image as ImageIcon, Film, Wand2, ClipboardCheck, ArrowLeft, Globe
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase/client';
 import { publicAnonKey, projectId } from '../../utils/supabase/info';
@@ -15,6 +15,7 @@ import { Progress } from '../ui/progress';
 import { WavEvent } from '../../src/types';
 import { EventCategory } from '../../utils/contentRules';
 import { FIELD_TOOLTIPS, getCharCount } from '../../utils/validation';
+import { generateXMLSitemap, generateJSONSitemap, downloadFile } from '../../utils/sitemapGenerator';
 
 interface AdminPanelMinimalProps {
   onBack: () => void;
@@ -236,6 +237,18 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
     URL.revokeObjectURL(url);
   };
 
+  const handleGenerateXMLSitemap = () => {
+    setMenuOpen(false);
+    const xmlContent = generateXMLSitemap(events);
+    downloadFile(xmlContent, 'wav-events-sitemap.xml', 'text/xml');
+  };
+
+  const handleGenerateJSONSitemap = () => {
+    setMenuOpen(false);
+    const jsonContent = generateJSONSitemap(events);
+    downloadFile(jsonContent, 'wav-events-sitemap.json', 'application/json');
+  };
+
   // Login screen
   if (!isAuthenticated) {
     return (
@@ -361,6 +374,18 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
               icon={<Download size={16} />}
               label="Exportar Eventos"
               onClick={handleExportEvents}
+            />
+            <MenuButton
+              icon={<Globe size={16} />}
+              label="Descargar Sitemap XML"
+              onClick={handleGenerateXMLSitemap}
+              variant="default"
+            />
+            <MenuButton
+              icon={<Globe size={16} />}
+              label="Descargar Sitemap JSON"
+              onClick={handleGenerateJSONSitemap}
+              variant="default"
             />
             
             <div className="border-t border-white/10 my-3" />

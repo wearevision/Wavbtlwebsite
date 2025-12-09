@@ -506,10 +506,28 @@ app.post(`${BASE_PATH}/optimize-event`, async (c) => {
 app.get(`${BASE_PATH}/events`, async (c) => {
   try {
     const events = await kv.get("wav_events") || [];
+    
+    console.log(`[GET /events] Found ${events.length} events in KV store`);
+    if (events.length > 0) {
+      console.log(`[GET /events] Sample event BEFORE normalization:`, {
+        hasId: !!events[0].id,
+        id: events[0].id,
+        title: events[0].title,
+      });
+    }
 
     // ✅ NORMALIZE ALL EVENTS BEFORE RETURNING
     // This ensures any events with missing fields are automatically fixed
     const normalizedEvents = events.map((event: any) => normalizeEvent(event));
+    
+    console.log(`[GET /events] Normalized ${normalizedEvents.length} events`);
+    if (normalizedEvents.length > 0) {
+      console.log(`[GET /events] Sample event AFTER normalization:`, {
+        hasId: !!normalizedEvents[0].id,
+        id: normalizedEvents[0].id,
+        title: normalizedEvents[0].title,
+      });
+    }
 
     // Generate signed URLs for images and gallery media
     const eventsWithUrls = await Promise.all(normalizedEvents.map(async (event: any) => {
@@ -550,76 +568,7 @@ app.get(`${BASE_PATH}/events`, async (c) => {
   }
 });
 
-/**
- * GET /sitemap.xml
- * 
- * Dynamically generates an XML sitemap for SEO.
- * 
- * - Iterates through all events in KV.
- * - Uses event.slug to build canonical URLs.
- * - Defaults to current time if lastmod is missing.
- */
-app.get(`${BASE_PATH}/sitemap.xml`, async (c) => {
-  try {
-    const events = (await kv.get("wav_events")) || [];
-    const baseUrl = "https://btl.wearevision.cl";
-    const now = new Date().toISOString();
-
-    // Header
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-
-    // 1. Homepage
-    xml += `
-    <url>
-        <loc>${baseUrl}/</loc>
-        <lastmod>${now}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-    </url>`;
-
-    // 2. Event Pages
-    // @ts-ignore
-    events.forEach((event: any) => {
-        if (!event.slug) return;
-        
-        // Safe Fallback for lastmod if missing in KV
-        const lastMod = event.updatedAt || now;
-        const eventUrl = `${baseUrl}/?evento=${event.slug}`;
-
-        xml += `
-    <url>
-        <loc>${eventUrl}</loc>
-        <lastmod>${lastMod}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>`;
-    });
-
-    xml += `</urlset>`;
-
-    return c.text(xml, 200, {
-      "Content-Type": "application/xml"
-    });
-  } catch (e) {
-    console.error("Error generating sitemap:", e);
-    return c.text("Error generating sitemap", 500);
-  }
-});
-
-/**
- * GET /robots.txt
- * 
- * Serves the robots.txt file to guide search engine crawlers.
- * - Allows all user agents.
- * - Points to the dynamic sitemap.
- */
-app.get(`${BASE_PATH}/robots.txt`, (c) => {
-  const robots = `User-agent: *\nAllow: /\n\nSitemap: https://btl.wearevision.cl/sitemap.xml`;
-  return c.text(robots, 200, {
-    "Content-Type": "text/plain"
-  });
-});
+// REMOVED: Duplicate sitemap.xml and robots.txt routes (moved to line 2101+)
 
 /**
  * POST /events
@@ -2090,5 +2039,595 @@ function simpleHash(str: string): number {
   }
   return Math.abs(hash);
 }
+
+/**
+ * ============================================
+ * SITEMAP ROUTES - SEO & AI OPTIMIZATION
+ * ============================================
+ * Genera sitemaps XML y JSON para SEO tradicional
+ * y motores de búsqueda de IA (ChatGPT, Perplexity, Claude)
+ */
+
+/**
+ * GET /sitemap.xml
+ * Sitemap XML estándar para Google, Bing, etc.
+ */
+app.get(`${BASE_PATH}/sitemap.xml`, async (c) => {
+  try {
+    const events = (await kv.get("wav_events")) || [];
+    const baseUrl = "https://btl.wearevision.cl";
+    
+    const sitemap = generateXMLSitemap(events, baseUrl);
+    
+    return c.text(sitemap, 200, {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    });
+  } catch (e) {
+    console.error("Error generating XML sitemap:", e);
+    return c.text('Error generating sitemap', 500);
+  }
+});
+
+/**
+ * GET /sitemap.json
+ * 
+ * Sitemap JSON ENRIQUECIDO para motores de IA (ChatGPT, Perplexity, Claude)
+ * 
+ * Features:
+ * - Metadata completa de organización con stats REALES
+ * - Portfolio stats agregados desde CMS
+ * - Información detallada de cada evento
+ * - Keywords y tags para mejor indexación
+ * - Cache optimizado (1 hora)
+ */
+app.get(`${BASE_PATH}/sitemap.json`, async (c) => {
+  try {
+    console.log('[SITEMAP.JSON] Generando desde datos reales del CMS...');
+    
+    const events = (await kv.get("wav_events")) || [];
+    console.log(`[SITEMAP.JSON] ${events.length} eventos encontrados en KV`);
+    
+    // Log de muestra de datos para verificar
+    if (events.length > 0) {
+      const sampleEvent = events[0];
+      console.log(`[SITEMAP.JSON] Evento de muestra:`, {
+        title: sampleEvent.title,
+        brand: sampleEvent.brand,
+        category: sampleEvent.category,
+        hasKeywords: !!sampleEvent.keywords,
+        hasLocation: !!sampleEvent.city,
+      });
+    }
+    
+    const baseUrl = "https://btl.wearevision.cl";
+    const sitemap = generateJSONSitemap(events, baseUrl);
+    
+    console.log(`[SITEMAP.JSON] ✅ Generado con metadata enriquecida`);
+    
+    return c.json(JSON.parse(sitemap), 200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    });
+  } catch (e) {
+    console.error("[SITEMAP.JSON] Error:", e);
+    return c.json({ error: 'Error generating sitemap', details: e.message }, 500);
+  }
+});
+
+/**
+ * GET /robots.txt
+ * Robots.txt optimizado para SEO y bots de IA
+ */
+app.get(`${BASE_PATH}/robots.txt`, async (c) => {
+  const baseUrl = "https://btl.wearevision.cl";
+  const robotsTxt = generateRobotsTxt(baseUrl);
+  
+  return c.text(robotsTxt, 200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+  });
+});
+
+/**
+ * Genera XML Sitemap con datos REALES del CMS
+ */
+function generateXMLSitemap(events: any[], baseUrl: string): string {
+  const now = new Date().toISOString();
+  
+  const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
+  const urlsetOpen = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">';
+  const urlsetClose = '</urlset>';
+
+  // URLs estáticas
+  const staticUrls = [
+    { loc: baseUrl, priority: 1.0, changefreq: 'daily', lastmod: now },
+    { loc: `${baseUrl}/eventos`, priority: 0.9, changefreq: 'daily', lastmod: now },
+    { loc: `${baseUrl}/nosotros`, priority: 0.7, changefreq: 'monthly', lastmod: now },
+    { loc: `${baseUrl}/contacto`, priority: 0.6, changefreq: 'monthly', lastmod: now },
+  ];
+
+  // URLs de eventos con DATOS REALES
+  const eventUrls = events.map((event: any) => {
+    const eventSlug = event.slug || slugify(event.title);
+    const lastMod = event.updated_at || event.created_at || now;
+    
+    return {
+      loc: `${baseUrl}/event/${eventSlug}`,
+      priority: 0.8,
+      changefreq: 'weekly',
+      lastmod: lastMod,
+      image: event.image,
+      title: event.title,
+      description: event.description || event.summary || '',
+      brand: event.brand,
+      category: event.category,
+      // Información de galería para videos
+      hasVideo: event.gallery?.some((item: any) => item.type === 'video'),
+      videoCount: event.gallery?.filter((item: any) => item.type === 'video').length || 0,
+    };
+  });
+
+  const allUrls = [...staticUrls, ...eventUrls];
+
+  const urls = allUrls.map(entry => {
+    const escapedLoc = escapeXml(entry.loc);
+    const lastmod = entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : `<lastmod>${now}</lastmod>`;
+    
+    // Image tag para eventos (Google Images)
+    const imageTag = entry.image ? `
+    <image:image>
+      <image:loc>${escapeXml(entry.image)}</image:loc>
+      <image:title>${escapeXml(entry.title || '')}</image:title>
+      ${entry.description ? `<image:caption>${escapeXml(truncateText(entry.description, 200))}</image:caption>` : ''}
+    </image:image>` : '';
+    
+    // Video tag si el evento tiene videos (Google Video)
+    const videoTag = entry.hasVideo && entry.videoCount > 0 ? `
+    <!-- Event has ${entry.videoCount} video(s) in gallery -->` : '';
+    
+    return `  <url>
+    <loc>${escapedLoc}</loc>
+    ${lastmod}
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>${imageTag}${videoTag}
+  </url>`;
+  }).join('\n');
+
+  return `${xmlHeader}\n${urlsetOpen}\n${urls}\n${urlsetClose}`;
+}
+
+/**
+ * Escapa caracteres especiales XML
+ */
+function escapeXml(unsafe: string): string {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/'/g, '&apos;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
+ * Trunca texto a una longitud máxima
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+}
+
+/**
+ * Genera JSON Sitemap para IA
+ * METADATA ENRIQUECIDA CON DATOS REALES DEL CMS
+ */
+function generateJSONSitemap(events: any[], baseUrl: string): string {
+  const now = new Date().toISOString();
+
+  // Extraer información agregada de los eventos REALES
+  const uniqueBrands = [...new Set(events.map((e: any) => e.brand).filter(Boolean))];
+  const uniqueCategories = [...new Set(events.map((e: any) => e.category).filter(Boolean))];
+  const uniqueCountries = [...new Set(events.map((e: any) => e.country).filter(Boolean))];
+  const uniqueCities = [...new Set(events.map((e: any) => e.city).filter(Boolean))];
+  const totalPeopleReached = events
+    .map((e: any) => parseInt(e.people_reached) || 0)
+    .reduce((sum: number, val: number) => sum + val, 0);
+
+  const sitemap = {
+    version: '2.0',
+    generated_at: now,
+    total_urls: events.length + 4,
+    
+    // ORGANIZACIÓN CON DATA REAL
+    organization: {
+      name: 'We Are Vision',
+      legal_name: 'We Are Vision BTL',
+      type: 'BTL Marketing Agency',
+      industry: 'Marketing & Advertising',
+      specialization: 'Corporate Events, Brand Activations, Immersive Experiences',
+      location: 'Chile',
+      languages: ['es', 'en'],
+      
+      // Servicios basados en categorías REALES
+      services: uniqueCategories.length > 0 ? uniqueCategories : [
+        'Eventos Corporativos',
+        'Activaciones de Marca',
+        'Experiencias Inmersivas',
+        'Marketing BTL',
+        'Diseño de Experiencias',
+        'Producción Audiovisual',
+      ],
+      
+      // Portfolio Stats REALES
+      portfolio_stats: {
+        total_events: events.length,
+        brands_served: uniqueBrands.length,
+        categories: uniqueCategories.length,
+        countries: uniqueCountries.length > 0 ? uniqueCountries : ['Chile'],
+        cities_coverage: uniqueCities.length,
+        total_people_reached: totalPeopleReached > 0 ? totalPeopleReached : undefined,
+      },
+      
+      // Marcas destacadas (top 10 por cantidad de eventos)
+      featured_brands: getBrandsByFrequency(events).slice(0, 10),
+      
+      // Keywords para IA
+      keywords: [
+        'eventos corporativos chile',
+        'activaciones de marca',
+        'btl marketing',
+        'experiencias inmersivas',
+        'marketing experiencial',
+        'agencia btl',
+        'producción de eventos',
+        ...uniqueBrands.map((b: string) => `eventos ${b.toLowerCase()}`).slice(0, 20),
+      ],
+    },
+    
+    urls: [
+      // URLs estáticas
+      {
+        url: baseUrl,
+        last_modified: now,
+        update_frequency: 'daily',
+        priority: 1.0,
+        metadata: {
+          title: 'We Are Vision - Experiencias BTL Cinematográficas',
+          description: `Agencia BTL líder en Chile con ${events.length}+ eventos realizados. Especialistas en activaciones de marca, eventos corporativos y experiencias inmersivas para marcas como ${uniqueBrands.slice(0, 5).join(', ')}.`,
+          type: 'homepage',
+          featured_count: events.length,
+          featured_brands: uniqueBrands.slice(0, 10),
+        },
+        tags: ['btl', 'marketing', 'eventos', 'chile', 'experiencias', 'brand-activation'],
+        content_type: 'homepage',
+      },
+      {
+        url: `${baseUrl}/eventos`,
+        last_modified: now,
+        update_frequency: 'daily',
+        priority: 0.9,
+        metadata: {
+          title: `Portafolio - ${events.length} Eventos BTL | We Are Vision`,
+          description: `Portfolio completo: ${events.length} proyectos de activaciones de marca y eventos corporativos en ${uniqueCountries.length > 0 ? uniqueCountries.join(', ') : 'Chile'}.`,
+          type: 'portfolio',
+          total_events: events.length,
+          categories_available: uniqueCategories,
+        },
+        tags: ['portfolio', 'case-studies', 'projects', 'eventos', ...uniqueCategories.map((c: string) => c.toLowerCase())],
+        content_type: 'portfolio',
+      },
+      {
+        url: `${baseUrl}/nosotros`,
+        last_modified: now,
+        update_frequency: 'monthly',
+        priority: 0.7,
+        metadata: {
+          title: 'Nosotros - We Are Vision BTL',
+          description: 'Equipo creativo especializado en diseño de experiencias cinematográficas. Metodología probada en +100 eventos.',
+          type: 'about',
+        },
+        tags: ['about', 'team', 'methodology', 'creative-agency'],
+        content_type: 'about',
+      },
+      {
+        url: `${baseUrl}/contacto`,
+        last_modified: now,
+        update_frequency: 'monthly',
+        priority: 0.6,
+        metadata: {
+          title: 'Contacto - Cotiza tu Evento BTL',
+          description: 'Conversemos sobre tu próximo evento o activación de marca. Experiencia comprobada con marcas líderes.',
+          type: 'contact',
+          services_offered: uniqueCategories,
+        },
+        tags: ['contact', 'inquiry', 'quote', 'cotizacion'],
+        content_type: 'contact',
+      },
+      
+      // URLs de eventos con METADATA COMPLETA
+      ...events.map((event: any) => {
+        const eventSlug = event.slug || slugify(event.title);
+        const lastMod = event.updated_at || event.created_at || now;
+        
+        // Metadata enriquecida del evento
+        const enrichedMetadata: any = {
+          title: event.title,
+          description: event.description || event.summary || '',
+          brand: event.brand,
+          category: event.category,
+          type: 'case-study',
+        };
+        
+        // Agregar campos opcionales si existen
+        if (event.client) enrichedMetadata.client = event.client;
+        if (event.year) enrichedMetadata.year = event.year;
+        if (event.month) enrichedMetadata.month = event.month;
+        if (event.country) enrichedMetadata.country = event.country;
+        if (event.city) enrichedMetadata.city = event.city;
+        if (event.venue) enrichedMetadata.venue = event.venue;
+        if (event.subcategory) enrichedMetadata.subcategory = event.subcategory;
+        
+        // KPIs y resultados
+        if (event.people_reached) enrichedMetadata.people_reached = event.people_reached;
+        if (event.attendees) enrichedMetadata.attendees = event.attendees;
+        if (event.days) enrichedMetadata.days = event.days;
+        if (event.cities) enrichedMetadata.cities_count = event.cities;
+        if (event.screens) enrichedMetadata.screens = event.screens;
+        
+        // Keywords y hashtags
+        if (event.keywords && event.keywords.length > 0) {
+          enrichedMetadata.keywords = event.keywords;
+        }
+        if (event.hashtags && event.hashtags.length > 0) {
+          enrichedMetadata.hashtags = event.hashtags;
+        }
+        
+        // SEO
+        if (event.seo_title) enrichedMetadata.seo_title = event.seo_title;
+        if (event.seo_description) enrichedMetadata.seo_description = event.seo_description;
+        
+        return {
+          url: `${baseUrl}/event/${eventSlug}`,
+          last_modified: lastMod,
+          update_frequency: 'weekly',
+          priority: 0.8,
+          metadata: enrichedMetadata,
+          tags: extractEventTags(event),
+          content_type: 'case-study',
+          image: event.image,
+          gallery_count: event.gallery ? event.gallery.length : 0,
+        };
+      }),
+    ],
+  };
+
+  return JSON.stringify(sitemap, null, 2);
+}
+
+/**
+ * Obtiene marcas ordenadas por frecuencia
+ */
+function getBrandsByFrequency(events: any[]): string[] {
+  const brandCount: Record<string, number> = {};
+  
+  events.forEach((event: any) => {
+    if (event.brand) {
+      brandCount[event.brand] = (brandCount[event.brand] || 0) + 1;
+    }
+  });
+  
+  return Object.entries(brandCount)
+    .sort(([, a], [, b]) => b - a)
+    .map(([brand]) => brand);
+}
+
+/**
+ * Genera robots.txt
+ */
+function generateRobotsTxt(baseUrl: string): string {
+  return `# We Are Vision - Robots.txt
+# Optimizado para SEO y motores de IA
+
+# Permitir todos los bots
+User-agent: *
+Allow: /
+
+# Sitemaps (XML para Google, JSON para motores de IA)
+Sitemap: https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/make-server-c4bb2206/sitemap.xml
+Sitemap: https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/make-server-c4bb2206/sitemap.json
+
+# Bots de IA - Acceso completo
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# Crawl delay (evitar sobrecarga)
+User-agent: *
+Crawl-delay: 1
+
+# Excluir rutas administrativas
+User-agent: *
+Disallow: /admin
+Disallow: /api/internal
+
+# Permitir páginas públicas
+Allow: /eventos
+Allow: /event/
+Allow: /categoria/
+Allow: /nosotros
+Allow: /contacto
+`;
+}
+
+/**
+ * Extrae tags de un evento para indexación IA
+ * ENRIQUECIDO CON DATOS REALES DEL CMS
+ */
+function extractEventTags(event: any): string[] {
+  const tags: string[] = [];
+
+  // Tags desde campos del evento
+  if (event.category) tags.push(event.category.toLowerCase().replace(/\s+/g, '-'));
+  if (event.subcategory) tags.push(event.subcategory.toLowerCase().replace(/\s+/g, '-'));
+  if (event.brand) tags.push(event.brand.toLowerCase().replace(/\s+/g, '-'));
+  if (event.client) tags.push(event.client.toLowerCase().replace(/\s+/g, '-'));
+  
+  // Tags geográficos REALES
+  if (event.country) tags.push(event.country.toLowerCase());
+  if (event.city) tags.push(event.city.toLowerCase());
+  
+  // Tags de año
+  if (event.year) tags.push(`year-${event.year}`);
+  
+  // Tags desde keywords del CMS
+  if (event.keywords && Array.isArray(event.keywords)) {
+    event.keywords.forEach((kw: string) => {
+      if (kw) tags.push(kw.toLowerCase().replace(/\s+/g, '-'));
+    });
+  }
+  
+  // Tags desde hashtags del CMS
+  if (event.hashtags && Array.isArray(event.hashtags)) {
+    event.hashtags.forEach((ht: string) => {
+      if (ht) tags.push(ht.toLowerCase().replace(/[#\s]+/g, ''));
+    });
+  }
+
+  // Tags generales BTL
+  tags.push('btl', 'marketing', 'evento', 'activacion', 'experiencia');
+
+  // Tags de categoría específicos
+  const categoryLower = event.category?.toLowerCase() || '';
+  if (categoryLower.includes('activación') || categoryLower.includes('activacion')) {
+    tags.push('brand-activation', 'marketing-experiencial', 'experiential-marketing');
+  }
+  if (categoryLower.includes('corporativo')) {
+    tags.push('corporate-event', 'empresa', 'business-event');
+  }
+  if (categoryLower.includes('lanzamiento')) {
+    tags.push('product-launch', 'launch-event');
+  }
+  if (categoryLower.includes('retail')) {
+    tags.push('retail-marketing', 'punto-de-venta', 'pos');
+  }
+  if (categoryLower.includes('digital')) {
+    tags.push('digital-marketing', 'online-event', 'virtual-event');
+  }
+  if (categoryLower.includes('roadshow')) {
+    tags.push('roadshow', 'tour', 'mobile-activation');
+  }
+  if (categoryLower.includes('sampling')) {
+    tags.push('product-sampling', 'degustacion', 'tasting');
+  }
+  
+  // Tags por alcance/escala
+  if (event.people_reached) {
+    const reach = parseInt(event.people_reached);
+    if (reach > 10000) tags.push('large-scale', 'massive-event');
+    else if (reach > 1000) tags.push('medium-scale');
+  }
+  
+  if (event.cities && parseInt(event.cities) > 1) {
+    tags.push('multi-city', 'regional-campaign');
+  }
+  
+  if (event.days && parseInt(event.days) > 7) {
+    tags.push('long-term-campaign');
+  }
+
+  // Remover duplicados y vacíos
+  return [...new Set(tags.filter(Boolean))];
+}
+
+// Note: slugify() already declared above (line ~182)
+
+/**
+ * ============================================
+ * PUBLIC ROUTES (NO BASE_PATH PREFIX)
+ * ============================================
+ * Estas rutas son accesibles sin el prefijo /make-server-c4bb2206
+ * para compatibilidad con Google Search Console y otros bots
+ */
+
+/**
+ * GET /sitemap.xml (PUBLIC - NO AUTH)
+ * Ruta pública para Google Search Console
+ */
+app.get('/sitemap.xml', async (c) => {
+  try {
+    console.log('[PUBLIC /sitemap.xml] Generando sitemap público...');
+    const events = (await kv.get("wav_events")) || [];
+    const baseUrl = "https://btl.wearevision.cl";
+    const sitemap = generateXMLSitemap(events, baseUrl);
+    
+    return c.text(sitemap, 200, {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    });
+  } catch (e) {
+    console.error("[PUBLIC /sitemap.xml] Error:", e);
+    return c.text('Error generating sitemap', 500);
+  }
+});
+
+/**
+ * GET /sitemap.json (PUBLIC - NO AUTH)
+ * Ruta pública para bots de IA
+ */
+app.get('/sitemap.json', async (c) => {
+  try {
+    console.log('[PUBLIC /sitemap.json] Generando sitemap JSON público...');
+    const events = (await kv.get("wav_events")) || [];
+    const baseUrl = "https://btl.wearevision.cl";
+    const sitemap = generateJSONSitemap(events, baseUrl);
+    
+    return c.json(JSON.parse(sitemap), 200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    });
+  } catch (e) {
+    console.error("[PUBLIC /sitemap.json] Error:", e);
+    return c.json({ error: 'Error generating sitemap' }, 500);
+  }
+});
+
+/**
+ * GET /robots.txt (PUBLIC - NO AUTH)
+ * Ruta pública para robots.txt
+ */
+app.get('/robots.txt', async (c) => {
+  const baseUrl = "https://btl.wearevision.cl";
+  const robotsTxt = generateRobotsTxt(baseUrl);
+  
+  return c.text(robotsTxt, 200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+  });
+});
 
 Deno.serve(app.fetch);

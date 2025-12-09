@@ -43,6 +43,7 @@ export interface WavEvent {
   og_image?: string;
 
   // Extended Content
+  technical_summary?: string; // New field for AEO
   summary?: string;
   highlights?: string[];
   tone?: string;

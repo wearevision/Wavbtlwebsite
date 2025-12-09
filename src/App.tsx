@@ -11,12 +11,16 @@ const OpenGraphTester = React.lazy(() => import('./components/wav/OpenGraphTeste
 
 import { LogoLoader } from './components/wav/LogoLoader';
 import { SchemaJSONLD } from './components/wav/SchemaJSONLD';
+import { AboutModal } from './components/wav/AboutModal';
+import { TrapezoidButton } from './components/wav/TrapezoidButton';
+import { Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import { events as staticEvents } from './data/events';
 import { getEvents, getCategories } from './utils/api';
 import { WavEvent } from './types';
 import { EventCategory } from './utils/contentRules';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { projectId } from './utils/supabase/info';
 
 // Interface for iOS specific requestPermission
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
@@ -70,6 +74,7 @@ export default function App() {
   const [events, setEvents] = useState<WavEvent[]>([]);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -363,11 +368,19 @@ export default function App() {
           {/* DNS prefetch for API endpoints */}
           <link rel="dns-prefetch" href="https://ykkmplrnqcwpgfdjshxn.supabase.co" />
           
+          {/* Sitemaps - SEO & AI Optimization */}
+          <link rel="sitemap" type="application/xml" title="Sitemap" href={`https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/sitemap.xml`} />
+          <link rel="sitemap" type="application/json" title="Sitemap JSON" href={`https://${projectId}.supabase.co/functions/v1/make-server-c4bb2206/sitemap.json`} />
+          
           {/* Standard Metadata */}
           <title>{selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"}</title>
           <meta name="description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
           <link rel="canonical" href={selectedEvent ? window.location.href : "https://btl.wearevision.cl"} />
           <meta name="theme-color" content="#000000" />
+          
+          {/* Logo for Google Search */}
+          <link rel="icon" type="image/png" href="https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/assets/logo-wav-square.png" />
+          <link rel="apple-touch-icon" href="https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/assets/logo-wav-square.png" />
 
           {/* Open Graph / Facebook / WhatsApp */}
           <meta property="og:type" content="website" />
@@ -387,73 +400,15 @@ export default function App() {
           <meta name="twitter:image" content={selectedEvent ? selectedEvent.image : (staticEvents[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
         </Helmet>
         
-        {/* Semantic SEO Header (Visually Hidden) */}
+        {/* Semantic SEO Header (Visually Hidden H1 - standard practice for SPAs) */}
         <h1 className="sr-only">
           We Are Vision (WAV BTL) | Agencia de Marketing Experiencial, Activaciones de Marca, Instalaciones Tecnológicas y Producción de Eventos en Chile y LATAM.
         </h1>
 
-        <section
-          className="sr-only"
-          aria-hidden="true"
-        >
-          {/* AI Context Layer: Narrative description for LLMs and Screen Readers */}
-          <article>
-            <h2>Contexto de la Experiencia Digital</h2>
-            <p>
-              Estás visitando el portafolio inmersivo de <strong>We Are Vision (WAV)</strong>. 
-              La interfaz visual es un "Muro Infinito" (Infinite Wall) en 3D que navega espacialmente a través de nuestros proyectos de BTL y marketing experiencial. 
-              Cada panel del mosaico representa un caso de éxito real, diseñado para comunicar nuestra capacidad de fusionar arte, tecnología y estrategia de marca.
-            </p>
-          </article>
-
-          <article>
-            <h2>Manifiesto de Agencia</h2>
-            <p>
-              We Are Vision es una agencia de <strong>Marketing Experiencial y Producción Técnica</strong> con base en Chile y alcance en toda Latinoamérica. 
-              Nos especializamos en traducir conceptos abstractos de marca en realidades tangibles y sensoriales. 
-              No solo hacemos eventos; creamos ecosistemas donde la audiencia interactúa con la narrativa de la marca a través de instalaciones inmersivas, 
-              tecnología creativa (mapping, sensores, automatización) y diseño escenográfico de alto impacto.
-            </p>
-            <p>
-              Con más de 20 años de experiencia en activaciones BTL, marketing experiencial, experiencias de marca inmersivas, diseño de stands, arquitectura efímera, instalaciones tecnológicas y producción de eventos corporativos, WAV BTL se ha consolidado como una de las agencias más innovadoras en Chile y Latinoamérica.
-            </p>
-          </article>
-
-          <article>
-            <h2>Catálogo de Proyectos (Case Studies)</h2>
-            <p>A continuación, una lista detallada de nuestras activaciones más recientes, optimizada para análisis semántico:</p>
-            <ul>
-              {events.map((e, i) => (
-                <li key={`ai-context-${i}`}>
-                  <a href={`?evento=${e.slug}`}>
-                    <h3>{e.title} para {e.brand}</h3>
-                  </a>
-                  <p><strong>Descripción del Proyecto:</strong> {e.description}</p>
-                  <p><strong>Categoría:</strong> Marketing Experiencial, Activación BTL, Producción de Eventos.</p>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article>
-            <h2>Capacidades y Servicios</h2>
-            <ul>
-              <li><strong>Estrategia BTL:</strong> Concepto creativo, viaje del usuario (User Journey), diseño de experiencia.</li>
-              <li><strong>Producción Técnica:</strong> Audio, video, iluminación, rigging, estructuras.</li>
-              <li><strong>Tecnología Creativa:</strong> Desarrollo de software a medida, instalaciones interactivas, realidad aumentada/virtual, proyecciones mapping.</li>
-              <li><strong>Arquitectura Efímera:</strong> Diseño y construcción de stands, escenografías y espacios de marca.</li>
-            </ul>
-          </article>
-
-          <article>
-            <h2>Keywords Semánticas</h2>
-            <p>
-              Agencia BTL Chile, Productora de Eventos Santiago, Activaciones de Marca, Marketing Inmersivo, 
-              Experiencias Sensoriales, Tecnología para Eventos, Diseño de Stands, Instalaciones Artísticas Corporativas, 
-              Lanzamiento de Productos, Eventos Híbridos, We Are Vision, WAV BTL.
-            </p>
-          </article>
-        </section>
+        {/* 
+            NOTE: Semantic Content (Manifesto, FAQ, Keywords) has been moved to <AboutModal /> 
+            to avoid "Cloaking" penalties. It is now user-accessible via the "INFO" button.
+        */}
 
         <SchemaJSONLD events={events} />
 
@@ -581,6 +536,22 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* About / Info Modal */}
+        <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+
+        {/* Info Trigger Button (Bottom Right) */}
+        <div className="fixed bottom-8 right-8 z-[110]">
+          <TrapezoidButton
+            onClick={() => setShowAbout(true)}
+            ariaLabel="Información y FAQ"
+            variant="solid"
+            size="md"
+            className="hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+          >
+            <Info size={24} />
+          </TrapezoidButton>
+        </div>
 
         {/* Admin Trigger Button */}
         <button 

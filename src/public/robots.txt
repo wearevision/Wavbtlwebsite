@@ -5,9 +5,8 @@
 User-agent: *
 Allow: /
 
-# Sitemaps - Archivos estáticos (actualizados desde Admin Panel)
+# Sitemaps principales
 Sitemap: https://btl.wearevision.cl/sitemap.xml
-Sitemap: https://btl.wearevision.cl/sitemap.json
 
 # Motores de IA - Acceso completo
 User-agent: GPTBot

@@ -1,0 +1,38 @@
+═══════════════════════════════════════════════════════════════════════════════
+  WE ARE VISION (WAV BTL) - SITEMAP URLS OFICIALES
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ ACTUALIZADO - Endpoint PÚBLICO (sin autenticación JWT)
+
+📍 SITEMAP XML (Google Search Console)
+https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/sitemap/sitemap.xml
+
+📍 SITEMAP JSON (AI Search Engines)
+https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/sitemap/sitemap.json
+
+📍 ROBOTS.TXT (Dynamic)
+https://ykkmplrnqcwpgfdjshxn.supabase.co/functions/v1/sitemap/robots.txt
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔗 QUICK LINKS
+
+Google Search Console: https://search.google.com/search-console
+Rich Results Test: https://search.google.com/test/rich-results
+XML Validator: https://www.xml-sitemaps.com/validate-xml-sitemap.html
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ STATUS: PRODUCCIÓN READY - PÚBLICO
+📅 FECHA: 3 Diciembre 2025 (Actualizado)
+🔄 ACTUALIZACIÓN: Automática desde KV Store
+⏱️ CACHE: 1 hora (3600s)
+🔓 ACCESO: SIN AUTENTICACIÓN (Google-ready)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚨 IMPORTANTE: Nueva Edge Function separada para acceso público
+Las URLs ahora apuntan a /functions/v1/sitemap/ (público) en lugar de 
+/functions/v1/make-server-c4bb2206/ (que requiere auth JWT)
+
+═══════════════════════════════════════════════════════════════════════════════

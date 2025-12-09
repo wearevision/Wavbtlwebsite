@@ -26,7 +26,12 @@ export const SchemaJSONLD: React.FC<SchemaJSONLDProps> = ({ events }) => {
       "name": "We Are Vision",
       "alternateName": ["WAV", "WAV BTL"],
       "url": "https://btl.wearevision.cl",
-      "logo": "https://btl.wearevision.cl/favicon.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/assets/logo-wav-square.png",
+        "width": 512,
+        "height": 512
+      },
       "description": "Agencia de Marketing Experiencial, Activaciones de Marca, Instalaciones Tecnológicas y Producción de Eventos en Chile y LATAM.",
       "foundingDate": "2003",
       "email": "federico@wearevision.cl",
@@ -63,7 +68,7 @@ export const SchemaJSONLD: React.FC<SchemaJSONLDProps> = ({ events }) => {
          "image": event.image,
          "identifier": event.slug || event.id,
          "url": `https://btl.wearevision.cl/?evento=${event.slug || ''}`,
-         "about": event.description,
+         "about": event.technical_summary || event.description,
          "keywords": [
              "activación BTL",
              "experiencia inmersiva",
@@ -90,7 +95,13 @@ export const SchemaJSONLD: React.FC<SchemaJSONLDProps> = ({ events }) => {
       "@type": "WebSite",
       "name": "WAV BTL Portfolio",
       "url": "https://btl.wearevision.cl",
-      "description": "Portafolio experiencial de activaciones y eventos BTL en Chile y Latinoamérica de We Are Vision."
+      "description": "Portafolio experiencial de activaciones y eventos BTL en Chile y Latinoamérica de We Are Vision.",
+      "hasPart": events.map(event => ({
+          "@type": "CreativeWork",
+          "name": event.title,
+          "url": `https://btl.wearevision.cl/?evento=${event.slug || ''}`,
+          "description": event.technical_summary || event.description
+      }))
     };
 
     const fullSchema = [orgSchema, websiteSchema];

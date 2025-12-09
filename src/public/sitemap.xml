@@ -1,0 +1,1553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://btl.wearevision.cl/</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Static Pages -->
+  <url>
+    <loc>https://btl.wearevision.cl/nosotros</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/servicios</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/contacto</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Dynamic Events -->
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2007-cristal-auspicio-eventos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2007-cristal-auspicio-eventos/gallery_00.webp</image:loc>
+      <image:title>Cristal Ilumina la Noche Chilena: Auspicio de Eventos 2013</image:title>
+      <image:caption>En 2013, WAV BTL llevó a cabo una estrategia integral para posicionar a Cerveza Cristal como auspiciador clave en una variedad de eventos a lo largo de Chile. A través de activaciones BTL personalizad</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2007-entel-fiesta-fin-de-ano</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2007-entel-fiesta-fin-de-ano/gallery_00.webp</image:loc>
+      <image:title>Entel Summit 2013 - Santiago</image:title>
+      <image:caption>En 2013, WAV BTL colaboró con Entel para llevar a cabo el Entel Summit, un evento que buscaba inspirar y conectar con su audiencia a través de innovación y tecnología. Este evento se realizó en el Hot</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2007-entel-summit</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2007-entel-summit/gallery_00.webp</image:loc>
+      <image:title>Entel Summit 2013: Impulsando el Futuro a Través de Experiencias BTL</image:title>
+      <image:caption>El Entel Summit 2013 se celebró en Santiago, Chile, y se enfocó en la innovación y la creación de experiencias BTL que transforman la conexión entre las marcas y sus audiencias. Durante un día, más de</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2007-mistral-plan-zora-oriente</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2007-mistral-plan-zora-oriente/gallery_00.webp</image:loc>
+      <image:title>Mistral Plan Zora Oriente 2012: Noches de Experiencia Premium con WAV BTL</image:title>
+      <image:caption>El éxito del Plan Zora Oriente radicó en la ejecución impecable y la coherencia con la identidad de Mistral. A través de activaciones estratégicas en locales nocturnos clave, WAV BTL logró aumentar el</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-ccu-premiacion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-ccu-premiacion/gallery_00.webp</image:loc>
+      <image:title>CCU Premia: Experiencia de Reconocimiento Inolvidable by WAV BTL</image:title>
+      <image:caption>Para CCU, en el año 2014, WAV BTL creó una experiencia de premiación que trascendió lo convencional. Entendiendo la importancia de reconocer el esfuerzo y la dedicación de los equipos, desarrollamos u</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-control-barra-auspicios</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-control-barra-auspicios/gallery_00.webp</image:loc>
+      <image:title>Control Pisco: Elevando la Experiencia en Barra a Nuevos Niveles</image:title>
+      <image:caption>En 2014, WAV BTL orquestó una activación de marca inolvidable para Control Pisco, diseñando y ejecutando una barra de auspicios que cautivó a los asistentes. La estructura, con líneas limpias y una il</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-indumotora-stand-feria-laboral</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-indumotora-stand-feria-laboral/gallery_00.webp</image:loc>
+      <image:title>Indumotora Impulsa el Talento en Feria Laboral 2014</image:title>
+      <image:caption>WAV BTL diseñó y ejecutó la participación de Indumotora en la Feria Laboral 2014, creando un stand interactivo y atractivo para los asistentes. El objetivo principal fue posicionar a Indumotora como u</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-proof-isla-mall</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-proof-isla-mall/gallery_00.webp</image:loc>
+      <image:title>Activación de Marca Proof: Una Experiencia Inolvidable en Isla Mall (2014)</image:title>
+      <image:caption>En 2014, WAV BTL desarrolló una estrategia de marketing experiencial innovadora para Proof, una marca de lentes de sol y accesorios, en Isla Mall. La activación consistió en un espacio interactivo y l</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-royal-guard-trasera-restaurante</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-royal-guard-trasera-restaurante/gallery_00.webp</image:loc>
+      <image:title>Royal Guard Eleva la Experiencia Gastronómica en Trasera Restaurante (2014)</image:title>
+      <image:caption>En 2014, WAV BTL tuvo el privilegio de colaborar con Royal Guard para crear una experiencia inmersiva en el prestigioso Trasera Restaurante. La activación se centró en la instalación de una estructura</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-samsung-galaxy-mobiliario-entel</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-samsung-galaxy-mobiliario-entel/gallery_00.webp</image:loc>
+      <image:title>Reviviendo la Innovación: Samsung Galaxy en Entel con WAV BTL (2013)</image:title>
+      <image:caption>En 2013, WAV BTL colaboró con Samsung para potenciar la presencia de la línea Galaxy en las tiendas Entel a lo largo de Chile. Nuestra estrategia se centró en el diseño y la implementación de mobiliar</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2008-samsung-wash-stand</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-samsung-wash-stand/gallery_00.webp</image:loc>
+      <image:title>Samsung Wash Stand: Aire puro para una experiencia de compra superior</image:title>
+      <image:caption>WAV BTL fue responsable del diseño, producción y despliegue del &apos;Wash Stand&apos; de Samsung en 2013. Este exhibidor modular, con un diseño minimalista y elegante, tenía como objetivo principal resaltar lo</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-bomo-bolivia-moda-fashion-show</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-bomo-bolivia-moda-fashion-show/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Iluminó la Pasarela de BOMO Bolivia Moda 2015</image:title>
+      <image:caption>En 2015, WAV BTL tuvo el honor de colaborar con Bolivia Moda (BOMO), el evento de moda más importante del país. Desplegamos toda nuestra experiencia en producción técnica para crear una atmósfera lumí</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-indumotora-stand-feria-laboral</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-indumotora-stand-feria-laboral/gallery_00.webp</image:loc>
+      <image:title>Indumotora Impulsa el Talento en Feria Laboral 2015 con Stand de WAV BTL</image:title>
+      <image:caption>En 2015, Indumotora, confiando en la experiencia de WAV BTL, participó en la Feria Laboral con un stand diseñado para atraer y captar el interés de profesionales y estudiantes en búsqueda de oportunid</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-kem-extreme-ice-machine</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-kem-extreme-ice-machine/gallery_00.webp</image:loc>
+      <image:title>KEM Extreme Ice Machine: Refrescando el Verano Chileno con WAV BTL</image:title>
+      <image:caption>En el caluroso verano de 2015, WAV BTL implementó la campaña &apos;Extreme Ice Machine&apos; para KEM, una activación BTL de alto impacto que buscaba conectar con el público en las playas y puntos clave de Chil</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-mistral-activaciones-zona-oriente</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-mistral-activaciones-zona-oriente/gallery_00.webp</image:loc>
+      <image:title>Mistral Ilumina la Zona Oriente: Activaciones Exclusivas 2015</image:title>
+      <image:caption>En 2015, WAV BTL llevó a cabo una serie de activaciones de la marca Mistral en diversos locales nocturnos de la Zona Oriente de Santiago. La estrategia se centró en crear un ambiente sofisticado y atr</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-samsung-galaxy-note-8-launch</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-samsung-galaxy-note-8-launch/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Lanzamiento Exitoso del Samsung Galaxy Note 8 en Chile</image:title>
+      <image:caption>En 2014, Samsung confió en WAV BTL para la activación y lanzamiento del innovador Galaxy Note 8 en Chile. Diseñamos una experiencia inmersiva y sofisticada que reflejaba la calidad premium del disposi</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-skyy-vodka-party-sponsor-bolivia</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-skyy-vodka-party-sponsor-bolivia/gallery_00.webp</image:loc>
+      <image:title>SKYY Vodka Electriza Bolivia: Éxito en Patrocinio de Evento 2014</image:title>
+      <image:caption>La ejecución incluyó la instalación de barras temáticas, la capacitación de bartenders para la preparación de cócteles signature, y la implementación de elementos visuales impactantes con la iconograf</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2009-tous-ooh-bolivia</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-tous-ooh-bolivia/gallery_00.webp</image:loc>
+      <image:title>Tous conquista Bolivia con Impactante Campaña OOH en Santa Cruz</image:title>
+      <image:caption>Para Tous, WAV BTL diseñó e implementó una estrategia de publicidad exterior (OOH) en Santa Cruz, Bolivia, durante el año 2014. La campaña buscó consolidar la presencia de la marca en el mercado boliv</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-mistral-bar-modular-auspicios</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-bar-modular-auspicios/gallery_00.webp</image:loc>
+      <image:title>Mistral ilumina la noche con innovadores Bares Modulares en 2015</image:title>
+      <image:caption>En 2015, WAV BTL elevó la experiencia de marca de Mistral mediante la implementación de bares modulares en diversos eventos. Estos bares, diseñados con una estética moderna y llamativa, no solo sirvie</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-mistral-dance-mapping-auspicios-eventos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-dance-mapping-auspicios-eventos/gallery_00.webp</image:loc>
+      <image:title>Mistral ilumina la noche con Dance Mapping en Eventos 2015</image:title>
+      <image:caption>En 2015, WAV BTL, en colaboración con Mistral, creó un evento inolvidable: un espectáculo de Dance Mapping que fusionó arte, tecnología y la esencia de la marca. El evento, realizado en un espacio con</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-mistral-dj-booth</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-dj-booth/gallery_00.webp</image:loc>
+      <image:title>MISTRAL DJ Booth 2015: Elevando la Experiencia Nocturna</image:title>
+      <image:caption>El éxito del evento se midió en el alto engagement del público, la amplificación en redes sociales y el fortalecimiento de la imagen de marca de Mistral. WAV BTL demostró su capacidad para conceptuali</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-mistral-motion-arte</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-motion-arte/gallery_00.webp</image:loc>
+      <image:title>MISTRAL MOTION ARTE: La experiencia sensorial que transformó el Pisco</image:title>
+      <image:caption>MOTION ARTE fue una innovadora activación para Pisco Mistral que buscó conectar la marca con un público sofisticado y amante del arte. A través de una instalación interactiva, los asistentes pudieron </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-mistral-plan-btl</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-plan-btl/gallery_00.webp</image:loc>
+      <image:title>Mistral Eleva la Experiencia en Plan BTL 2015</image:title>
+      <image:caption>En WAV BTL, convertimos el Plan BTL 2015 en una plataforma inigualable para Mistral, el pisco premium que define el estándar de excelencia. Nuestra estrategia se centró en crear momentos únicos e inme</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-samsung-infinity-tables</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-samsung-infinity-tables/gallery_00.webp</image:loc>
+      <image:title>WAV BTL: Samsung Infinity Tables, Experiencia Sin Límites en 2015</image:title>
+      <image:caption>Las Infinity Tables, diseñadas e implementadas por WAV BTL para Samsung en 2015, fueron mucho más que simples exhibidores; fueron portales a la innovación. Estas mesas interactivas, ubicadas estratégi</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2010-samsung-on-site-store</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-samsung-on-site-store/gallery_00.webp</image:loc>
+      <image:title>Samsung On Site Store 2015: Experiencia inmersiva en el punto de venta</image:title>
+      <image:caption>En 2015, WAV BTL diseñó e implementó la estrategia On Site Store para Samsung, buscando llevar la innovación de la marca directamente al consumidor. La activación consistió en la creación de espacios </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-entel-boiler-room</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-entel-boiler-room/gallery_00.webp</image:loc>
+      <image:title>Entel y WAV BTL: El Ritmo Conectado de Boiler Room 2016</image:title>
+      <image:caption>En 2016, WAV BTL llevó la experiencia Boiler Room a otro nivel de la mano de Entel. La activación buscaba conectar la marca con un público joven y vanguardista, a través de la música electrónica y una</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-entel-digital-meeting</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-entel-digital-meeting/gallery_00.webp</image:loc>
+      <image:title>Entel Digital Meeting 2016: Conectando el Futuro Empresarial</image:title>
+      <image:caption>En 2016, WAV BTL colaboró con Entel para la realización del Digital Meeting, un evento diseñado para conectar a líderes empresariales con las últimas tendencias en tecnología y soluciones digitales. E</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-gatorade-beat-the-gate</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-gatorade-beat-the-gate/gallery_00.webp</image:loc>
+      <image:title>WAV BTL: Reviviendo la adrenalina de Gatorade Beat The Gate 2016</image:title>
+      <image:caption>Gatorade Beat The Gate 2016, gestionado por WAV BTL, fue una activación BTL de alto impacto diseñada para conectar a la marca con su público objetivo a través de una experiencia desafiante y memorable</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-heineken-decibel</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-heineken-decibel/gallery_00.webp</image:loc>
+      <image:title>Heineken en Decibel 2016: Amplificando la Experiencia Musical</image:title>
+      <image:caption>En Decibel 2016, WAV BTL implementó una estrategia BTL integral para Heineken, transformando la experiencia musical en una conexión tangible con la marca. La pieza central fue una imponente instalació</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-samsung-try-love-influencers-off-to-on</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-samsung-try-love-influencers-off-to-on/gallery_00.webp</image:loc>
+      <image:title>Samsung Galaxy S8/S8+ Try & Love: Influencers del Online al Offline</image:title>
+      <image:caption>La ambientación del salón de belleza, con branding sutil pero impactante de Samsung, creó un espacio ideal para la prueba de los smartphones. La activación &apos;Try & Love&apos; buscó conectar la tecnología de</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-wom-batiwom</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-wom-batiwom/gallery_00.webp</image:loc>
+      <image:title>BATIWOM 2015: Cuando la ciudad se tiñó de morado</image:title>
+      <image:caption>BATIWOM 2015 fue una audaz campaña de marketing experiencial implementada por WAV BTL para WOM. Consistió en la proyección de la marca WOM en edificios emblemáticos de Santiago, transformando la noche</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2011-wom-lanzamiento-marca</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2011-wom-lanzamiento-marca/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Impactante Lanzamiento de WOM en 2015</image:title>
+      <image:caption>En 2015, WOM revolucionó el mercado de las telecomunicaciones en Chile, y WAV BTL estuvo presente para amplificar su lanzamiento a través de una estrategia de marketing experiencial audaz e innovadora</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-angloamerican-event-content</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-angloamerican-event-content/gallery_00.webp</image:loc>
+      <image:title>ANGLOAMERICAN: Contenido que Explora el Futuro Minero (2017)</image:title>
+      <image:caption>En 2017, WAV BTL colaboró con ANGLOAMERICAN para crear contenido inmersivo y de alto impacto. La activación se centró en la visión de futuro de la empresa, destacando la innovación y la tecnología en </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-huawey-huawey-day</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-huawey-huawey-day/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Lanzamiento de Huawei Day 2016</image:title>
+      <image:caption>Huawei Day 2016, gestionado integralmente por WAV BTL, fue la plataforma estratégica para comunicar la visión de Huawei en el mercado chileno. El evento, con un formato de conferencia magistral, congr</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-huawey-lanzamiento-matebook</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-huawey-lanzamiento-matebook/gallery_00.webp</image:loc>
+      <image:title>Huawei Matebook: WAV BTL Desata la Experiencia del Futuro en Chile</image:title>
+      <image:caption>El evento contó con presentaciones magistrales, zonas de experiencia donde los asistentes pudieron interactuar directamente con el Matebook y demostraciones de sus capacidades. A través de la tecnolog</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-mall-vivo-habilitacion-patio-de-comidas</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-mall-vivo-habilitacion-patio-de-comidas/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa la Experiencia Gastronómica en Mall Vivo con la Habilitación de su Patio de Comidas</image:title>
+      <image:caption>El evento de habilitación contó con una amplia gama de actividades diseñadas para atraer a diferentes públicos, desde familias hasta jóvenes y profesionales. Se realizaron presentaciones musicales en </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-mistral-lanzamiento-in-and-out</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-mistral-lanzamiento-in-and-out/gallery_00.webp</image:loc>
+      <image:title>Mistral In and Out: WAV BTL Eleva la Experiencia de Marca en el Lanzamiento 2016</image:title>
+      <image:caption>La activación In and Out de Mistral, impulsada por WAV BTL, superó las expectativas al ofrecer una noche inolvidable donde la marca fue la protagonista. Logramos una alta participación y un feedback p</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2012-nissan-lanzamiento-np300</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2012-nissan-lanzamiento-np300/gallery_00.webp</image:loc>
+      <image:title>Nissan NP300: Lanzamiento Exclusivo que Impulsó la Experiencia de Marca</image:title>
+      <image:caption>En 2017, Nissan confió en WAV BTL para el lanzamiento de su nueva NP300. Creamos un evento exclusivo diseñado para conectar profundamente con la audiencia, combinando presentaciones informativas con e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-bauza-activaciones</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-bauza-activaciones/gallery_00.webp</image:loc>
+      <image:title>BAUZÁ Ice: Refrescando el Verano con Activaciones Inolvidables (2018)</image:title>
+      <image:caption>Para BAUZÁ Ice en 2018, WAV BTL diseñó e implementó una serie de activaciones estratégicas que buscaban conectar con el público objetivo en ambientes veraniegos y eventos clave. La propuesta se centró</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-copec-voltex-video-red-de-carga</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-copec-voltex-video-red-de-carga/gallery_00.webp</image:loc>
+      <image:title>Copec Voltex: Impulsando la electromovilidad en terreno (2018)</image:title>
+      <image:caption>En 2018, WAV BTL colaboró con Copec Voltex para la promoción de su red de carga eléctrica a través de una experiencia inmersiva y participativa. La activación se centró en la exhibición de vehículos e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-corona-sunset-backstage-diseno-e-implementacion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-corona-sunset-backstage-diseno-e-implementacion/gallery_00.webp</image:loc>
+      <image:title>WAV BTL: Llevando la Experiencia Corona Sunset 2018 a un Nuevo Nivel</image:title>
+      <image:caption>En 2018, Corona Sunset confió en WAV BTL para la creación y ejecución del backstage de su evento insignia. Nuestra misión fue transformar el espacio en una experiencia inmersiva que complementara a la</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-edwards-y-matte-matrimonio</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-edwards-y-matte-matrimonio/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Ilumina el Matrimonio de Edwards y Matte en 2018</image:title>
+      <image:caption>La planificación y ejecución del evento requirió una coordinación minuciosa de todos los detalles, desde la selección del lugar hasta la gestión de los proveedores. El resultado fue una celebración qu</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-scotiabank-fin-de-ano</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-scotiabank-fin-de-ano/gallery_00.webp</image:loc>
+      <image:title>Scotiabank Despide el 2017 con Espectacular Evento BTL</image:title>
+      <image:caption>En WAV BTL, creamos un evento de fin de año para Scotiabank que trascendió lo convencional, transformando el cierre del 2017 en una experiencia inmersiva y memorable. Utilizamos la imponente arquitect</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-verisure-cunaseg</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-verisure-cunaseg/gallery_00.webp</image:loc>
+      <image:title>VERISURE y WAV BTL: Elevando la Seguridad en CUNASEG 2017</image:title>
+      <image:caption>En 2017, WAV BTL se asoció con VERISURE para una activación de marca estratégica en el congreso CUNASEG, un evento clave en el sector de la seguridad. Nuestro objetivo fue posicionar a VERISURE como l</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2013-wom-womers-welcome-to-casino</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2013-wom-womers-welcome-to-casino/gallery_00.webp</image:loc>
+      <image:title>WOMERS WELCOME TO CASINO: Activación de Marca en Entorno Experiencial</image:title>
+      <image:caption>En 2017, WAV BTL desarrolló una activación de marca impactante para WOM en el evento WOMERS WELCOME TO CASINO. La estrategia se centró en crear una experiencia memorable y participativa para los asist</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=samsung-activacion-de-marca-entel-2013</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-samsung-galaxy-mobiliario-entel/gallery_00.webp</image:loc>
+      <image:title>Samsung | Activación de Marca - Entel 2013</image:title>
+      <image:caption>En 2013, WAV BTL colaboró con Samsung para potenciar la presencia de la línea Galaxy en las tiendas Entel a lo largo de Chile. Nuestra estrategia se centró en el diseño y la implementación de mobiliar</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-bauza-activaciones</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-bauza-activaciones/gallery_00.webp</image:loc>
+      <image:title>BAUZÁ se Destaca con Activaciones BTL Innovadoras en 2019</image:title>
+      <image:caption>En 2019, WAV BTL diseñó e implementó una serie de activaciones BTL para BAUZÁ, enfocadas en fortalecer la conexión de la marca con sus consumidores. A través de stands de diseño moderno y atractivo, s</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-belmont-stand-corrida-familiar</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-belmont-stand-corrida-familiar/gallery_00.webp</image:loc>
+      <image:title>BELMONT Impulsa la Vida Activa en la Corrida Familiar 2019</image:title>
+      <image:caption>En 2019, Belmont, de la mano de WAV BTL, se sumó a la Corrida Familiar con un stand interactivo diseñado para conectar con las familias participantes y fomentar un estilo de vida activo. La activación</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-cntv-premiacion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-cntv-premiacion/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Ilumina la Premiación CNTV 2019: Una Experiencia de Reconocimiento Inolvidable</image:title>
+      <image:caption>En 2019, CNTV confió en WAV BTL para la creación de una premiación que celebrara la creatividad y el talento en la industria audiovisual nacional. Nuestra misión fue transformar un evento corporativo </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-copec-voltext-wrc-stand</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-copec-voltext-wrc-stand/gallery_00.webp</image:loc>
+      <image:title>Copec Voltex WRC Stand 2019: Acelerando la Experiencia de Marca</image:title>
+      <image:caption>Para el Copec Voltex WRC Stand 2019, WAV BTL diseñó y ejecutó un espacio que capturó la adrenalina del rally, traduciendo la pasión por el automovilismo en una experiencia de marca inmersiva. Desde la</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-dodge-lanzamiento-ram</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-dodge-lanzamiento-ram/gallery_00.webp</image:loc>
+      <image:title>Dodge RAM 700: Lanzamiento Imparable en Chile (2019)</image:title>
+      <image:caption>En 2019, WAV BTL tuvo el privilegio de ejecutar el lanzamiento de la nueva Dodge RAM 700 en Chile. Diseñamos un evento que sumergiera a los asistentes en la esencia de la marca, transmitiendo la robus</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-india-chick-fundadoras</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-india-chick-fundadoras/gallery_00.webp</image:loc>
+      <image:title>India Chick Fundadoras 2018: Empoderamiento y Naturaleza Chilena</image:title>
+      <image:caption>La experiencia &apos;Fundadoras&apos; incluyó sesiones inspiradoras con líderes femeninas, actividades al aire libre que fomentaron la colaboración y el networking, y presentaciones de la nueva colección de Ind</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2014-india-chik-brand-video</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2014-india-chik-brand-video/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Captura la Esencia de India Chik en Brand Video 2018</image:title>
+      <image:caption>En 2018, WAV BTL tuvo el honor de colaborar con India Chik en la producción de un brand video que encapsula la identidad única de la marca. La activación, desarrollada en un entorno natural agreste y </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=indumotora-stand-feria-laboral-santiago-2014</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-indumotora-stand-feria-laboral/gallery_00.webp</image:loc>
+      <image:title>Indumotora | Stand de Feria Laboral - Santiago 2014</image:title>
+      <image:caption>En 2014, Indumotora participó en la Feria Laboral de Santiago, creando un stand interactivo que conectó con futuros talentos. La activación incluyó entrevistas express, presentaciones informativas y d</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=proof-activacion-de-marca-isla-mall-2014</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-proof-isla-mall/gallery_00.webp</image:loc>
+      <image:title>PROOF | Activación de Marca - Isla Mall 2014</image:title>
+      <image:caption>En 2014, WAV BTL desarrolló una estrategia de marketing experiencial innovadora para Proof, una marca de lentes de sol y accesorios, en Isla Mall. La activación consistió en un espacio interactivo y l</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=royal-guard-activacion-gastronomica-trasera-restaurante-2014</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-royal-guard-trasera-restaurante/gallery_00.webp</image:loc>
+      <image:title>Royal Guard | Activación Gastronómica - Trasera Restaurante 2014</image:title>
+      <image:caption>En 2014, WAV BTL colaboró con Royal Guard para crear una experiencia inmersiva en Trasera Restaurante. La activación se centró en una estructura lumínica de gran formato que exhibía la marca de manera</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=tous-campana-ooh-santa-cruz-2014</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-tous-ooh-bolivia/gallery_00.webp</image:loc>
+      <image:title>TOUS | Campaña OOH - Santa Cruz 2014</image:title>
+      <image:caption>En 2014, WAV BTL diseñó una impactante campaña de publicidad exterior (OOH) para TOUS en Santa Cruz, Bolivia. Esta estrategia buscó consolidar la presencia de la marca en el mercado boliviano, utiliza</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-51-ice-auspicio-evento-y-activacion-bolivia</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-51-ice-auspicio-evento-y-activacion-bolivia/gallery_00.webp</image:loc>
+      <image:title>51 ICE Refresca Bolivia: Activación BTL que Marcó la Diferencia</image:title>
+      <image:caption>WAV BTL diseñó y ejecutó una activación BTL integral para 51 ICE en Bolivia durante 2020, enfocándose en generar un engagement significativo con el público objetivo. El evento buscó reflejar el espíri</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-falabella-fmedia</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-falabella-fmedia/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Éxito de FMEDIA 2019 para Falabella</image:title>
+      <image:caption>En 2019, WAV BTL tuvo el privilegio de colaborar con Falabella para la realización de FMEDIA, un evento clave para la marca. Nuestra agencia diseñó una activación BTL que buscaba fortalecer las relaci</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-hilaria-reel-matrimonio</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-hilaria-reel-matrimonio/gallery_00.webp</image:loc>
+      <image:title>HILARIA: Creando Recuerdos Inolvidables con Reels de Matrimonio</image:title>
+      <image:caption>WAV BTL se asoció con HILARIA en 2019 para ofrecer un servicio innovador: la creación de reels de matrimonio profesionales. Capturamos la esencia de cada celebración, transformando momentos únicos en </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-johnson-johnson-convencion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-johnson-johnson-convencion/gallery_00.webp</image:loc>
+      <image:title>Johnson & Johnson: Convención 2019 - Una Experiencia BTL Inolvidable</image:title>
+      <image:caption>En 2019, WAV BTL tuvo el honor de colaborar con Johnson & Johnson para la realización de su convención anual. Diseñamos una experiencia inmersiva y de alto impacto, transformando un espacio convencion</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-mistral-carro-auspicios-eventos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-mistral-carro-auspicios-eventos/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Eleva la Experiencia Mistral con Carro de Auspicios en Eventos 2019</image:title>
+      <image:caption>En WAV BTL, comprendemos el poder de las experiencias para construir marcas sólidas. En 2019, desafiamos los límites del marketing BTL con el desarrollo e implementación de un carro de auspicios para </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-nissan-lanzamiento-np300</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-nissan-lanzamiento-np300/gallery_00.webp</image:loc>
+      <image:title>Nissan NP300: Lanzamiento Experiencial que Impulsó la Marca en Chile</image:title>
+      <image:caption>En 2019, Nissan Chile confió en WAV BTL para el lanzamiento de su icónica NP300. Creamos una experiencia inmersiva que resaltó la robustez y versatilidad del vehículo, transformando un evento corporat</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2015-paris-motion-duendes-magicos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2015-paris-motion-duendes-magicos/gallery_00.webp</image:loc>
+      <image:title>París y WAV BTL: La Magia de la Navidad Cobra Vida con Motion Duendes Mágicos 2019</image:title>
+      <image:caption>WAV BTL orquestó una experiencia inmersiva para París, revitalizando la magia de la Navidad a través de la activación Motion Duendes Mágicos. A través de proyecciones innovadoras y escenografías detal</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=mistral-activacion-de-marca-chile-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-bar-modular-auspicios/gallery_00.webp</image:loc>
+      <image:title>Mistral | Activación de Marca - Chile 2015</image:title>
+      <image:caption>En 2015, WAV BTL elevó la experiencia de marca de Mistral mediante la implementación de bares modulares en diversos eventos. Estos bares, diseñados con una estética moderna y llamativa, no solo sirvie</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=mistral-activacion-de-marca-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-plan-btl/gallery_00.webp</image:loc>
+      <image:title>Mistral | Activación de Marca - Santiago 2015</image:title>
+      <image:caption>La activación de Mistral en Plan BTL 2015 transformó la experiencia del consumidor mediante momentos únicos e inmersivos. Ubicada en el Centro Cultural La Moneda, la activación destacó por su diseño i</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=mistral-dance-mapping-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-dance-mapping-auspicios-eventos/gallery_00.webp</image:loc>
+      <image:title>Mistral | Dance Mapping - Santiago 2015</image:title>
+      <image:caption>En 2015, WAV BTL y Mistral presentaron un innovador espectáculo de Dance Mapping en Santiago, fusionando arte y tecnología. Este evento, realizado en un concurrido centro cultural, sumergió a la audie</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=mistral-dj-booth-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-dj-booth/gallery_00.webp</image:loc>
+      <image:title>MISTRAL | DJ Booth - Santiago 2015</image:title>
+      <image:caption>En 2015, Mistral presentó una innovadora DJ Booth en Santiago, creando una experiencia nocturna inmersiva que fusionó música y tecnología de vanguardia. Este evento logró un alto engagement del públic</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=mistral-experiencia-sensorial-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-mistral-motion-arte/gallery_00.webp</image:loc>
+      <image:title>Mistral | Experiencia Sensorial - Santiago 2015</image:title>
+      <image:caption>MOTION ARTE fue una innovadora activación de Pisco Mistral que buscó conectar la marca con un público sofisticado y amante del arte. A través de una instalación interactiva, los asistentes experimenta</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=samsung-activacion-infinity-tables-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-samsung-infinity-tables/gallery_00.webp</image:loc>
+      <image:title>Samsung | Activación Infinity Tables - Santiago 2015</image:title>
+      <image:caption>Las Infinity Tables de Samsung, implementadas por WAV BTL en 2015, ofrecieron una experiencia inmersiva en puntos de venta clave en Santiago. Estas mesas interactivas capturaron la atención del públic</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=samsung-on-site-store-santiago-2015</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2010-samsung-on-site-store/gallery_00.webp</image:loc>
+      <image:title>Samsung | On Site Store - Santiago 2015</image:title>
+      <image:caption>En 2015, WAV BTL diseñó e implementó la estrategia On Site Store para Samsung en Santiago, Chile. Esta activación transformó el punto de venta en un espacio interactivo donde los consumidores experime</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-converse-gathering</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-converse-gathering/gallery_00.webp</image:loc>
+      <image:title>Converse Gathering 2022: Inspiración All Stars en Chile</image:title>
+      <image:caption>En 2022, Converse, de la mano de WAV BTL, celebró el Gathering, una activación experiencial diseñada para conectar a la marca con jóvenes creadores y artistas emergentes en Chile. El evento se centró </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-coopeuch-convencion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-coopeuch-convencion/gallery_00.webp</image:loc>
+      <image:title>COOPEUCH 2020: Una Convención que Inspiró el Futuro</image:title>
+      <image:caption>En WAV BTL, diseñamos y ejecutamos la Convención COOPEUCH 2020, un evento trascendental para la marca. El objetivo principal fue inspirar y motivar a los colaboradores, proyectando una visión de futur</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-copec-aniversario-84-anos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-copec-aniversario-84-anos/gallery_00.webp</image:loc>
+      <image:title>Copec Celebra 84 Años: Una Experiencia de Marca Inolvidable</image:title>
+      <image:caption>En 2022, Copec cumplió 84 años de historia, innovación y servicio al país. Para celebrar este hito, WAV BTL creó una experiencia de marca a la altura de su trayectoria. El evento buscó reconocer la la</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-cummins-summit</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-cummins-summit/gallery_00.webp</image:loc>
+      <image:title>Cummins Summit 2022: Impulsando el Futuro de la Energía en Chile</image:title>
+      <image:caption>En el Cummins Summit 2022, WAV BTL diseñó una activación completa, desde la conceptualización hasta la ejecución, para conectar a Cummins con sus stakeholders clave en Chile. El evento contó con prese</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-fraccion-apertura-bolsa-de-comercio</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-fraccion-apertura-bolsa-de-comercio/gallery_00.webp</image:loc>
+      <image:title>FRACCIÓN en la Apertura de la Bolsa de Comercio: Un Debut con Impacto</image:title>
+      <image:caption>En 2022, WAV BTL tuvo el honor de colaborar con FRACCIÓN en la importante apertura de la Bolsa de Comercio. Diseñamos una experiencia de marca que no solo celebrara este hito, sino que también refleja</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-lee-bluesessions</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-lee-bluesessions/gallery_00.webp</image:loc>
+      <image:title>LEE Bluesessions 2021: Una Noche de Estilo y Sonido</image:title>
+      <image:caption>En 2021, WAV BTL colaboró con LEE para dar vida a Bluesessions, una experiencia de marca inmersiva que combinó la autenticidad del blues con el estilo inconfundible de la marca. El evento, realizado e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2016-myrasalud-lanzamiento-centro-de-salud</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2016-myrasalud-lanzamiento-centro-de-salud/gallery_00.webp</image:loc>
+      <image:title>MyraSalud: WAV BTL impulsa el exitoso lanzamiento de su nuevo Centro de Salud.</image:title>
+      <image:caption>WAV BTL se enorgullece de haber sido parte fundamental en el lanzamiento del nuevo Centro de Salud de MyraSalud. El evento, diseñado para transmitir la visión y los valores de la marca, contó con la p</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-altra-produccion-e-influencer-marketing-costa-rica</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-altra-produccion-e-influencer-marketing-costa-rica/gallery_00.webp</image:loc>
+      <image:title>ALTRA lleva el Trail Running al Paraíso: Producción e Influencer Marketing en Costa Rica 2023</image:title>
+      <image:caption>En 2023, WAV BTL colaboró con ALTRA para llevar su pasión por el trail running a Costa Rica, mediante una impecable producción de evento y una estratégica campaña de influencer marketing. El evento, u</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-converse-8m</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-converse-8m/gallery_00.webp</image:loc>
+      <image:title>Converse Celebra el 8M: Una Experiencia Creativa en GAM</image:title>
+      <image:caption>En el marco del Día Internacional de la Mujer, Converse apostó por una activación BTL memorable en el corazón del Centro Cultural Gabriela Mistral (GAM). El evento buscó generar un espacio de expresió</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-lg-stand-casa-costanera</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-lg-stand-casa-costanera/gallery_00.webp</image:loc>
+      <image:title>LG Impulsa Experiencias Innovadoras en Casa Costanera con WAV BTL</image:title>
+      <image:caption>En 2022, LG confió en WAV BTL para diseñar y ejecutar una activación de marca impactante en Casa Costanera. El stand, conceptualizado como un espacio hogareño moderno y estilizado, permitió a los visi</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-mistral-primavera-fauna-experience</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-mistral-primavera-fauna-experience/gallery_00.webp</image:loc>
+      <image:title>Mistral Refrescó Primavera Fauna 2022: Una Experiencia Inolvidable</image:title>
+      <image:caption>En WAV BTL, diseñamos una activación impactante para Mistral en Primavera Fauna 2022, transformando el festival en un oasis de frescura y entretención. Buscamos conectar con el público asistente a tra</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-schwarzkopf-lanzamiento-bonacure</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-schwarzkopf-lanzamiento-bonacure/gallery_00.webp</image:loc>
+      <image:title>Schwarzkopf y WAV BTL: Un Lanzamiento Bonacure Inolvidable</image:title>
+      <image:caption>En 2022, WAV BTL tuvo el honor de colaborar con Schwarzkopf Professional en el lanzamiento de su renovada línea Bonacure. Diseñamos un evento BTL que buscaba sumergir a los asistentes en el mundo de l</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2017-sofofa-plan-estrategico</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2017-sofofa-plan-estrategico/gallery_00.webp</image:loc>
+      <image:title>SOFOFA y WAV BTL: Impulsando la Estrategia 2022 con Experiencias Memorables</image:title>
+      <image:caption>En WAV BTL, nos enorgullece haber colaborado con SOFOFA en la presentación de su Plan Estratégico 2022. Desarrollamos una activación BTL de alto impacto que conectó a los asistentes con la visión y lo</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=samsung-lanzamiento-galaxy-note-8-santiago-2017</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2009-samsung-galaxy-note-8-launch/gallery_00.webp</image:loc>
+      <image:title>Samsung | Lanzamiento Galaxy Note 8 - Santiago 2017</image:title>
+      <image:caption>En octubre de 2017, Samsung confió en WAV BTL para el lanzamiento del innovador Galaxy Note 8 en Santiago, Chile. Diseñamos una experiencia inmersiva y sofisticada que reflejaba la calidad premium del</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-converse-find-your-beat-2</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-converse-find-your-beat-2/gallery_00.webp</image:loc>
+      <image:title>CONVERSE FIND YOUR BEAT 2: Activación BTL Impulsa la Cultura Urbana</image:title>
+      <image:caption>WAV BTL materializó la visión de CONVERSE en FIND YOUR BEAT 2, un evento experiencial diseñado para resonar con la audiencia joven y urbana de Chile. La activación integró a la perfección la identidad</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-copec-aniversario-85-anos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-copec-aniversario-85-anos/gallery_00.webp</image:loc>
+      <image:title>Copec Celebra 85 Años con Espectacular Activación Experiencial</image:title>
+      <image:caption>Para celebrar el 85 aniversario de Copec, WAV BTL diseñó y ejecutó una activación experiencial de alto impacto, sumergiendo a los asistentes en un viaje a través de la historia y los valores de la com</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-hendrick-s-casa-costanera-activacion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-hendrick-s-casa-costanera-activacion/gallery_00.webp</image:loc>
+      <image:title>Hendrick&apos;s transforma Casa Costanera: Una experiencia BTL Inolvidable</image:title>
+      <image:caption>En 2023, WAV BTL colaboró con Hendrick&apos;s para desarrollar una activación experiencial impactante en Casa Costanera. Transformamos un espacio urbano clave en un punto de contacto directo con la marca, </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-mg-motor-dealer-conference</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-mg-motor-dealer-conference/gallery_00.webp</image:loc>
+      <image:title>MG Motor Dealer Conference 2023: Impulsando el Futuro de la Movilidad</image:title>
+      <image:caption>En WAV BTL, nos enorgullece haber sido parte de la MG Motor Dealer Conference 2023, un evento clave para alinear estrategias, celebrar logros y proyectar el futuro de la marca en Chile. Diseñamos una </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-mg-motor-exhibicion-alto-las-condes</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-mg-motor-exhibicion-alto-las-condes/gallery_00.webp</image:loc>
+      <image:title>MG Motor Impulsa Experiencias Inolvidables en Alto Las Condes</image:title>
+      <image:caption>En 2023, WAV BTL colaboró con MG Motor para crear una exhibición impactante en el prestigioso centro comercial Alto Las Condes. El objetivo principal fue acercar la innovadora gama de vehículos MG a u</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-mg-motor-mg-one-lanzamiento</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-mg-motor-mg-one-lanzamiento/gallery_00.webp</image:loc>
+      <image:title>MG Motor Despliega Innovación y Conectividad en el Lanzamiento del MG ONE 2023</image:title>
+      <image:caption>En 2023, WAV BTL colaboró con MG Motor para la presentación oficial en Chile del MG ONE, un vehículo que redefine la conectividad y el diseño. El evento, diseñado como una inmersión total en el univer</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2018-mg-motor-stand-experiencia-e</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2018-mg-motor-stand-experiencia-e/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa la Experiencia Eléctrica de MG Motor en 2023</image:title>
+      <image:caption>En 2023, WAV BTL colaboró con MG Motor para crear un stand inmersivo y de alto impacto centrado en su línea de vehículos eléctricos. El diseño del stand buscó transmitir la modernidad, la tecnología y</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-always-influencers-offline-to-online</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-always-influencers-offline-to-online/gallery_00.webp</image:loc>
+      <image:title>WAV BTL: Always - Influencers Offline to Online 2024</image:title>
+      <image:caption>WAV BTL diseñó y ejecutó el evento &apos;Influencers Offline to Online&apos; para Always, un encuentro exclusivo donde destacadas figuras de redes sociales se sumergieron en una experiencia de marca inmersiva. </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-bioritmo-lanzamiento-gimnasio-panama</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-bioritmo-lanzamiento-gimnasio-panama/gallery_00.webp</image:loc>
+      <image:title>Activación BTL: Bioritmo revoluciona Panamá con su nuevo gimnasio</image:title>
+      <image:caption>En WAV BTL diseñamos una experiencia de marca impactante para el lanzamiento del nuevo gimnasio Bioritmo en Panamá. Transformamos un espacio urbano en un oasis de bienestar, invitando a los asistentes</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-ocean-spray-ttl-cosecha</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-ocean-spray-ttl-cosecha/gallery_00.webp</image:loc>
+      <image:title>WAV BTL y Ocean Spray: Una Cosecha Inolvidable en TTL 2023</image:title>
+      <image:caption>En 2023, WAV BTL tuvo el privilegio de colaborar con Ocean Spray para llevar la experiencia de su cosecha TTL a un nuevo nivel. Diseñamos e implementamos una activación BTL inmersiva que permitió a lo</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-pichara-activacion-mall-bogota</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-pichara-activacion-mall-bogota/gallery_00.webp</image:loc>
+      <image:title>Pichara ilumina Bogotá: Activación BTL Exclusiva en Mall</image:title>
+      <image:caption>En WAV BTL, diseñamos y ejecutamos una activación BTL para Pichara en el concurrido Mall de Bogotá, con el objetivo de amplificar el reconocimiento de la marca y conectar de manera directa con los con</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-pichara-lollapalooza</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-pichara-lollapalooza/gallery_00.webp</image:loc>
+      <image:title>Pichara y WAV BTL: Un Éxito Experiencial en Lollapalooza Chile 2023</image:title>
+      <image:caption>En Lollapalooza Chile 2023, WAV BTL diseñó y ejecutó una activación BTL para Pichara que superó las expectativas.  Basándonos en las imágenes que nos proporcionaron, la activación se centró en la crea</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-pichara-stand-cosmetic-beauty-lima</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-pichara-stand-cosmetic-beauty-lima/gallery_00.webp</image:loc>
+      <image:title>Pichara Impulsa el Beauty Retail en Lima con Stand Experiencial</image:title>
+      <image:caption>En Cosmetic Beauty Lima 2023, Pichara, de la mano de WAV BTL, revolucionó la experiencia de compra de productos de belleza con un stand interactivo y dinámico. Se buscó conectar con el público peruano</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2019-soprole-stand-feria-laboral</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2019-soprole-stand-feria-laboral/gallery_00.webp</image:loc>
+      <image:title>Soprole Impulsa Talento en Feria Laboral 2023</image:title>
+      <image:caption>En la reciente Feria Laboral 2023, Soprole se destacó con un stand innovador diseñado por WAV BTL, transformando la experiencia de los asistentes y posicionando a la marca como un empleador de elecció</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-birkenstock-apertura-tienda-bogota</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-birkenstock-apertura-tienda-bogota/gallery_00.webp</image:loc>
+      <image:title>Birkenstock aterriza en Bogotá: Una Experiencia de Confort y Estilo</image:title>
+      <image:caption>En WAV BTL, nos enorgullecemos de haber sido parte integral del lanzamiento de la nueva tienda Birkenstock en Bogotá. La activación de apertura no fue solo un evento, sino una inmersión en el universo</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-bubble-gummers-motion-design</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-bubble-gummers-motion-design/gallery_00.webp</image:loc>
+      <image:title>Unknown y Bubble Gummers: Una Experiencia Submarina Inolvidable en 2024</image:title>
+      <image:caption>La activación incluyó un recorrido sensorial donde los asistentes exploraron diferentes ecosistemas marinos, cada uno asociado a un sabor de Bubble Gummers. Esta experiencia multisensorial no solo gen</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-buffet-abogados-carey-celebracion-navidad</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-buffet-abogados-carey-celebracion-navidad/gallery_00.webp</image:loc>
+      <image:title>Carey Abogados: Navidad 2024 - Una Experiencia Inolvidable con WAV BTL</image:title>
+      <image:caption>En WAV BTL, creamos una celebración navideña única para Carey Abogados, inspirada en el mundo mágico de Harry Potter.  Transformamos sus espacios en un entorno lleno de fantasía, con decoración temáti</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-catv-infantil-motion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-catv-infantil-motion/gallery_00.webp</image:loc>
+      <image:title>CATV Infantil: Una Aventura Nocturna Inolvidable en el Festival del Niño 2024</image:title>
+      <image:caption>En el corazón del Festival del Niño 2024, WAV BTL diseñó una activación de marca para CATV Infantil que cautivó a los más pequeños. Inspirados en la estética de la programación del canal, creamos un e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-cencosud-scotiabank-duende-magico-show</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-cencosud-scotiabank-duende-magico-show/gallery_00.webp</image:loc>
+      <image:title>Cencosud Scotiabank presenta: Duende Mágico Show 2024, una experiencia inolvidable.</image:title>
+      <image:caption>La activación incluyó la creación de espacios tematizados en el teatro, material promocional exclusivo y la amplificación de la campaña a través de redes sociales. Se buscó generar un ambiente mágico </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-cencosud-scotiabank-te-quiero-ver-feliz</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-cencosud-scotiabank-te-quiero-ver-feliz/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Ilumina la Navidad con Cencosud Scotiabank: Te Quiero Ver Feliz 2024</image:title>
+      <image:caption>Para Cencosud Scotiabank, WAV BTL diseñó e implementó una activación navideña completa en 2024, bajo el concepto &apos;Te Quiero Ver Feliz&apos;. El objetivo principal fue generar un impacto positivo en la perc</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-cencosud-the-nutcracker</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-cencosud-the-nutcracker/gallery_00.webp</image:loc>
+      <image:title>WAV BTL presenta: La Magia de El Cascanueces para Unknown en 2024</image:title>
+      <image:caption>En WAV BTL, diseñamos experiencias que conectan. Para Unknown en 2024, transformamos un espacio en un mundo de fantasía con la mágica puesta en escena de El Cascanueces. Desde la escenografía detallad</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-codelco-programa-miradas</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-codelco-programa-miradas/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa la Conexión Humana en Programa Miradas de Codelco 2024</image:title>
+      <image:caption>En 2024, WAV BTL tuvo el privilegio de colaborar con Codelco en la materialización del Programa Miradas, un evento estratégico diseñado para generar un diálogo significativo y construir relaciones dur</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-converse-lanzamiento-edge-of-style</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-converse-lanzamiento-edge-of-style/gallery_00.webp</image:loc>
+      <image:title>Converse Desata el &quot;Edge of Style&quot; en Chile: Una Noche de Moda y Música</image:title>
+      <image:caption>En 2024, Converse confió en WAV BTL para el lanzamiento de su nueva línea &quot;Edge of Style&quot; en Chile. La activación se diseñó como una inmersión total en la identidad de la marca, combinando una present</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-corona-stage-design</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-corona-stage-design/gallery_00.webp</image:loc>
+      <image:title>Corona Unknown 2024: Una Experiencia de Marca Inolvidable</image:title>
+      <image:caption>En 2024, WAV BTL colaboró con Corona para dar vida a &apos;Unknown&apos;, una experiencia de marca inmersiva y sofisticada. El evento, concebido bajo un halo de misterio, buscó conectar con el público a un nive</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-enjoy-motion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-enjoy-motion/gallery_00.webp</image:loc>
+      <image:title>Enjoy 2024: Una experiencia BTL inolvidable que redefine el juego</image:title>
+      <image:caption>WAV BTL diseñó y ejecutó una activación BTL impactante para Enjoy en 2024. Inspirándonos en la estética de un casino y la emoción del juego, creamos una experiencia inmersiva donde los participantes i</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-entel-fiesta-de-fin-de-ano</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-entel-fiesta-de-fin-de-ano/gallery_00.webp</image:loc>
+      <image:title>Entel Unknown 2024: Una Experiencia BTL Inolvidable</image:title>
+      <image:caption>En 2024, WAV BTL tuvo el privilegio de diseñar y ejecutar una experiencia BTL de alto impacto para Entel en su evento Unknown.  La activación, concebida para un público selecto y exigente, se desarrol</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2021-geely-brand-relaunch</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2021-geely-brand-relaunch/gallery_00.webp</image:loc>
+      <image:title>Geely Regresa a Chile: Una Experiencia BTL Inolvidable</image:title>
+      <image:caption>En 2024, Geely marcó su regreso al mercado chileno con un evento de relanzamiento diseñado y ejecutado por WAV BTL. La activación, desarrollada en un entorno al aire libre con un montaje imponente, bu</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-geely-ex5-stand-casa-costanera</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-geely-ex5-stand-casa-costanera/gallery_00.webp</image:loc>
+      <image:title>Geely EX5: Una Experiencia Inmersiva en Casa Costanera</image:title>
+      <image:caption>En 2024, WAV BTL elevó el estándar del marketing experiencial para Geely con la creación de un stand impactante en Casa Costanera para el modelo EX5. Este espacio, diseñado meticulosamente, ofreció a </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-geely-lanzamiento-ex5</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-geely-lanzamiento-ex5/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Lanzamiento del Nuevo Geely EX5: Una Experiencia Inmersiva</image:title>
+      <image:caption>En WAV BTL, nos enorgullece haber colaborado con Geely en el lanzamiento de su innovador EX5, un evento que buscó no solo presentar el vehículo, sino también sumergir a los asistentes en el ADN de la </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-geely-sneak-peak</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-geely-sneak-peak/gallery_00.webp</image:loc>
+      <image:title>Geely StarRay: Un Vistazo al Futuro Automotriz Chileno</image:title>
+      <image:caption>En un ambiente selecto y bajo las estrellas, Geely presentó en Chile su modelo StarRay, marcando un hito en la estrategia de la marca en el país. WAV BTL diseñó una experiencia inmersiva que permitió </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-geely-stand-navidad</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-geely-stand-navidad/gallery_00.webp</image:loc>
+      <image:title>Geely te regala la Navidad en Sky Costanera: Descubre el futuro de la movilidad</image:title>
+      <image:caption>WAV BTL ha creado un stand navideño impactante para Geely en Sky Costanera, transformando la experiencia de compra en un momento inolvidable. Los visitantes podrán admirar de cerca los últimos modelos</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-hilaria-casate-conmigo</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-hilaria-casate-conmigo/gallery_00.webp</image:loc>
+      <image:title>WAV BTL celebra el amor con Unknown en &quot;Cásate Conmigo&quot; 2024</image:title>
+      <image:caption>En WAV BTL, nos especializamos en crear momentos memorables que conectan a las marcas con sus audiencias. Para Unknown en 2024, desarrollamos una activación BTL sofisticada y emotiva en el evento &quot;Cás</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-hoka-sponsor-stand-e-influencers-marketing-ecuador</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-hoka-sponsor-stand-e-influencers-marketing-ecuador/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Éxito de HOKA en Ecuador: Activación de Marca e Influencer Marketing 2024</image:title>
+      <image:caption>La sinergia entre el stand físico y la presencia digital a través de influencers generó un impacto significativo en el conocimiento de la marca HOKA y en la consideración de compra.  Implementamos un </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2022-hyundai-apertura-sucursal-peru</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2022-hyundai-apertura-sucursal-peru/gallery_00.webp</image:loc>
+      <image:title>Hyundai Acelera en Perú: Inauguración de Nueva Sucursal con Impacto BTL</image:title>
+      <image:caption>En 2024, WAV BTL tuvo el privilegio de colaborar con Hyundai en la inauguración de su nueva sucursal en Perú. La activación se centró en crear una experiencia inmersiva para los asistentes, destacando</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-ikea-lanzamiento-tienda-medellin</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-ikea-lanzamiento-tienda-medellin/gallery_00.webp</image:loc>
+      <image:title>IKEA Medellín: Una Experiencia Inmersiva de Inauguración</image:title>
+      <image:caption>En WAV BTL, estamos orgullosos de haber liderado la estrategia de marketing experiencial para el lanzamiento de la primera tienda IKEA en Medellín. Diseñamos una experiencia inmersiva que capturó la e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-mg-motor-car-display</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-mg-motor-car-display/gallery_00.webp</image:loc>
+      <image:title>MG Motor Electriza el Estadio: Un Car Display Inolvidable con WAV BTL</image:title>
+      <image:caption>MG Motor confió en WAV BTL para generar un impacto memorable en un evento de alto calibre en el estadio. A través de una estrategia BTL meticulosamente planificada, logramos una visibilidad sin preced</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-mg-motor-dealer-conference-peru</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-mg-motor-dealer-conference-peru/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Éxito de MG Motor en la Dealer Conference Perú 2024</image:title>
+      <image:caption>En WAV BTL, nos enorgullece haber colaborado con MG Motor en la exitosa realización de la Dealer Conference Perú 2024. Esta conferencia reunió a los principales distribuidores de la marca en un ambien</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-mistral-auspicios-y-activaciones</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-mistral-auspicios-y-activaciones/gallery_00.webp</image:loc>
+      <image:title>Unknown Vibra Ultra: Activación BTL que Electrizó el 2024</image:title>
+      <image:caption>WAV BTL diseñó e implementó una activación de alto impacto para la marca Unknown en Ultra Chile 2024. Buscábamos conectar con la audiencia a través de una experiencia sensorial que resonara con la ene</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-mistral-stand-primavera-fauna</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-mistral-stand-primavera-fauna/gallery_00.webp</image:loc>
+      <image:title>Mistral Unknown 2024: Una Experiencia Inolvidable Creada por WAV BTL</image:title>
+      <image:caption>En 2024, WAV BTL tuvo el privilegio de colaborar con Mistral en una activación experiencial cuyo nombre clave fue &apos;Unknown&apos;.  Basándonos en el espíritu joven y la tradición de la marca, creamos un amb</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-monticello-grand-arena-gamedev</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-monticello-grand-arena-gamedev/gallery_00.webp</image:loc>
+      <image:title>Monticello Grand Arena 2024: Experiencias Inolvidables con WAV BTL</image:title>
+      <image:caption>En 2024, WAV BTL se enorgulleció de colaborar con Monticello para elevar la experiencia en Grand Arena. Diseñamos y ejecutamos una activación BTL que transformó el ambiente, sumergiendo a los asistent</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2023-omega-navidad</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2023-omega-navidad/gallery_00.webp</image:loc>
+      <image:title>Omega Brilla en Navidad: Una Experiencia Exclusiva</image:title>
+      <image:caption>En esta Navidad 2024, WAV BTL tuvo el privilegio de colaborar con Omega para crear una experiencia inolvidable. Diseñamos un evento exclusivo, con un ambiente sofisticado y detalles que reflejaban la </image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2020-santander-convencion-de-ventas</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2020-santander-convencion-de-ventas/gallery_00.webp</image:loc>
+      <image:title>Santander Unknown 2024: Experiencia Inmersiva para sus Colaboradores</image:title>
+      <image:caption>La ejecución de &apos;Unknown&apos; para Santander fue un claro ejemplo del expertise de WAV BTL en la creación de experiencias de marca memorables. Desde la concepción creativa hasta la implementación técnica,</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-pisco-mistral-auspicios-eventos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-pisco-mistral-auspicios-eventos/gallery_00.webp</image:loc>
+      <image:title>Pisco Mistral Electriza la Noche: Una Experiencia Inolvidable</image:title>
+      <image:caption>Para Pisco Mistral, WAV BTL diseñó una experiencia de marca inmersiva que capturó la esencia de la marca en un ambiente nocturno vibrante. El evento, concebido para un público joven y moderno, buscó r</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-sofofa-progreso</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-sofofa-progreso/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa el Progreso de Unknown en Evento Exclusivo 2024</image:title>
+      <image:caption>En WAV BTL, entendemos el poder de las experiencias para conectar marcas con su audiencia de manera significativa. Para Unknown en 2024, creamos un evento bajo el concepto &apos;Progreso&apos; que buscó inspira</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-sqm-stand-feria-litio</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-sqm-stand-feria-litio/gallery_00.webp</image:loc>
+      <image:title>SQM Lidera la Feria del Litio 2024 con Stand de Impacto</image:title>
+      <image:caption>En la Feria del Litio 2024, SQM, de la mano de WAV BTL, presentó un stand de vanguardia diseñado para comunicar su compromiso con la innovación y la sostenibilidad en la producción de litio. La activa</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-sura-summit</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-sura-summit/gallery_00.webp</image:loc>
+      <image:title>SURA Summit 2024: Impulsando un Futuro Más Resiliente</image:title>
+      <image:caption>WAV BTL se enorgullece de haber colaborado con SURA en la creación del Summit 2024, un evento de alto impacto diseñado para inspirar y empoderar a los líderes empresariales chilenos. A través de una e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-turbus-unknown</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-turbus-unknown/gallery_00.webp</image:loc>
+      <image:title>Turbus: Impulsando la Movilidad Sostenible con Buses Eléctricos</image:title>
+      <image:caption>Turbus, en colaboración con WAV BTL, lideró una impactante activación centrada en dar a conocer los beneficios de su flota de buses eléctricos. El evento buscó informar y sensibilizar al público sobre</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2024-tvn-super-estrellas-tvn-sets</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2024-tvn-super-estrellas-tvn-sets/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Ilumina el Escenario de TVN con Super Estrellas TVN Sets 2024</image:title>
+      <image:caption>Para el evento Super Estrellas TVN Sets 2024, TVN confió en WAV BTL para crear un ambiente escénico inmersivo y memorable.  Nuestro equipo se encargó del diseño y la producción integral de los sets, i</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2025-angloamerican-transformacion-y-resultados</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2025-angloamerican-transformacion-y-resultados/gallery_00.webp</image:loc>
+      <image:title>AngloAmerican: Una Década de Transformación y Resultados - Celebrado en 2029</image:title>
+      <image:caption>En WAV BTL tuvimos el privilegio de diseñar y ejecutar la celebración de AngloAmerican &apos;Transformación y Resultados&apos; en 2029. El evento fue concebido como un hito para reconocer una década de progreso</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2025-colinas-del-urubo-ooh-bolivia</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2025-colinas-del-urubo-ooh-bolivia/gallery_00.webp</image:loc>
+      <image:title>Colinas del Urubó: Impacto OOH en Bolivia, 2027</image:title>
+      <image:caption>En 2027, WAV BTL lideró la campaña de Out-of-Home (OOH) para Colinas del Urubó, consolidando su presencia en el mercado boliviano. La estrategia se centró en puntos clave de alto tráfico, resaltando e</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2025-umbro-100-anos</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2025-umbro-100-anos/gallery_00.webp</image:loc>
+      <image:title>UMBRO: 100 Años de Legado Deportivo – Celebración Exclusiva</image:title>
+      <image:caption>Con motivo del centenario de UMBRO, WAV BTL diseñó una activación de marca enfocada en resaltar la rica historia y el legado de la marca en el mundo deportivo. A través de una exhibición visualmente i</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=2025-zumbastico-studios-motion</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2025-zumbastico-studios-motion/gallery_00.webp</image:loc>
+      <image:title>WAV BTL Impulsa la Creatividad de Zumbastico Studios en 2024</image:title>
+      <image:caption>En 2024, WAV BTL tuvo el privilegio de asociarse con Zumbastico Studios, un referente en la animación y producción audiovisual chilena, para dar vida a una activación experiencial única. Si bien los d</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://btl.wearevision.cl/?evento=control-c-activacion-btl-santiago-2025</loc>
+    <lastmod>2025-12-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://ykkmplrnqcwpgfdjshxn.supabase.co/storage/v1/object/public/events/2008-control-barra-auspicios/gallery_00.webp</image:loc>
+      <image:title>Control C | Activación BTL - Santiago 2025</image:title>
+      <image:caption>En 2025, WAV BTL llevó a cabo una activación de marca excepcional para Control Pisco, creando una barra de auspicios que cautivó a los asistentes con su diseño elegante y sofisticado. Esta activación </image:caption>
+    </image:image>
+  </url>
+</urlset>

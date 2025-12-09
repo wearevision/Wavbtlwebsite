@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "title": "We Are Vision (WAV) - Marketing Experiencial & BTL Portfolio",
+    "description": "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas.",
+    "baseUrl": "https://btl.wearevision.cl",
+    "generatedAt": "2025-12-03T00:00:00.000Z",
+    "totalEvents": 0,
+    "note": "Este archivo se regenera automáticamente desde el Admin Panel",
+    "seo": {
+      "keywords": [
+        "Agencia BTL Chile",
+        "Marketing Experiencial",
+        "Activaciones de Marca",
+        "Producción de Eventos",
+        "Instalaciones Tecnológicas",
+        "We Are Vision",
+        "WAV BTL",
+        "Eventos Corporativos",
+        "Lanzamiento de Productos",
+        "Experiencias Inmersivas"
+      ],
+      "language": "es-CL",
+      "region": "Chile, LATAM"
+    }
+  },
+  "pages": [
+    {
+      "url": "https://btl.wearevision.cl/",
+      "title": "We Are Vision | Portfolio BTL",
+      "description": "Explora nuestro portafolio de proyectos de marketing experiencial y activaciones de marca.",
+      "lastModified": "2025-12-03",
+      "priority": 1.0,
+      "type": "homepage"
+    },
+    {
+      "url": "https://btl.wearevision.cl/nosotros",
+      "title": "Nosotros | We Are Vision",
+      "description": "Conoce más sobre nuestra agencia y equipo.",
+      "lastModified": "2025-12-03",
+      "priority": 0.9,
+      "type": "page"
+    },
+    {
+      "url": "https://btl.wearevision.cl/servicios",
+      "title": "Servicios | We Are Vision",
+      "description": "Descubre nuestros servicios de marketing experiencial y producción de eventos.",
+      "lastModified": "2025-12-03",
+      "priority": 0.9,
+      "type": "page"
+    },
+    {
+      "url": "https://btl.wearevision.cl/contacto",
+      "title": "Contacto | We Are Vision",
+      "description": "Ponte en contacto con nosotros para tu próximo proyecto.",
+      "lastModified": "2025-12-03",
+      "priority": 0.8,
+      "type": "page"
+    }
+  ],
+  "events": []
+}

@@ -149,6 +149,7 @@ export const normalizeEventForSave = (rawEvent: any): any => {
     og_image: rawEvent.og_image || '',
 
     // CONTENT (Extended)
+    technical_summary: rawEvent.technical_summary || '',
     summary: rawEvent.summary || '',
     highlights: Array.isArray(rawEvent.highlights) ? rawEvent.highlights : [],
     tone: rawEvent.tone || '',
