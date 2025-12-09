@@ -66,6 +66,8 @@ export default function App() {
   // Debug Version
   useEffect(() => {
     console.log("WAV BTL App v2.1.2 - Build Cache Force Refresh");
+    console.log("🚀 DEPLOYMENT V1.2.0 - CRITICAL FIX APPLIED");
+    console.log("⏰ Timestamp: " + new Date().toISOString());
   }, []);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
