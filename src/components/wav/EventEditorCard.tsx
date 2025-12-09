@@ -6,7 +6,7 @@ import {
 import { FormField } from './FormField';
 import { ShareLinkButton } from './ShareLinkButton';
 import { getCharCount } from '../../utils/validation';
-import { WavEvent } from '../../src/types';
+import { WavEvent } from '../../types';
 import { FIELD_TOOLTIPS } from '../../utils/validation';
 
 interface EventEditorCardProps {

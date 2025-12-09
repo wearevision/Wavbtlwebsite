@@ -5,7 +5,7 @@
  */
 
 import { EventCategory } from './contentRules';
-import { WavEvent } from '../src/types';
+import { WavEvent } from '../types';
 
 /**
  * Normaliza texto para comparación (lowercase, sin tildes, sin espacios extra)

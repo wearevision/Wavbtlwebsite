@@ -150,6 +150,7 @@
     --font-weight-black: 900;
     --tracking-tighter: -.05em;
     --tracking-tight: -.025em;
+    --tracking-normal: 0em;
     --tracking-wide: .025em;
     --tracking-wider: .05em;
     --tracking-widest: .1em;
@@ -622,6 +623,10 @@
 
   .z-\[200\] {
     z-index: 200;
+  }
+
+  .z-\[300\] {
+    z-index: 300;
   }
 
   .container {
@@ -2014,6 +2019,10 @@
     text-align: left;
   }
 
+  .align-top {
+    vertical-align: top;
+  }
+
   .font-\[\'Outfit\'\] {
     font-family: Outfit;
   }
@@ -2126,6 +2135,11 @@
   .tracking-\[0\.3em\] {
     --tw-tracking: .3em;
     letter-spacing: .3em;
+  }
+
+  .tracking-normal {
+    --tw-tracking: var(--tracking-normal);
+    letter-spacing: var(--tracking-normal);
   }
 
   .tracking-tight {
@@ -2261,6 +2275,10 @@
 
   .text-purple-400 {
     color: var(--color-purple-400);
+  }
+
+  .text-purple-500 {
+    color: var(--color-purple-500);
   }
 
   .text-red-400 {

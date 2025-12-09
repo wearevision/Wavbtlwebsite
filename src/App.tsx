@@ -60,6 +60,11 @@ const ensureUniqueSlugs = (events: WavEvent[]): WavEvent[] => {
 };
 
 export default function App() {
+  // Debug Version
+  useEffect(() => {
+    console.log("WAV BTL App v2.1.2 - Build Cache Force Refresh");
+  }, []);
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   // Initialize isMobile with correct value to prevent flash/reflow
@@ -556,18 +561,20 @@ export default function App() {
         {/* About / Info Modal */}
         <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
-        {/* Info Trigger Button (Bottom Right) */}
-        <div className="fixed bottom-8 right-8 z-[110]">
-          <TrapezoidButton
-            onClick={() => setShowAbout(true)}
-            ariaLabel="Información y FAQ"
-            variant="solid"
-            size="md"
-            className="hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-          >
-            <Info size={24} />
-          </TrapezoidButton>
-        </div>
+        {/* Info Trigger Button (Bottom Right) - Hidden when Admin Panel is open */}
+        {!showAdmin && (
+          <div className="fixed bottom-8 right-8 z-[300]">
+            <TrapezoidButton
+              onClick={() => setShowAbout(true)}
+              ariaLabel="Información y FAQ"
+              variant="solid"
+              size="md"
+              className="hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+            >
+              <Info size={24} />
+            </TrapezoidButton>
+          </div>
+        )}
 
         {/* Admin Trigger Button */}
         <button 

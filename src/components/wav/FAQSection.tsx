@@ -1,3 +1,8 @@
+/**
+ * FAQSection - Preguntas Frecuentes
+ * v2.1.2 - Build Refresh
+ */
+
 import React from 'react';
 
 export const FAQSection = () => {

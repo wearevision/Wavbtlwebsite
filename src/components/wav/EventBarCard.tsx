@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { WavEvent } from '../../src/types';
+import { WavEvent } from '../../types';
 import { ImageIcon } from 'lucide-react';
 import { optimizeForThumbnail } from '../../utils/imageOptimizer';
 

@@ -12,7 +12,7 @@ import { OpenAIStatusIndicator } from './OpenAIStatusIndicator';
 import { ClaudeOptimizer } from './ClaudeOptimizer';
 import { FormField } from './FormField';
 import { Progress } from '../ui/progress';
-import { WavEvent } from '../../src/types';
+import { WavEvent } from '../../types';
 import { EventCategory } from '../../utils/contentRules';
 import { FIELD_TOOLTIPS, getCharCount } from '../../utils/validation';
 import { generateXMLSitemap, generateJSONSitemap, downloadFile } from '../../utils/sitemapGenerator';
@@ -239,7 +239,7 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="w-full max-w-md border border-white/10 bg-black/60 backdrop-blur-xl p-8">
           <div className="mb-8">
-            <h1 className="text-2xl mb-2">WAV BTL</h1>
+            <h1 className="text-2xl mb-2">WAV BTL <span className="text-xs align-top text-purple-500">v2.1</span></h1>
             <p className="text-white/40 text-sm">Admin Panel — CMS</p>
           </div>
           
@@ -292,7 +292,7 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
 
           {/* Logo/Title */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <h1 className="text-sm font-mono tracking-[0.3em] uppercase">WAV CMS</h1>
+            <h1 className="text-sm font-mono tracking-[0.3em] uppercase">WAV CMS <span className="text-[9px] text-purple-400 tracking-normal">v2.1</span></h1>
             <span className="text-[10px] text-white/30 font-mono">
               {events.length}
             </span>
@@ -348,15 +348,7 @@ export const AdminPanelMinimal = ({ onBack, categories = [] }: AdminPanelMinimal
               disabled={saving || isSyncing}
               variant="primary"
             />
-            {/*
-            <MenuButton
-              icon={<Sparkles size={16} />}
-              label="Ingesta Masiva AI"
-              onClick={handleMassIngest}
-              disabled={saving || isSyncing}
-              variant="gradient"
-            />
-            */}
+            
             <MenuButton
               icon={<Download size={16} />}
               label="Descargar events.ts"

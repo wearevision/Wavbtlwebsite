@@ -17,7 +17,7 @@ import { ClaudeOptimizer } from './ClaudeOptimizer';
 import { FIELD_TOOLTIPS, getCharCount, validateEvent } from '../../utils/validation';
 import { EventCategory } from '../../utils/contentRules';
 import { Progress } from '../ui/progress';
-import { WavEvent } from '../../src/types';
+import { WavEvent } from '../../types';
 
 interface AdminPanelProps {
   onBack: () => void;

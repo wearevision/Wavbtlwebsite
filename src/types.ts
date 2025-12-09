@@ -12,7 +12,7 @@ export interface WavMedia {
 }
 
 export interface WavEvent {
-  id: string;
+  id?: string;
   brand: string;
   title: string;
   description: string;

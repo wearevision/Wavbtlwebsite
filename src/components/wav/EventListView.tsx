@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { WavEvent } from '../../src/types';
+import { WavEvent } from '../../types';
 import { FilterBar } from './FilterBar';
 import { EventBarCard, SkeletonEventBar } from './EventBarCard';
 import { EventCategory } from '../../utils/contentRules';

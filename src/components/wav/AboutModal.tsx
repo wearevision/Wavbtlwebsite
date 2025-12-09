@@ -1,3 +1,8 @@
+/**
+ * AboutModal - Información de We Are Vision
+ * v2.1.2 - Build Refresh Force Trigger
+ */
+
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
