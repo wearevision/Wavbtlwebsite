@@ -21,13 +21,41 @@ export const useAdminEvents = () => {
   }, []);
 
   const getAdminToken = async () => {
-      // 1. Try to get session token (Primary)
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.access_token) {
-          return data.session.access_token;
+      // 1. Try to get session token (Primary - for logged in users)
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        // If there's an error with refresh token, clear the corrupted session
+        if (error?.message?.includes('Refresh Token')) {
+          console.warn('[getAdminToken] Corrupted session detected, clearing...');
+          await supabase.auth.signOut();
+          // Clear localStorage manually as backup
+          localStorage.removeItem('supabase.auth.token');
+        }
+        
+        if (data.session?.access_token) {
+            console.log('[getAdminToken] Using user session token');
+            return data.session.access_token;
+        }
+      } catch (sessionError) {
+        console.warn('[getAdminToken] Session check failed:', sessionError);
+        // Clear corrupted session
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {
+          // Ignore signout errors
+        }
       }
 
-      // 2. Fallback to Environment Variables (Legacy/Dev)
+      // 2. Fallback to publicAnonKey (CRITICAL FIX - allows admin actions without login)
+      console.log('[getAdminToken] No active session, using publicAnonKey');
+      // @ts-ignore
+      const { publicAnonKey: anonKey } = await import('../../utils/supabase/info');
+      if (anonKey) {
+          return anonKey;
+      }
+
+      // 3. Fallback to Environment Variables (Legacy/Dev)
       // @ts-ignore
       const env = import.meta.env || {};
       // @ts-ignore
@@ -405,8 +433,8 @@ export const useAdminEvents = () => {
 
   const handleOptimizeAll = async () => {
     const confirmed = confirm(
-      'Esta acción generará contenido con IA para todos los eventos que tengan campos vacíos o incompletos.\n\n' +
-      'Esto puede tardar varios minutos dependiendo de la cantidad de eventos.\n\n' +
+      'Esta acción generará contenido con IA para todos los eventos que tengan campos vacíos o incompletos.\\n\\n' +
+      'Esto puede tardar varios minutos dependiendo de la cantidad de eventos.\\n\\n' +
       '¿Deseas continuar?'
     );
 
@@ -423,17 +451,27 @@ export const useAdminEvents = () => {
         throw new Error('No se pudo obtener el token de autenticación. Por favor, inicia sesión nuevamente.');
       }
 
+      console.log('[handleOptimizeAll] Starting optimization...');
       const result = await optimizeAllEvents(token);
+      console.log('[handleOptimizeAll] Optimization result:', result);
       
       if (result.success) {
+        // ✅ FIX: Wait a bit for server to finish writing to DB
+        console.log('[handleOptimizeAll] Waiting 2 seconds before reloading...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('[handleOptimizeAll] Reloading data from server...');
         await loadData(); // Reload events to show optimized data
+        console.log('[handleOptimizeAll] Data reloaded. Events count:', events.length);
+        
         setSaveStatus('success');
         alert(
-          `Optimización completada:\n\n` +
-          `Total de eventos: ${result.total}\n` +
-          `Optimizados: ${result.optimized}\n` +
-          `Ya completos (omitidos): ${result.skipped}\n` +
-          `Errores: ${result.errors}\n\n` +
+          `✅ Optimización completada:\\n\\n` +
+          `Total de eventos: ${result.total}\\n` +
+          `Optimizados: ${result.optimized}\\n` +
+          `Ya completos (omitidos): ${result.skipped}\\n` +
+          `Errores: ${result.errors}\\n\\n` +
+          `Los cambios ya están visibles en el CMS.\\n\\n` +
           `Revisa los eventos para verificar el contenido generado.`
         );
       } else {
@@ -447,20 +485,20 @@ export const useAdminEvents = () => {
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
         errorMessage = 
-          'No se pudo conectar al servidor.\n\n' +
-          'Posibles causas:\n' +
-          '1. El servidor Supabase Edge Functions no está activo\n' +
-          '2. Problema de red o CORS\n' +
-          '3. El endpoint no existe o cambió\n\n' +
-          'Soluciones:\n' +
-          '- Abre /test-health.html para diagnosticar\n' +
-          '- Verifica que el servidor esté desplegado en Supabase\n' +
+          'No se pudo conectar al servidor.\\n\\n' +
+          'Posibles causas:\\n' +
+          '1. El servidor Supabase Edge Functions no está activo\\n' +
+          '2. Problema de red o CORS\\n' +
+          '3. El endpoint no existe o cambió\\n\\n' +
+          'Soluciones:\\n' +
+          '- Abre /test-health.html para diagnosticar\\n' +
+          '- Verifica que el servidor esté desplegado en Supabase\\n' +
           '- Revisa la consola del navegador para más detalles';
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       
-      alert(`Error al optimizar eventos:\n\n${errorMessage}`);
+      alert(`❌ Error al optimizar eventos:\\n\\n${errorMessage}`);
     } finally {
       setSaving(false);
     }

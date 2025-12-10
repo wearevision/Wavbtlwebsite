@@ -1128,15 +1128,7 @@ const EventDetailMobile: React.FC<EventDetailMobileProps> = ({
           <div className="space-y-3">
             <MediaPreviewMobile label="Cover" src={event.image} />
             <MediaPreviewMobile label="Logo" src={event.logo} />
-            <MediaPreviewMobile label="OpenGraph" src={event.og_image} />
           </div>
-
-          <FormField
-            label="URL OpenGraph (Imagen para Redes)"
-            value={event.og_image || ''}
-            onChange={(value) => updateEvent(eventIndex, 'og_image', value)}
-            placeholder="https://..."
-          />
 
           {/* OpenGraph Share Link with Visual Preview */}
           {event.slug && (

@@ -57,6 +57,13 @@ export const CircularNavButton: React.FC<CircularNavButtonProps> = ({
         scale: isActive ? { duration: 0.3, ease: 'easeOut' } : { duration: 0.2 }
       }}
       aria-label={ariaLabel}
+      style={{
+        // Garantizar touch target mínimo de 44x44px (accesibilidad)
+        minWidth: '44px',
+        minHeight: '44px',
+        // Área de touch en mobile (iOS/Android)
+        WebkitTapHighlightColor: 'transparent'
+      }}
     >
       <div className="relative w-14 h-14 lg:w-16 lg:h-16">
         {/* SVG Circle with Gradient Fill */}

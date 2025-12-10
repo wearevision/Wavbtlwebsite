@@ -146,33 +146,27 @@ const verifyAuth = async (c: any) => {
 
   // 1.5 Check Anon Key (Allow migration from frontend without login if needed)
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (anonKey) {
-    if (token === anonKey) {
-      console.log("Auth warning: Request authorized via SUPABASE_ANON_KEY");
-      return { authorized: true, method: "anon_key" };
-    } else {
-       // Debug info for frontend
-       const debugInfo = `Token len: ${token.length}, EnvKey len: ${anonKey.length}, Token prefix: ${token.substring(0, 5)}, EnvKey prefix: ${anonKey.substring(0, 5)}`;
-       console.log(`Anon Key check failed. ${debugInfo}`);
-       // Don't return false yet, try Supabase Auth
-    }
-  } else {
-    console.error("CRITICAL: SUPABASE_ANON_KEY not found in environment variables");
+  if (anonKey && token === anonKey) {
+    console.log("✅ Auth success via SUPABASE_ANON_KEY");
+    return { authorized: true, method: "anon_key" };
   }
 
-  // 2. Check Supabase Auth (Secure)
+  // 2. Check Supabase Auth (Only for actual user session tokens)
+  // IMPORTANT: Do NOT validate anonKey as a user session - it will fail with "Auth session missing!"
+  // Only attempt user validation if token doesn't match any anon keys
   try {
     const { data: { user }, error } = await supabaseAuth.auth.getUser(token);
     
     if (user && !error) {
-        console.log(`Auth success for user: ${user.id}`);
+        console.log(`✅ Auth success for user: ${user.id}`);
         return { authorized: true, method: "user_jwt", userId: user.id };
     }
     
-    console.error("Auth failed. Token invalid or expired.", error?.message);
-    return { authorized: false, reason: `Supabase Auth failed: ${error?.message || 'Unknown error'}` };
+    // If we reach here, token is neither anon key nor valid user session
+    console.error("❌ Auth failed. Token is not anon key and not a valid user session.", error?.message);
+    return { authorized: false, reason: `Invalid token: ${error?.message || 'Not authorized'}` };
   } catch (e) {
-    console.error("Auth failed. Exception during token validation:", e);
+    console.error("❌ Auth failed. Exception during token validation:", e);
     return { authorized: false, reason: `Exception: ${e.message}` };
   }
 };

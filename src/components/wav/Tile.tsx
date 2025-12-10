@@ -131,7 +131,7 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
           // - Peripheral: async (non-blocking, better for offscreen content)
           decoding={priority ? "sync" : "async"}
           // FETCH PRIORITY: Browser hint for network prioritization
-          fetchPriority={priority ? "high" : "low"}
+          fetchpriority={priority ? "high" : "low"}
           src={optimizeForTile(image, 'medium')}
           srcSet={generateSrcSet(image, 'tile')}
           // OPTIMIZATION: More accurate sizes to prevent loading overly large images.

@@ -11,75 +11,103 @@ import { WavEvent, WavMedia } from '../../types';
 import { useFocusTrap } from '../../src/hooks/useFocusTrap';
 import { useSwipe } from '../../src/hooks/useSwipe';
 import { useKeyboardNav } from '../../src/hooks/useKeyboardNav';
+import { useResponsive } from '../../src/hooks/useResponsive';
 import { Z_INDEX } from '../../lib/constants/zIndex';
 
 /* -------------------------------------------------------------------------- */
 /*                        ANIMATION VARIANTS - APPLE STYLE                   */
 /* -------------------------------------------------------------------------- */
 
-// Duración total: 600ms (más lento, más elegante)
-const DURATION = 0.6;
+// ===== CONFIGURACIÓN DE TIEMPOS =====
+const MODAL_DURATION = 1.0; // Modal se desenmascara en 1 segundo
+const GALLERY_START = 0.5; // Galería empieza al 50% del modal (0.5s)
+const GALLERY_DURATION = 0.8; // Galería se desenmascara en 0.8s
+const CONTENT_START = 0.65; // Contenido empieza al 65% del modal (0.65s)
+const CONTENT_DURATION = 0.6; // Cada campo dura 0.6s
+const CONTENT_STAGGER = 0.65; // Siguiente empieza al 65% del anterior (0.65 × 0.6 = 0.39s)
+
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]; // Expo Out (Apple-style)
 
-// BACKDROP: Fade in/out PREVIO y POSTERIOR a las animaciones de contenido
+// BACKDROP: Fade in/out suave
 const backdropVariants = {
   hidden: { opacity: 0 },
   visible: { 
     opacity: 1,
     transition: { 
       duration: 0.4, 
-      ease: EASE,
-      // Entra ANTES que el contenido
-      delay: 0
+      ease: EASE
     }
   },
   exit: { 
     opacity: 0,
     transition: { 
-      duration: 0.4, 
-      ease: EASE,
-      // Sale DESPUÉS que el contenido
-      delay: 0.6
+      duration: 0.6, 
+      ease: EASE
     }
   }
 };
 
-// MODAL CONTAINER: Desktop - Sin clip-path, rectangular simple
+// MODAL CONTAINER: Desenmascaramiento de izquierda a derecha (wipe effect)
 const modalContainerVariants = {
   hidden: { 
-    opacity: 0, 
-    scale: 0.96,
-    y: 20
+    clipPath: 'inset(0 100% 0 0)', // Oculto (máscara derecha cubriendo todo)
+    opacity: 1
   },
   visible: { 
-    opacity: 1, 
-    scale: 1,
-    y: 0,
+    clipPath: 'inset(0 0% 0 0)', // Visible (máscara desaparece)
+    opacity: 1,
     transition: { 
-      duration: DURATION, 
-      ease: EASE,
-      when: "beforeChildren",
-      staggerChildren: 0.08 // Más espaciado para 600ms
+      clipPath: {
+        duration: MODAL_DURATION,
+        ease: EASE
+      },
+      opacity: {
+        duration: 0.01 // Instantáneo
+      }
     }
   },
   exit: { 
-    opacity: 0, 
-    scale: 0.96,
-    y: 20,
+    opacity: 0, // Solo fade out
     transition: { 
-      duration: DURATION, 
-      ease: EASE,
-      when: "afterChildren",
-      staggerChildren: 0.06,
-      staggerDirection: -1 // Reversa en salida
+      duration: 0.6, 
+      ease: EASE
     } 
+  }
+};
+
+// MEDIA GALLERY: Desenmascaramiento desde izquierda (empieza al 50% del modal)
+const mediaGalleryVariants = {
+  hidden: { 
+    clipPath: 'inset(0 100% 0 0)', // Oculto
+    opacity: 1
+  },
+  visible: { 
+    clipPath: 'inset(0 0% 0 0)', // Visible
+    opacity: 1,
+    transition: { 
+      clipPath: {
+        duration: GALLERY_DURATION,
+        ease: EASE,
+        delay: GALLERY_START // Empieza al 50% del modal
+      },
+      opacity: {
+        duration: 0.01
+      }
+    }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { 
+      duration: 0.4,
+      ease: EASE
+    }
   }
 };
 
 // MOBILE: Media Container - Entra desde arriba hacia abajo con diagonal
 const mobileMediaVariants = {
   hidden: { 
-    y: -100, // Desde arriba
+    y: -100,
     opacity: 0
   },
   visible: { 
@@ -88,88 +116,10 @@ const mobileMediaVariants = {
     transition: { 
       duration: 0.6,
       ease: EASE,
-      delay: 0.2 // Después del backdrop
+      delay: 0.2
     }
   },
   exit: { 
-    y: -100,
-    opacity: 0,
-    transition: { 
-      duration: 0.6,
-      ease: EASE
-    }
-  }
-};
-
-// MOBILE: Content elements - Secuencia: Categoría → Marca → Título → Párrafo → Año
-const mobileContentVariants = {
-  hidden: { 
-    y: 20, // Desde arriba (más sutil que el media)
-    opacity: 0 
-  },
-  visible: (delay: number) => ({ 
-    y: 0, 
-    opacity: 1,
-    transition: { 
-      duration: 0.5,
-      ease: EASE,
-      delay: 0.8 + delay // Empieza después del media container
-    }
-  }),
-  exit: (delay: number) => ({ 
-    y: 20, 
-    opacity: 0,
-    transition: { 
-      duration: 0.4,
-      ease: EASE,
-      delay: delay // Inverso
-    }
-  })
-};
-
-// DESKTOP: Media Gallery - Entra desde derecha desenmascarándose + Zoom In suave
-const mediaGalleryVariants = {
-  hidden: { 
-    x: '30%', // Comienza desde derecha
-    opacity: 0,
-    scale: 1.15 // Zoom inicial
-  },
-  visible: { 
-    x: 0, 
-    opacity: 1,
-    scale: 1, // Zoom in suave
-    transition: { 
-      duration: DURATION,
-      ease: EASE
-    }
-  },
-  exit: { 
-    x: '30%',
-    opacity: 0,
-    scale: 1.15,
-    transition: { 
-      duration: DURATION,
-      ease: EASE
-    }
-  }
-};
-
-// DESKTOP: Content elements - Entran de izquierda a derecha
-const slideFromLeft = {
-  hidden: { 
-    x: -30, 
-    opacity: 0 
-  },
-  visible: { 
-    x: 0, 
-    opacity: 1,
-    transition: { 
-      duration: 0.5,
-      ease: EASE
-    }
-  },
-  exit: { 
-    x: -30, 
     opacity: 0,
     transition: { 
       duration: 0.4,
@@ -178,27 +128,102 @@ const slideFromLeft = {
   }
 };
 
-// CLOSE BUTTON: Gira 90° sobre su eje
+// CONTENT FIELDS: Entrada sutil con movimiento pequeño y opacidad
+// Cada uno empieza al 65% del avance del anterior
+const contentFieldVariants = {
+  hidden: { 
+    y: 12, // Movimiento sutil (12px)
+    opacity: 0 
+  },
+  visible: (index: number) => {
+    // index: 0=categoría, 1=marca, 2=título, 3=párrafo, 4=año
+    const delay = CONTENT_START + (index * CONTENT_DURATION * CONTENT_STAGGER);
+    return {
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        duration: CONTENT_DURATION,
+        ease: EASE,
+        delay: delay
+      }
+    };
+  },
+  exit: { 
+    opacity: 0,
+    transition: { 
+      duration: 0.4,
+      ease: EASE
+    }
+  }
+};
+
+// MOBILE CONTENT FIELDS: Versión simplificada para mobile (más rápido, menos delay)
+const mobileContentFieldVariants = {
+  hidden: { 
+    y: 8, // Movimiento más sutil en mobile (8px)
+    opacity: 0 
+  },
+  visible: (index: number) => {
+    // Stagger más rápido en mobile: 0.15s entre campos
+    const delay = 0.3 + (index * 0.15);
+    return {
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        duration: 0.4,
+        ease: EASE,
+        delay: delay
+      }
+    };
+  },
+  exit: { 
+    opacity: 0,
+    transition: { 
+      duration: 0.4,
+      ease: EASE
+    }
+  }
+};
+
+// CLOSE BUTTON: Aparece al final
 const closeButtonVariants = {
   hidden: { 
-    rotate: -90,
     opacity: 0,
-    scale: 0.8
+    scale: 0.9
   },
   visible: { 
-    rotate: 0,
     opacity: 1,
     scale: 1,
     transition: { 
       duration: 0.5,
       ease: EASE,
-      delay: 0.2 // Entra último
+      delay: CONTENT_START + (4 * CONTENT_DURATION * CONTENT_STAGGER) + 0.2 // Después de todos los campos
     }
   },
   exit: { 
-    rotate: 90,
     opacity: 0,
-    scale: 0.8,
+    transition: { 
+      duration: 0.4,
+      ease: EASE
+    }
+  }
+};
+
+// GRADIENT OVERLAYS: Aparecen con el contenido
+const gradientVariants = {
+  hidden: { 
+    opacity: 0
+  },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      duration: 0.6,
+      ease: EASE,
+      delay: CONTENT_START
+    }
+  },
+  exit: { 
+    opacity: 0,
     transition: { 
       duration: 0.4,
       ease: EASE
@@ -227,6 +252,14 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
     event?.gallery?.length
       ? event.gallery
       : [{ id: 'fallback', type: 'image', url: event.image }];
+
+  // Hook responsive con width
+  const { width } = useResponsive();
+  
+  // REGLA CRÍTICA CON BREAKPOINT FIJO:
+  // Width ≤ 1023px: Stack vertical (imagen arriba con diagonal)
+  // Width ≥ 1024px: Side-by-side (imagen izquierda sin diagonal)
+  const useStackedLayout = width <= 1023;
 
   useEffect(() => setGalleryIndex(0), [event]);
   useFocusTrap(containerRef, onClose);
@@ -262,12 +295,12 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
   return (
     <motion.div
       className={clsx(
-        "fixed inset-0 flex flex-col",
+        "fixed inset-0",
         Z_INDEX.MODAL_CONTENT,
-        // Mobile/Tablet: Allow scroll on the overlay itself
-        "overflow-y-auto",
-        // Desktop: Hide overlay scroll (internal scroll takes over)
-        "lg:overflow-hidden lg:items-center lg:justify-center"
+        // ≤1023px: No flex, overflow-y-auto para scroll
+        useStackedLayout && "overflow-y-auto",
+        // ≥1024px: Flex para centrar, sin overflow-y
+        !useStackedLayout && "flex items-center justify-center overflow-hidden"
       )}
       initial="hidden"
       animate="visible"
@@ -286,18 +319,19 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
         style={{ pointerEvents: 'auto' }}
       />
 
-      {/* CARD CONTAINER - Rectangular simple, sin clip-paths */}
+      {/* CARD CONTAINER - Layout basado en breakpoint 1024px */}
       <motion.div
         ref={containerRef}
         role="dialog"
         aria-modal="true"
         className={clsx(
-          "relative w-full bg-black",
-          // Mobile: Sin clip-path
-          "min-h-screen lg:min-h-0",
-          // Desktop: Rectangular simple
-          "lg:max-w-5xl lg:h-[70vh] lg:overflow-hidden lg:flex lg:flex-row",
-          Z_INDEX.MODAL_CONTENT
+          "relative bg-black",
+          Z_INDEX.MODAL_CONTENT,
+          // ≤1023px: Stack vertical, full width, full screen
+          useStackedLayout && "w-full min-h-screen flex flex-col",
+          // ≥1024px: Side-by-side, contenido y cinematográfico
+          // Objetivo: 60vw × 60vh | Máximo: 90vw × 80vh
+          !useStackedLayout && "w-[60vw] max-w-[90vw] h-[60vh] max-h-[80vh] min-h-0 flex flex-row overflow-hidden"
         )}
         variants={modalContainerVariants}
       >
@@ -320,16 +354,15 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
           <X size={isMobile ? 24 : 20} />
         </motion.button>
 
-        {/* LEFT COLUMN: MEDIA GALLERY - Desktop rectangular / Mobile con diagonal */}
+        {/* MEDIA GALLERY - Portrait: Arriba con diagonal | Landscape: Izquierda sin diagonal */}
         <motion.div 
-          variants={isMobile ? mobileMediaVariants : mediaGalleryVariants}
+          variants={useStackedLayout ? mobileMediaVariants : mediaGalleryVariants}
           className={clsx(
-            "relative w-full shrink-0 bg-neutral-900 overflow-hidden",
-            // Mobile: 4:5 Aspect Ratio con diagonal inferior
-            "aspect-[4/5] md:h-[45vh] md:aspect-auto",
-            isMobile && "clip-mobile-media", // ✅ Diagonal inferior 17° en mobile
-            // Desktop: Full height, 45% width, sin diagonal
-            "lg:w-[45%] lg:h-full"
+            "relative shrink-0 bg-neutral-900 overflow-hidden",
+            // PORTRAIT: Imagen arriba, 45-55% altura vertical, diagonal inferior
+            useStackedLayout && "w-full h-[50vh] clip-mobile-media",
+            // LANDSCAPE: Imagen izquierda, 45% ancho, sin diagonal
+            !useStackedLayout && "w-[45%] h-full"
           )}
         >
           <MediaGallery
@@ -350,28 +383,51 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
           )}
         </motion.div>
 
-        {/* RIGHT COLUMN: CONTENT - Mobile animaciones secuenciales */}
-        <div className={clsx(
-          "relative w-full flex flex-col",
-          // Mobile: Flow content, padding, dark background
-          "bg-black/90 p-8 pb-32",
-          // Desktop: Full height, Scrollable, padding estándar
-          "lg:w-[55%] lg:h-full lg:bg-transparent lg:pl-12 lg:pr-12 lg:py-12 lg:overflow-y-auto lg:custom-scroll-modal"
-        )}>
+        {/* GRADIENT OVERLAYS - FIXED al modal (fuera del scroll) */}
+        {!useStackedLayout && (
+          <>
+            {/* Top Gradient: Negro → Transparente */}
+            <motion.div 
+              className="absolute top-0 right-0 w-[55%] h-20 bg-gradient-to-b from-black to-transparent pointer-events-none z-20"
+              aria-hidden="true"
+              variants={gradientVariants}
+            />
+            
+            {/* Bottom Gradient: Transparente → Negro */}
+            <motion.div 
+              className="absolute bottom-0 right-0 w-[55%] h-20 bg-gradient-to-t from-black to-transparent pointer-events-none z-20"
+              aria-hidden="true"
+              variants={gradientVariants}
+            />
+          </>
+        )}
+
+        {/* RIGHT COLUMN: CONTENT - Sistema de proporciones consistente + Safe Areas iOS */}
+        <div 
+          className={clsx(
+            "relative flex flex-col",
+            // PORTRAIT: Full width, dark background, scrollable
+            useStackedLayout && "w-full bg-black/90 px-6 py-8 overflow-y-auto",
+            // LANDSCAPE: 55% width, full height, scrollable
+            !useStackedLayout && "w-[55%] h-full bg-transparent px-10 py-10 lg:px-12 lg:py-12 overflow-y-auto custom-scroll-modal"
+          )}
+          style={{
+            // Safe area para iOS: Solo en portrait (móvil/tablet vertical)
+            paddingBottom: useStackedLayout 
+              ? 'calc(5rem + env(safe-area-inset-bottom))' 
+              : undefined
+          }}
+        >
           
-          {/* HEADER: Category Badge */}
+          {/* HEADER: Category Badge - Altura fija */}
           {event.category && (
             <motion.div 
-              variants={isMobile ? undefined : slideFromLeft}
-              custom={0} // delay: 0ms (primero)
+              variants={useStackedLayout ? mobileContentFieldVariants : contentFieldVariants}
+              custom={0} // index 0: Categoría
               initial="hidden"
               animate="visible"
               exit="exit"
-              {...(isMobile && {
-                variants: mobileContentVariants,
-                custom: 0 // delay: 0ms
-              })}
-              className="mb-6 flex"
+              className="mb-4 md:mb-5 lg:mb-6 flex shrink-0"
             >
               <TrapezoidBadge
                 label={event.category}
@@ -381,87 +437,75 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
             </motion.div>
           )}
 
-          {/* BRAND/LOGO */}
+          {/* BRAND/LOGO - Altura fija */}
           <motion.div 
-            variants={isMobile ? undefined : slideFromLeft}
-            custom={0.15} // delay: 150ms (segundo)
+            variants={useStackedLayout ? mobileContentFieldVariants : contentFieldVariants}
+            custom={1} // index 1: Marca
             initial="hidden"
             animate="visible"
             exit="exit"
-            {...(isMobile && {
-              variants: mobileContentVariants,
-              custom: 0.15
-            })}
-            className="mb-8"
+            className="mb-6 md:mb-7 lg:mb-8 shrink-0"
           >
             {event.logo ? (
               <img 
                 src={event.logo} 
                 alt={`${event.brand} Logo`} 
-                className="h-10 md:h-12 lg:h-14 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+                className="h-10 md:h-12 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
               />
             ) : (
-              <span className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-widest text-white">
+              <span className="text-lg md:text-xl lg:text-2xl font-black uppercase tracking-widest text-white block">
                 {event.brand}
               </span>
             )}
           </motion.div>
 
-          {/* TITLE */}
+          {/* TITLE - Tipografía fluida con clamp() */}
           <motion.h1 
-            variants={isMobile ? undefined : slideFromLeft}
-            custom={0.3} // delay: 300ms (tercero)
+            variants={useStackedLayout ? mobileContentFieldVariants : contentFieldVariants}
+            custom={2} // index 2: Título
             initial="hidden"
             animate="visible"
             exit="exit"
-            {...(isMobile && {
-              variants: mobileContentVariants,
-              custom: 0.3
-            })}
-            className="text-[28px] md:text-[32px] lg:text-[34px] font-black uppercase tracking-tight leading-[1.0] text-balance text-white mb-8"
+            className="font-black uppercase tracking-tight leading-[0.95] text-balance text-white mb-6 md:mb-7 lg:mb-8 shrink-0"
+            style={{ 
+              fontSize: 'clamp(26px, 4vw, 27px)',
+              maxWidth: '90%' 
+            }}
           >
             {event.title}
           </motion.h1>
 
-          {/* DESCRIPTION (Párrafo) */}
+          {/* DESCRIPTION (Párrafo) - Flex-grow para ocupar espacio disponible */}
           <motion.div 
-            variants={isMobile ? undefined : slideFromLeft}
-            custom={0.45} // delay: 450ms (cuarto)
+            variants={useStackedLayout ? mobileContentFieldVariants : contentFieldVariants}
+            custom={3} // index 3: Párrafo
             initial="hidden"
             animate="visible"
             exit="exit"
-            {...(isMobile && {
-              variants: mobileContentVariants,
-              custom: 0.45
-            })}
-            className="prose prose-invert prose-base lg:prose-lg text-neutral-300 leading-relaxed font-light mb-10"
-            style={{ maxWidth: '55ch' }}
+            className="flex-grow mb-6 md:mb-8 lg:mb-10"
           >
-            <h2 className="sr-only">Descripción del Proyecto</h2>
-            <p className="whitespace-pre-wrap">{event.description}</p>
+            <p className="text-sm md:text-base lg:text-lg text-neutral-300 leading-relaxed font-light whitespace-pre-wrap">
+              {event.description}
+            </p>
           </motion.div>
           
-          {/* METADATA GRID (Año) */}
+          {/* METADATA GRID (Año) - Altura fija al final */}
           <motion.div 
-            variants={isMobile ? undefined : slideFromLeft}
-            custom={0.6} // delay: 600ms (quinto - último)
+            variants={useStackedLayout ? mobileContentFieldVariants : contentFieldVariants}
+            custom={4} // index 4: Año
             initial="hidden"
             animate="visible"
             exit="exit"
-            {...(isMobile && {
-              variants: mobileContentVariants,
-              custom: 0.6
-            })}
-            className="grid grid-cols-2 gap-4 text-xs"
+            className="grid grid-cols-2 gap-8 shrink-0 mt-auto"
           >
             <div>
               <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Año</h3>
-              <span className="text-sm lg:text-base text-white font-light">{event.year || new Date().getFullYear()}</span>
+              <span className="text-xs md:text-sm lg:text-base text-white font-light">{event.year || new Date().getFullYear()}</span>
             </div>
             {event.venue && (
               <div>
                 <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Lugar</h3>
-                <span className="text-sm lg:text-base text-white font-light">{event.venue}</span>
+                <span className="text-xs md:text-sm lg:text-base text-white font-light">{event.venue}</span>
               </div>
             )}
           </motion.div>

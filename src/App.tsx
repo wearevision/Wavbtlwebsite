@@ -24,6 +24,7 @@ import { WavEvent } from './types';
 import { EventCategory } from './utils/contentRules';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { projectId } from './utils/supabase/info';
+import { useResponsive } from './src/hooks/useResponsive';
 
 // CRITICAL: Force UTF-8 charset and load Outfit font with full Latin Extended support
 const FONT_PRECONNECT = 'https://fonts.googleapis.com';
@@ -79,11 +80,10 @@ export default function App() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  // Initialize isMobile with correct value to prevent flash/reflow
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-  });
+  
+  // Use consolidated responsive hook (1024px breakpoint)
+  const { isMobile } = useResponsive();
+  
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [showPermissionButton, setShowPermissionButton] = useState(false);
   
@@ -195,18 +195,6 @@ export default function App() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const lastOrientationUpdate = useRef(0);
-
-  // 1. Mobile Detection
-  useEffect(() => {
-    const checkMobile = () => {
-      // Simple check for mobile width or touch capability
-      const mobile = window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-      setIsMobile(mobile);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // 2. Input Handling (Mouse vs Gyroscope)
   useEffect(() => {
