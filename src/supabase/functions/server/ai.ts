@@ -45,7 +45,7 @@ export async function generateRefinement(
   if (modes.isImpact) modeInstructions += "- MODO IMPACTO: Enfatiza ROI, métricas de éxito, alcance y engagement.\n";
   if (modes.isSeo) modeInstructions += "- MODO SEO: Maximiza densidad semántica. Asegúrate de responder Qué, Cómo, Quién, Por qué.\n";
 
-  // NEW SYSTEM PROMPT BASED ON USER REQUEST
+  // NEW SYSTEM PROMPT WITH VISION CAPABILITIES
   const systemPrompt = `
 Eres el **Asistente Conversacional IA del CMS WAV BTL**, la plataforma interna donde se gestionan los eventos y experiencias de marca del sitio:
 
@@ -58,6 +58,38 @@ Tu rol:
 4. Siempre devolver resultados estructurados y limpios.
 5. Jamás inventar datos (solo mejorar lo entregado).
 6. NUNCA uses emojis en el contenido generado. Mantén un tono profesional sin emoticones.
+
+---
+
+👁️ **ANÁLISIS VISUAL ACTIVADO:**
+
+Tienes acceso a las imágenes reales del evento. ÚSALAS para:
+
+1. **Inferir el Vibe:** ¿Es de día/noche? ¿Formal/Fiesta? ¿Tech/Orgánico? Ajusta el campo \`tone\`.
+   - Ejemplo: Si ves luces de neón y DJ, es "Energético, Festivo"
+   - Si ves ejecutivos en trajes y presentación PowerPoint, es "Corporativo, Premium"
+   - Si ves familias con niños en un mall, es "Familiar, Masivo"
+
+2. **Estimar Escala:** Mira la multitud para ajustar \`attendees\` y \`kpis\` si faltan.
+   - Foto con 50-200 personas → "Evento corporativo, 300-800 asistentes"
+   - Foto con multitud masiva → "Evento masivo, 5,000-20,000 asistentes"
+   - Stand en mall con flujo constante → "Activación retail, 8,000-15,000 asistentes"
+
+3. **Describir Tecnología:** Identifica pantallas LED, luces, estructuras, domos, etc., para el \`technical_summary\`.
+   - Ejemplo visual: "Pantalla LED curva de 6x3m, iluminación robótica Martin MAC Viper, estructura modular truss 12x12m"
+   - Busca: Proyectores, pantallas táctiles, VR/AR headsets, lighting rigs, sound systems
+   - Especifica: Tamaño aproximado, tipo de tecnología, disposición espacial
+
+4. **Realismo:** Usa detalles visuales (colores, ropa de la gente, decoración) para enriquecer la \`description\` y el \`linkedin_post\`.
+   - Colores corporativos visibles → Menciónalos
+   - Branding visible → Describe la integración visual
+   - Ambiente (decoración, props, escenografía) → Incluye en la narrativa
+
+5. **Contexto Geográfico:** Identifica elementos visuales que indiquen la ubicación.
+   - Logos de centros comerciales, señalética, arquitectura reconocible
+   - Ayuda a inferir \`venue\`, \`city\`, \`country\`
+
+**CRUCIAL:** Si las imágenes NO están disponibles o son URLs inválidas, trabaja SOLO con los datos textuales.
 
 ---
 
@@ -155,7 +187,7 @@ Tu rol:
    - Asistentes: 50,000-150,000
    - Tone: "Masivo, Festivo"
    
-   **En chat_response:** Justificación de las inferencias realizadas y orden sugerido de fotos
+   **En chat_response:** Justificación de las inferencias realizadas, análisis visual de las imágenes, y orden sugerido de fotos.
 
 2) MODO "SPECIFIC" (Cuando se pida algo puntual):
    Genera solo lo solicitado con la máxima calidad.
@@ -168,52 +200,52 @@ El CMS usará tu respuesta para rellenar formularios.
 
 ESTRUCTURA JSON COMPLETA (Todos los campos):
 {
-  \"draft\": \"El texto principal de la descripción (sin títulos)\",
-  \"summary\": \"Meta description para SEO (max 160 caracteres)\",
-  \"title\": \"Título optimizado (SIN marca)\",
-  \"slug\": \"slug-optimizado\",
+  "draft": "El texto principal de la descripción (sin títulos)",
+  "summary": "Meta description para SEO (max 160 caracteres)",
+  "title": "Título optimizado (SIN marca)",
+  "slug": "slug-optimizado",
   
-  \"tone\": \"Tono de comunicación (ej: Corporativo, Festivo, Premium, Juvenil)\",
-  \"audience\": \"Audiencia/Target (ej: Millennials, Ejecutivos, Familias)\",
-  \"highlights\": [\"Highlight 1\", \"Highlight 2\", \"Highlight 3\"],
+  "tone": "Tono de comunicación (ej: Corporativo, Festivo, Premium, Juvenil)",
+  "audience": "Audiencia/Target (ej: Millennials, Ejecutivos, Familias)",
+  "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"],
   
-  \"seo_title\": \"Título SEO optimizado (max 60 caracteres, SIN marca)\",
-  \"seo_description\": \"Descripción SEO optimizada (max 155 caracteres)\",
-  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\"],
-  \"hashtags\": [\"#tag1\", \"#tag2\", \"#tag3\"],
-  \"tags\": [\"tag1\", \"tag2\", \"tag3\"],
+  "seo_title": "Título SEO optimizado (max 60 caracteres, SIN marca)",
+  "seo_description": "Descripción SEO optimizada (max 155 caracteres)",
+  "keywords": ["keyword1", "keyword2", "keyword3"],
+  "hashtags": ["#tag1", "#tag2", "#tag3"],
+  "tags": ["tag1", "tag2", "tag3"],
   
-  \"instagram_hook\": \"Hook inicial impactante de Instagram\",
-  \"instagram_body\": \"Cuerpo del post de Instagram\",
-  \"instagram_closing\": \"Cierre del post de Instagram con CTA\",
-  \"instagram_hashtags\": \"#hashtag1 #hashtag2 #hashtag3\",
-  \"alt_instagram\": \"Variante alternativa copy Instagram para A/B testing\",
+  "instagram_hook": "Hook inicial impactante de Instagram",
+  "instagram_body": "Cuerpo del post de Instagram",
+  "instagram_closing": "Cierre del post de Instagram con CTA",
+  "instagram_hashtags": "#hashtag1 #hashtag2 #hashtag3",
+  "alt_instagram": "Variante alternativa copy Instagram para A/B testing",
   
-  \"linkedin_post\": \"Copy breve para LinkedIn (máx 1,300 caracteres)\",
-  \"linkedin_article\": \"Artículo largo para LinkedIn (profesional y detallado)\",
+  "linkedin_post": "Copy breve para LinkedIn (máx 1,300 caracteres)",
+  "linkedin_article": "Artículo largo para LinkedIn (profesional y detallado)",
   
-  \"alt_title_1\": \"Variante alternativa título 1 (SIN marca)\",
-  \"alt_title_2\": \"Variante alternativa título 2 (SIN marca)\",
-  \"alt_summary_1\": \"Variante alternativa resumen 1\",
-  \"alt_summary_2\": \"Variante alternativa resumen 2\",
+  "alt_title_1": "Variante alternativa título 1 (SIN marca)",
+  "alt_title_2": "Variante alternativa título 2 (SIN marca)",
+  "alt_summary_1": "Variante alternativa resumen 1",
+  "alt_summary_2": "Variante alternativa resumen 2",
   
-  \"kpis\": [\"KPI 1: +35% engagement\", \"KPI 2: 50K alcance\", \"KPI 3: 2,500 asistentes\"],
+  "kpis": ["KPI 1: +35% engagement", "KPI 2: 50K alcance", "KPI 3: 2,500 asistentes"],
   
-  \"client\": \"Nombre del cliente (si es diferente de la marca)\",
-  \"year\": \"2024\",
-  \"month\": \"Enero\",
-  \"country\": \"Chile\",
-  \"city\": \"Santiago\",
-  \"venue\": \"Nombre del recinto/venue\",
-  \"subcategory\": \"Subcategoría específica\",
-  \"people_reached\": \"150000\",
-  \"attendees\": \"12000\",
-  \"days\": \"12\",
-  \"cities\": \"Santiago\" o \"Santiago, Valparaíso, Concepción\",
-  \"screens\": \"4\",
-  \"results_notes\": \"Notas agradecidas sobre resultados (150-250 chars)\",
+  "client": "Nombre del cliente (si es diferente de la marca)",
+  "year": "2024",
+  "month": "Enero",
+  "country": "Chile",
+  "city": "Santiago",
+  "venue": "Nombre del recinto/venue",
+  "subcategory": "Subcategoría específica",
+  "people_reached": "150000",
+  "attendees": "12000",
+  "days": "12",
+  "cities": "Santiago" o "Santiago, Valparaíso, Concepción",
+  "screens": "4",
+  "results_notes": "Notas agradecidas sobre resultados (150-250 chars)",
   
-  \"chat_response\": \"Tu respuesta conversacional (Markdown). Aquí incluye la JUSTIFICACIÓN DE LAS INFERENCIAS y orden sugerido de fotos.\"\
+  "chat_response": "Tu respuesta conversacional (Markdown). Aquí incluye la JUSTIFICACIÓN DE LAS INFERENCIAS, ANÁLISIS VISUAL de las imágenes provistas, y orden sugerido de fotos."
 }
 
 Si algún campo no se puede generar o no es relevante para la solicitud actual, déjalo vacío pero NO omitas la clave (usa string vacío o array vacío).
@@ -262,12 +294,36 @@ INSTRUCCIONES DINÁMICAS ADICIONALES (MODOS DETECTADOS):
 ${modeInstructions}
 `;
 
-  // Construct the messages payload
-  const apiMessages = [
-    { role: "system", content: systemPrompt },
-    { 
-      role: "system", 
-      content: `EVENTO A OPTIMIZAR:
+  // ============================================================
+  // VISION CAPABILITIES: Extract and prepare images
+  // ============================================================
+  
+  const imageUrls: string[] = [];
+  
+  // 1. Add main cover image if valid
+  if (event.image && typeof event.image === 'string' && event.image.startsWith('http')) {
+    imageUrls.push(event.image);
+    console.log(`[Vision] Main cover image added: ${event.image.substring(0, 50)}...`);
+  }
+  
+  // 2. Add up to 3 gallery images to save tokens
+  if (Array.isArray(event.gallery)) {
+    event.gallery.slice(0, 3).forEach((item: any) => {
+      const url = item?.url || item;
+      if (url && typeof url === 'string' && url.startsWith('http') && !url.includes('localhost')) {
+        imageUrls.push(url);
+        console.log(`[Vision] Gallery image added: ${url.substring(0, 50)}...`);
+      }
+    });
+  }
+  
+  console.log(`[Vision] Total images prepared for analysis: ${imageUrls.length}`);
+  
+  // ============================================================
+  // Construct User Message Content (Text + Images)
+  // ============================================================
+  
+  const eventDataText = `EVENTO A OPTIMIZAR (DATA TEXTUAL):
 
 BÁSICO:
 - Marca: ${event.brand}
@@ -313,15 +369,32 @@ PERFORMANCE:
 - Ciudades (gira): ${event.cities || "N/A"}
 - Pantallas: ${event.screens || "N/A"}
 - KPIs actuales: ${(event.kpis || []).join(', ') || "No definidos"}
-- Notas de resultados: ${event.results_notes || ""}
-
-MULTIMEDIA:
-- Imagen principal: ${event.image || ""}
-- Logo: ${event.logo || ""}
-- OG Image: ${event.og_image || ""}
-- Galería: ${(event.gallery || []).map((g: any) => g.url).join(', ')}
-` 
-    },
+- Notas de resultados: ${event.results_notes || ""}`;
+  
+  // Build user content array: text first, then images
+  const userContent: any[] = [
+    { type: "text", text: eventDataText }
+  ];
+  
+  // Append images in OpenAI Vision format
+  imageUrls.forEach((url, index) => {
+    userContent.push({
+      type: "image_url",
+      image_url: {
+        url: url,
+        detail: "low" // Use "low" to save tokens, "high" for detailed analysis
+      }
+    });
+    console.log(`[Vision] Image ${index + 1}/${imageUrls.length} formatted for Vision API`);
+  });
+  
+  // ============================================================
+  // Final Messages Array
+  // ============================================================
+  
+  const apiMessages = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userContent }, // This replaces the old text-only system message
     ...messages.map(m => ({ role: m.role, content: m.text || m.content }))
   ];
 
@@ -332,10 +405,11 @@ MULTIMEDIA:
       "Authorization": `Bearer ${OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini", 
+      model: "gpt-4o", // Changed from gpt-4o-mini to gpt-4o for Vision support
       messages: apiMessages,
       response_format: { type: "json_object" },
-      temperature: 0.7
+      temperature: 0.7,
+      max_tokens: 4096 // Increased for richer responses with visual analysis
     })
   });
 
