@@ -659,6 +659,10 @@
     z-index: 300;
   }
 
+  .z-\[999\] {
+    z-index: 999;
+  }
+
   .z-\[9999\] {
     z-index: 9999;
   }
@@ -999,6 +1003,10 @@
     height: 100vh;
   }
 
+  .max-h-32 {
+    max-height: calc(var(--spacing) * 32);
+  }
+
   .max-h-80 {
     max-height: calc(var(--spacing) * 80);
   }
@@ -1133,6 +1141,10 @@
 
   .max-w-\[90vw\] {
     max-width: 90vw;
+  }
+
+  .max-w-md {
+    max-width: var(--container-md);
   }
 
   .max-w-sm {
@@ -3089,6 +3101,18 @@
   }
 
   @media (hover: hover) {
+    .hover\:bg-white\/20:hover {
+      background-color: #fff3;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-white\/20:hover {
+        background-color: color-mix(in oklab, var(--color-white) 20%, transparent);
+      }
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:bg-zinc-800:hover {
       background-color: var(--color-zinc-800);
     }
@@ -3436,6 +3460,12 @@
     }
   }
 
+  @media (width >= 40rem) {
+    .sm\:flex-row {
+      flex-direction: row;
+    }
+  }
+
   @media (width >= 48rem) {
     .md\:aspect-auto {
       aspect-ratio: auto;
@@ -3518,6 +3548,13 @@
     .md\:text-2xl {
       font-size: var(--text-2xl);
       line-height: var(--tw-leading, var(--text-2xl--line-height));
+    }
+  }
+
+  @media (width >= 48rem) {
+    .md\:text-3xl {
+      font-size: var(--text-3xl);
+      line-height: var(--tw-leading, var(--text-3xl--line-height));
     }
   }
 

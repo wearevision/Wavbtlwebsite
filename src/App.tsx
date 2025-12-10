@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
 import { X } from 'lucide-react';
 import { Wall } from './components/wav/Wall';
@@ -13,6 +13,7 @@ const SyncHelper = React.lazy(() => import('./components/wav/SyncHelper').then(m
 import { LogoLoader } from './components/wav/LogoLoader';
 import { SchemaJSONLD } from './components/wav/SchemaJSONLD';
 import { AboutModal } from './components/wav/AboutModal';
+import { ErrorBoundary } from './components/wav/ErrorBoundary';
 import { TrapezoidButton } from './components/wav/TrapezoidButton';
 import { Info } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -305,21 +306,21 @@ export default function App() {
   }, [selectedId, events]);
 
   // Navigation helpers for modal
-  const handleNextEvent = () => {
+  const handleNextEvent = useCallback(() => {
     if (!selectedEvent || filteredEvents.length === 0) return;
     const currentIndex = filteredEvents.findIndex(e => e.id === selectedId);
     if (currentIndex === -1) return;
     const nextIndex = (currentIndex + 1) % filteredEvents.length;
     setSelectedId(filteredEvents[nextIndex].id || null);
-  };
+  }, [selectedEvent, filteredEvents, selectedId]);
 
-  const handlePrevEvent = () => {
+  const handlePrevEvent = useCallback(() => {
     if (!selectedEvent || filteredEvents.length === 0) return;
     const currentIndex = filteredEvents.findIndex(e => e.id === selectedId);
     if (currentIndex === -1) return;
     const prevIndex = (currentIndex - 1 + filteredEvents.length) % filteredEvents.length;
     setSelectedId(filteredEvents[prevIndex].id || null);
-  };
+  }, [selectedEvent, filteredEvents, selectedId]);
 
   // Deep Linking: URL Sync
   useEffect(() => {
@@ -524,16 +525,18 @@ export default function App() {
         {/* Modal Overlay */}
         <AnimatePresence>
           {selectedId && selectedEvent && (
-            <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-black/20" />}>
-              <Modal 
-                key={selectedId}
-                event={selectedEvent} 
-                onClose={() => setSelectedId(null)} 
-                isMobile={isMobile}
-                onNext={handleNextEvent}
-                onPrev={handlePrevEvent}
-              />
-            </React.Suspense>
+            <ErrorBoundary>
+              <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-black/20" />}>
+                <Modal 
+                  key={selectedId}
+                  event={selectedEvent} 
+                  onClose={() => setSelectedId(null)} 
+                  isMobile={isMobile}
+                  onNext={handleNextEvent}
+                  onPrev={handlePrevEvent}
+                />
+              </React.Suspense>
+            </ErrorBoundary>
           )}
         </AnimatePresence>
 

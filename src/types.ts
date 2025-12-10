@@ -80,5 +80,12 @@ export interface WavEvent {
   alt_summary_1?: string;
   alt_summary_2?: string;
   
+  // TODO: REFACTORING - Remove [key: string]: any escape hatch
+  // This is a temporary measure for backward compatibility.
+  // Migration Plan:
+  // 1. Audit all dynamic property access in the codebase
+  // 2. Move dynamic metadata to a dedicated 'metadata' field
+  // 3. Remove this line to enforce strict typing
+  // See: AUDIT_REPORT.md for details
   [key: string]: any;
 }

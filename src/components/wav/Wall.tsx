@@ -25,19 +25,20 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
   }, [isLoading, events.length]);
 
   // 1. Infinite Wall logic
-  // Mobile: 10 rows, 3 cols. (Reduced density for performance)
-  // Desktop: 12 rows, 6 cols. (Reduced from 16x8 -> 72 tiles)
-  // This significantly reduces DOM nodes while maintaining the "infinite" feel.
-  const ROWS = isMobile ? 10 : 12; 
-  const COLS = isMobile ? 3 : 6; 
+  // Memoize grid configuration to prevent unnecessary recalculations
+  const gridConfig = useMemo(() => ({
+    rows: isMobile ? 10 : 12,
+    cols: isMobile ? 3 : 6
+  }), [isMobile]);
   
   const tiles = useMemo(() => {
+    const { rows, cols } = gridConfig;
     // While loading, if no events, generate placeholder tiles for skeletons
     const sourceEvents = (events && events.length > 0) ? events : (isLoading ? Array(10).fill({ id: 'skeleton', image: '', title: '', brand: '' }) : []);
     
     if (sourceEvents.length === 0) return [];
     
-    return Array.from({ length: ROWS * COLS }).map((_, i) => {
+    return Array.from({ length: rows * cols }).map((_, i) => {
       // Use a large prime multiplier to scatter the events pseudo-randomly
       // This prevents visual clusters and makes the repetition less obvious pattern-wise
       const SCATTER_PRIME = 37; 
@@ -55,7 +56,7 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
         brand: eventData.brand,
       };
     });
-  }, [events, ROWS, COLS, isLoading]);
+  }, [events, gridConfig, isLoading]);
 
   const springConfig = { damping: 40, stiffness: 150 };
   
@@ -111,16 +112,16 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
         <div 
           className="grid gap-y-1 gap-x-0 w-[180vw] md:w-[130vw]"
           style={{
-            gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+            gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
           }}
         >
           {tiles.map((tile, i) => {
-            const row = Math.floor(i / COLS);
-            const col = i % COLS;
+            const row = Math.floor(i / gridConfig.cols);
+            const col = i % gridConfig.cols;
             
             // Critical Path Optimization
-            const isCenterRow = row >= (ROWS / 2) - 2 && row <= (ROWS / 2) + 2;
-            const isCenterCol = col >= (COLS / 2) - 1 && col <= (COLS / 2) + 1;
+            const isCenterRow = row >= (gridConfig.rows / 2) - 2 && row <= (gridConfig.rows / 2) + 2;
+            const isCenterCol = col >= (gridConfig.cols / 2) - 1 && col <= (gridConfig.cols / 2) + 1;
             const isCritical = isCenterRow && isCenterCol;
 
             const shouldExplode = !isMobile;

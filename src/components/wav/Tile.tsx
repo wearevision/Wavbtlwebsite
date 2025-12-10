@@ -14,7 +14,7 @@ interface TileProps {
   isLoading?: boolean;
 }
 
-export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSelect, priority = false, isLoading = false }) => {
+export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onSelect, priority = false, isLoading = false }) => {
   // Geometry Update:
   // "Left side same angle as right side" -> Parallelogram ( / / )
   // "Top/Bottom parallel to render" -> Horizontal top/bottom edges
@@ -115,26 +115,29 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
       }}
     >
       {/* Image */}
-      <motion.img
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        // @ts-ignore - fetchPriority is standard but React types might lag. Lowercase required by React DOM.
-        fetchpriority={priority ? "high" : "low"}
-        src={optimizeForTile(image, 'medium')}
-        srcSet={generateSrcSet(image, 'tile')}
-        // OPTIMIZATION: More accurate sizes to prevent loading overly large images.
-        // Mobile: 180vw / 3 cols ≈ 60vw.
-        // Desktop: 130vw / 6 cols ≈ 22vw.
-        sizes="(max-width: 768px) 60vw, 25vw"
-        alt={title}
-        className={clsx(
-          "absolute inset-0 w-full h-full object-cover grayscale bg-neutral-900 transition-opacity duration-500",
-          imageLoaded ? "opacity-100" : "opacity-0"
-        )}
-        onLoad={() => setImageLoaded(true)}
+      <motion.div
+        className="absolute inset-0 w-full h-full overflow-hidden"
         initial={{ scale: 1 }}
         whileHover={{ scale: 1.1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
-      />
+      >
+        <img
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          fetchPriority={priority ? "high" : "low"}
+          src={optimizeForTile(image, 'medium')}
+          srcSet={generateSrcSet(image, 'tile')}
+          // OPTIMIZATION: More accurate sizes to prevent loading overly large images.
+          // Mobile: 180vw / 3 cols ≈ 60vw.
+          // Desktop: 130vw / 6 cols ≈ 22vw.
+          sizes="(max-width: 768px) 60vw, 25vw"
+          alt={title}
+          className={clsx(
+            "w-full h-full object-cover grayscale bg-neutral-900 transition-opacity duration-500",
+            imageLoaded ? "opacity-100" : "opacity-0"
+          )}
+          onLoad={() => setImageLoaded(true)}
+        />
+      </motion.div>
 
       {/* Hover Gradient Overlay - Monochrome mode only */}
       <div 
@@ -165,4 +168,4 @@ export const Tile: React.FC<TileProps> = ({ id, image, title, brand, index, onSe
       />
     </motion.div>
   );
-};
+});
