@@ -1,0 +1,10 @@
+{
+  "lastBuild": "2025-12-10T23:21:00Z",
+  "version": "2.3.1",
+  "migrationButtonAdded": true,
+  "changes": [
+    "Added Asset Migration button between 'Pull desde Supabase' and 'Backup' buttons",
+    "Button should be cyan gradient (from-cyan-600 to-blue-600)",
+    "Removed events.length === 0 condition from disabled prop"
+  ]
+}

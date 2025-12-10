@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { RefreshCw, Download, Copy, Check } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 import { getEvents } from '../../utils/api';
 import { WavEvent } from '../../types';
 
@@ -22,11 +24,13 @@ export const SyncHelper = () => {
     fetch();
   }, []);
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     const json = JSON.stringify(events, null, 2);
-    navigator.clipboard.writeText(json);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const success = await copyToClipboard(json);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   if (loading) return <div className="fixed inset-0 z-[200] bg-black p-10 text-white flex items-center justify-center">Cargando eventos reales...</div>;
@@ -47,6 +51,7 @@ export const SyncHelper = () => {
                 onClick={handleCopy}
                 className="px-8 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-500 transition-all transform active:scale-95 shadow-lg shadow-green-900/20 flex items-center gap-2"
             >
+                {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                 {copied ? '✅ ¡Copiado!' : '📋 Copiar JSON Completo'}
             </button>
             <a href="/" className="px-8 py-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition-all flex items-center justify-center">

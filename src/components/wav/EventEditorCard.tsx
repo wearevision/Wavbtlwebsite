@@ -10,6 +10,7 @@ import { WavEvent } from '../../types';
 import { FIELD_TOOLTIPS } from '../../utils/validation';
 import { useEventEnricher } from '../../src/hooks/useEventEnricher';
 import { toast } from 'sonner@2.0.3';
+import { AIConsoleModal } from './AIConsoleModal';
 
 interface EventEditorCardProps {
   event: WavEvent;
@@ -32,7 +33,14 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasValidationErrors = validation && !validation.isValid;
-  const { enrichEvent, isEnriching } = useEventEnricher();
+  const { 
+    enrichEvent, 
+    isEnriching, 
+    enrichProgress,
+    consoleLogs,
+    isConsoleOpen,
+    setIsConsoleOpen
+  } = useEventEnricher();
 
   // Handler for AI auto-complete
   const handleAutoComplete = async (e: React.MouseEvent) => {
@@ -74,9 +82,20 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
   ].filter(item => item && item.trim() !== "").join(" - ") || "Nuevo Evento";
 
   return (
-    <div className={`bg-neutral-900 border-2 rounded-xl overflow-hidden shadow-sm transition-all ${
-      hasValidationErrors ? 'border-red-500/50' : 'border-neutral-800'
-    }`}>
+    <>
+      {/* AI Console Modal */}
+      <AIConsoleModal
+        isOpen={isConsoleOpen}
+        onClose={() => setIsConsoleOpen(false)}
+        logs={consoleLogs}
+        progress={enrichProgress}
+        isProcessing={isEnriching}
+        title={`🤖 AI Agent: ${event.title || 'Evento'}`}
+      />
+
+      <div className={`bg-neutral-900 border-2 rounded-xl overflow-hidden shadow-sm transition-all ${
+        hasValidationErrors ? 'border-red-500/50' : 'border-neutral-800'
+      }`}>
         {/* Header / Collapsed View */}
         <div 
             className="flex items-center justify-between p-4 cursor-pointer bg-neutral-900 hover:bg-neutral-800/50 transition-colors select-none"
@@ -585,6 +604,7 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
               </div>
             </div>
         )}
-    </div>
+      </div>
+    </>
   );
 };

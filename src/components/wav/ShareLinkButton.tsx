@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Copy, Check, Share2, ExternalLink } from 'lucide-react';
+import { Link2, Check, Copy, ExternalLink } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 import { projectId } from '../../utils/supabase/info';
 
 interface ShareLinkButtonProps {
@@ -28,58 +29,17 @@ export const ShareLinkButton: React.FC<ShareLinkButtonProps> = ({
   const appUrl = `https://btl.wearevision.cl?evento=${eventSlug}`;
   
   const handleCopy = async (url: string, type: 'og' | 'app') => {
-    try {
-      // Try modern Clipboard API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(url);
-        setCopiedType(type);
-        setTimeout(() => setCopiedType(null), 2000);
-        return;
-      }
-    } catch (err) {
-      // Silently fall through to fallback - this is expected in some environments
-    }
-    
-    // Fallback: Create temporary textarea and select text
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = url;
-      textarea.style.position = 'fixed';
-      textarea.style.top = '0';
-      textarea.style.left = '0';
-      textarea.style.width = '1px';
-      textarea.style.height = '1px';
-      textarea.style.padding = '0';
-      textarea.style.border = 'none';
-      textarea.style.outline = 'none';
-      textarea.style.boxShadow = 'none';
-      textarea.style.background = 'transparent';
-      document.body.appendChild(textarea);
-      
-      // Select and copy
-      textarea.focus();
-      textarea.select();
-      
-      const successful = document.execCommand('copy');
-      document.body.removeChild(textarea);
-      
-      if (successful) {
-        setCopiedType(type);
-        setTimeout(() => setCopiedType(null), 2000);
-      } else {
-        // Last resort: Show alert with URL
-        alert(`No se pudo copiar automáticamente. Copia esta URL manualmente:\n\n${url}`);
-      }
-    } catch (err) {
-      console.error('All copy methods failed:', err);
-      alert(`No se pudo copiar automáticamente. Copia esta URL manualmente:\n\n${url}`);
+    const success = await copyToClipboard(url);
+    if (success) {
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2000);
     }
   };
   
   if (variant === 'inline') {
     return (
       <div className="flex items-center gap-2">
-        <Share2 className="w-4 h-4 text-neutral-500" />
+        <Link2 className="w-4 h-4 text-neutral-500" />
         <button
           onClick={() => handleCopy(ogUrl, 'og')}
           className="px-3 py-1.5 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 rounded-lg text-xs text-pink-400 transition-all flex items-center gap-2"
@@ -105,7 +65,7 @@ export const ShareLinkButton: React.FC<ShareLinkButtonProps> = ({
   return (
     <div className="space-y-3 bg-neutral-900/50 border border-neutral-800 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Share2 className="w-4 h-4 text-pink-500" />
+        <Link2 className="w-4 h-4 text-pink-500" />
         <h4 className="text-sm font-bold text-white">Compartir Evento</h4>
       </div>
       

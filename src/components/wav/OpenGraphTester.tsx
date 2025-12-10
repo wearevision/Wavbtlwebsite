@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, CheckCircle, XCircle, Loader2, Copy, Check } from 'lucide-react';
+import { ExternalLink, Copy, Check, Share2, AlertCircle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 import { projectId } from '../../utils/supabase/info';
 
 interface TestResult {
@@ -131,30 +132,10 @@ export const OpenGraphTester: React.FC<OpenGraphTesterProps> = ({
   };
 
   const handleCopy = async (url: string) => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(url);
-        setCopiedUrl(url);
-        setTimeout(() => setCopiedUrl(null), 2000);
-        return;
-      }
-    } catch (err) {
-      // Fall through to fallback
-    }
-    
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = url;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+    const success = await copyToClipboard(url);
+    if (success) {
       setCopiedUrl(url);
       setTimeout(() => setCopiedUrl(null), 2000);
-    } catch (err) {
-      alert(`No se pudo copiar. URL: ${url}`);
     }
   };
 

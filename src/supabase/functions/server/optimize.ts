@@ -5,13 +5,9 @@
  * in events using OpenAI.
  */
 
-import OpenAI from 'npm:openai';
 import * as kv from './kv_store.tsx';
 import { suggestCategoryForEvent, getCategories } from './categories.ts';
-
-const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY'),
-});
+import { generateRefinement } from './ai.ts';
 
 interface OptimizationResult {
   eventId: string;
@@ -75,148 +71,23 @@ function needsOptimization(event: any): boolean {
 }
 
 /**
- * Generate complete content for an event using AI
+ * Generate complete content for an event using AI (via generateRefinement in ai.ts)
+ * Now supports GPT-4 Vision thanks to the centralized logic in ai.ts
  */
 async function generateEventContent(event: any): Promise<any> {
-  const prompt = `Eres el Asistente de Optimización de Contenido del CMS WAV BTL para https://btl.wearevision.cl
-
-EVENTO A OPTIMIZAR:
-- ID: ${event.id}
-- Marca: ${event.brand || 'Desconocida'}
-- Título: ${event.title || 'Sin título'}
-- Descripción actual: ${event.description || 'Sin descripción'}
-- Año: ${event.year || 'Desconocido'}
-- País: ${event.country || 'Desconocido'}
-- Ciudad: ${event.city || 'Desconocida'}
-- Imagen: ${event.image || 'Sin imagen'}
-
-CONTEXTO CRÍTICO:
-Este evento es parte de un portafolio BTL de We Are Vision (Chile) que abarca desde 2007 hasta 2025.
-Debes inferir inteligentemente todos los datos faltantes basándote en:
-- El nombre del evento/marca
-- El tipo de activación BTL
-- Patrones comunes de la industria chilena/latinoamericana
-- El año aproximado (si no está especificado, usa un año entre 2007-2025)
-
-MISIÓN:
-Genera contenido profesional, optimizado y COMPLETO para este evento BTL. El contenido debe ser:
-- Concreto y narrativo (sin humo)
-- Orientado a negocio y resultados
-- Optimizado para SEO y AI indexing
-- Profesional y creativo
-- En español (Chile/Latinoamérica)
-
-INSTRUCCIONES CRÍTICAS (NO NEGOCIABLES):
-1. DEBES generar TODOS los campos sin excepción
-2. Si un dato no está presente, DEBES inferirlo de forma inteligente
-3. Los campos de IDENTIFICATION & LOCATION son OBLIGATORIOS
-4. Los campos de PERFORMANCE & RESULTS son OBLIGATORIOS
-5. NO omitas ningún campo del JSON de respuesta
-6. Si la descripción actual es genérica, crea una profesional
-7. Usa un tono profesional pero accesible
-8. NO uses lenguaje promocional excesivo
-9. NO inventes datos imposibles, pero SÍ infiere datos razonables
-10. NUNCA uses emojis en campos profesionales (solo en Instagram)
-
-ESTRATEGIA DE INFERENCIA:
-- Activación de marca en mall → 10-15 días, 150K-300K personas alcanzadas
-- Lanzamiento corporativo → 1-3 días, 500-2000 asistentes, venue: hotel/teatro
-- Evento musical/festival → 1-3 días, 5K-50K asistentes, estadio/recinto
-- Experiencia de marca → 7-30 días, 50K-500K personas alcanzadas
-
-AÑOS DE EVENTOS:
-Los eventos de WAV BTL van desde 2007 hasta 2025. Si no hay año especificado, infiere un año razonable.
-
-RESPONDE CON ESTE JSON EXACTO (REEMPLAZA LOS VALORES DE EJEMPLO):
-
-{
-  "title": "Coca-Cola | Experiencia Navideña - Santiago 2024",
-  "description": "Activación de marca inmersiva para el lanzamiento de la campaña navideña de Coca-Cola en Mall Plaza Vespucio. Realizada en diciembre 2024, la experiencia transformó el mall en un universo festivo con mapping 3D, zona de fotos interactivas y degustación de productos. Alcance: +250K visitantes en 15 días.",
-  "summary": "Activación navideña inmersiva de Coca-Cola en Mall Plaza Vespucio con mapping 3D y experiencias interactivas. Alcance: +250K visitantes en 15 días.",
-  "highlights": [
-    "Mapping 3D inmersivo en fachada principal del mall",
-    "Zona de fotos interactivas con elementos navideños branded",
-    "Sampling de productos y experiencia de degustación"
-  ],
-  "keywords": [
-    "Coca-Cola Santiago",
-    "Activación navideña 2024",
-    "Experiencia de marca Chile",
-    "BTL marketing Santiago",
-    "Evento Coca-Cola Navidad"
-  ],
-  "hashtags": [
-    "#CocaCola",
-    "#ActivaciónDeMarca",
-    "#MarketingExperiencial"
-  ],
-  "instagram_hook": "✨ Transformamos Mall Plaza Vespucio en un universo navideño mágico para Coca-Cola",
-  "instagram_body": "Durante 15 días, creamos una experiencia inmersiva que conectó con más de 250K visitantes. Mapping 3D, zona selfie branded y momentos únicos que hicieron brillar la Navidad.",
-  "instagram_closing": "¿Estuviste ahí? Cuéntanos tu momento favorito 👇",
-  "instagram_hashtags": "#CocaCola #NavidadCocaCola #MallPlaza #ExperienciaInmersiva #BTL #MarketingExperiencial",
-  "linkedin_post": "Orgullosos de haber ejecutado la activación navideña de Coca-Cola en Mall Plaza Vespucio. Una experiencia inmersiva que alcanzó +250K visitantes en 15 días, combinando tecnología de mapping 3D con activaciones interactivas que generaron conexiones emocionales reales con la marca.",
-  "linkedin_article": "La temporada navideña presenta desafíos únicos para las marcas: captar atención en un entorno saturado mientras se genera conexión emocional genuina. Para Coca-Cola, diseñamos una activación que transformó Mall Plaza Vespucio en un universo festivo durante 15 días de diciembre 2024. La estrategia combinó mapping 3D en la fachada principal, una zona de fotos interactivas con elementos navideños branded, y sampling de productos. El resultado: +250K visitantes impactados, alto engagement en redes sociales, y una experiencia que quedó en la memoria de miles de familias chilenas.",
-  "alt_title_1": "Experiencia Navideña Coca-Cola - Mall Plaza Vespucio 2024",
-  "alt_title_2": "Coca-Cola Navidad 2024 | Activación Inmersiva Santiago",
-  "alt_instagram": "🎄 15 días de magia navideña con Coca-Cola en Mall Plaza Vespucio. +250K visitantes vivieron una experiencia única con mapping 3D, zona selfie y momentos inolvidables. Un regalo para Santiago entero.",
-  "alt_summary_1": "Activación BTL inmersiva de Coca-Cola en Santiago. Mapping 3D y experiencias interactivas para conectar con 250K personas.",
-  "alt_summary_2": "Descubre cómo Coca-Cola transformó la Navidad en Mall Plaza Vespucio con una experiencia de marca inolvidable.",
-  "tone": "Festivo, Mágico, Innovador, Cercano",
-  "audience": "Familias, Jóvenes adultos (18-35), Visitantes de Mall Plaza",
-  "seo_title": "Coca-Cola Navidad 2024 | Activación BTL Inmersiva Santiago",
-  "seo_description": "Activación de marca Coca-Cola en Mall Plaza Vespucio. Experiencia inmersiva con mapping 3D y sampling. Diciembre 2024.",
-  "tags": ["Navidad", "Mapping 3D", "Mall Plaza", "BTL", "Sampling"],
-  "brand": "Coca-Cola",
-  "client": "Coca-Cola Chile",
-  "year": "2024",
-  "month": "Diciembre",
-  "country": "Chile",
-  "city": "Santiago",
-  "venue": "Mall Plaza Vespucio",
-  "subcategory": "Experiencia Inmersiva",
-  "people_reached": "250000",
-  "attendees": "250000",
-  "days": "15",
-  "cities": "1",
-  "screens": "4",
-  "kpis": [
-    "Alcance: +250K visitantes únicos en 15 días",
-    "Engagement: 8.5% en contenido orgánico",
-    "UGC: 1,200 menciones espontáneas en redes sociales",
-    "Tiempo promedio de interacción: 12 minutos"
-  ],
-  "results_notes": "Activación exitosa que superó expectativas de tráfico. Alta participación en zonas interactivas y excelente recepción del público familiar. Generó contenido orgánico valioso para la marca."
-}
-
-IMPORTANTE FINAL:
-- TODOS los campos son OBLIGATORIOS, no omitas ninguno
-- Los valores numéricos (people_reached, attendees, etc.) deben ser strings con números
-- El venue debe ser específico (no genérico como "un mall")
-- El client puede ser igual a brand si no hay distinción
-- La subcategory debe ser específica (no solo "Activación")
-- Los KPIs deben tener formato descriptivo con números
-- El results_notes debe ser un párrafo breve pero sustancioso
-
-Responde SOLO con el objeto JSON válido. No incluyas markdown, comentarios ni texto adicional.`;
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
-      response_format: { type: 'json_object' }
-    });
-
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No content generated');
+  console.log(`[generateEventContent] Delegating to ai.ts (Vision Enabled) for event: ${event.title}`);
+  
+  // Create a fake conversation history that triggers the "MEGA AUDIT" mode in ai.ts
+  // The keyword "OPTIMIZAR TODO" is crucial here.
+  const messages = [
+    { 
+      role: 'user', 
+      content: 'OPTIMIZAR TODO. Analiza visualmente las imágenes (si existen) e infiere todos los datos faltantes. Genera contenido completo y profesional.' 
     }
+  ];
 
-    return JSON.parse(content);
-  } catch (error) {
-    console.error(`Error generating content for event ${event.id}:`, error);
-    throw error;
-  }
+  // Call the centralized AI logic which handles Vision, prompts, and formatting
+  return await generateRefinement(messages, event.description || '', event);
 }
 
 /**

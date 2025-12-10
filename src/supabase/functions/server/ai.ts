@@ -218,7 +218,7 @@ ESTRUCTURA JSON COMPLETA (Todos los campos):
   "instagram_hook": "Hook inicial impactante de Instagram",
   "instagram_body": "Cuerpo del post de Instagram",
   "instagram_closing": "Cierre del post de Instagram con CTA",
-  "instagram_hashtags": "#hashtag1 #hashtag2 #hashtag3",
+  "instagram_hashtags": "#hashtag1 #hashtag2 #tag3",
   "alt_instagram": "Variante alternativa copy Instagram para A/B testing",
   
   "linkedin_post": "Copy breve para LinkedIn (máx 1,300 caracteres)",
@@ -244,6 +244,8 @@ ESTRUCTURA JSON COMPLETA (Todos los campos):
   "cities": "Santiago" o "Santiago, Valparaíso, Concepción",
   "screens": "4",
   "results_notes": "Notas agradecidas sobre resultados (150-250 chars)",
+  
+  "og_image": "URL de la imagen para OpenGraph/redes sociales - DEBE ser la event.image o primera imagen pública de gallery. Ejemplo: https://... NO uses URLs locales. SIEMPRE usa una URL HTTPS válida.",
   
   "chat_response": "Tu respuesta conversacional (Markdown). Aquí incluye la JUSTIFICACIÓN DE LAS INFERENCIAS, ANÁLISIS VISUAL de las imágenes provistas, y orden sugerido de fotos."
 }
@@ -300,24 +302,67 @@ ${modeInstructions}
   
   const imageUrls: string[] = [];
   
+  // Helper function to validate if a URL is publicly accessible
+  const isValidPublicUrl = (url: string): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    
+    // Must start with http/https (includes Supabase Storage URLs)
+    if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+    
+    // Exclude localhost and local development URLs
+    if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('0.0.0.0')) return false;
+    
+    // Exclude figma:asset and other virtual schemes (not accessible by OpenAI)
+    if (url.includes('figma:') || url.includes('blob:')) return false;
+    
+    // Check for valid image file extensions that OpenAI supports
+    // OpenAI Vision API supports: png, jpeg, jpg, gif, webp
+    const validExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+    const urlLower = url.toLowerCase();
+    
+    // Remove query parameters and hash before checking extension
+    const urlWithoutQuery = urlLower.split('?')[0].split('#')[0];
+    
+    // Check if URL ends with a valid extension
+    const hasValidExtension = validExtensions.some(ext => urlWithoutQuery.endsWith(ext));
+    
+    if (!hasValidExtension) {
+      console.log(`⚠️  [Vision] URL doesn't have a valid image extension (png, jpg, jpeg, gif, webp): ${url.substring(0, 80)}...`);
+      return false;
+    }
+    
+    // ✅ Supabase Storage URLs are valid (https://xxxxx.supabase.co/storage/v1/object/public/...)
+    // ✅ Signed URLs are also valid (contain /storage/ path)
+    
+    return true;
+  };
+  
   // 1. Add main cover image if valid
-  if (event.image && typeof event.image === 'string' && event.image.startsWith('http')) {
+  if (isValidPublicUrl(event.image)) {
     imageUrls.push(event.image);
-    console.log(`[Vision] Main cover image added: ${event.image.substring(0, 50)}...`);
+    console.log(`✅ [Vision] Main cover image added: ${event.image.substring(0, 60)}...`);
+  } else if (event.image) {
+    console.log(`⚠️  [Vision] Skipping invalid cover image URL: ${event.image.substring(0, 60)}...`);
   }
   
   // 2. Add up to 3 gallery images to save tokens
   if (Array.isArray(event.gallery)) {
-    event.gallery.slice(0, 3).forEach((item: any) => {
+    event.gallery.slice(0, 3).forEach((item: any, idx: number) => {
       const url = item?.url || item;
-      if (url && typeof url === 'string' && url.startsWith('http') && !url.includes('localhost')) {
+      if (isValidPublicUrl(url)) {
         imageUrls.push(url);
-        console.log(`[Vision] Gallery image added: ${url.substring(0, 50)}...`);
+        console.log(`✅ [Vision] Gallery image ${idx + 1} added: ${url.substring(0, 60)}...`);
+      } else if (url) {
+        console.log(`⚠️  [Vision] Skipping invalid gallery image ${idx + 1}: ${typeof url === 'string' ? url.substring(0, 60) : typeof url}...`);
       }
     });
   }
   
-  console.log(`[Vision] Total images prepared for analysis: ${imageUrls.length}`);
+  if (imageUrls.length > 0) {
+    console.log(`✅ [Vision] Total valid images for AI analysis: ${imageUrls.length}`);
+  } else {
+    console.log(`️  [Vision] No valid public images found. AI will work with text data only.`);
+  }
   
   // ============================================================
   // Construct User Message Content (Text + Images)
@@ -394,38 +439,74 @@ PERFORMANCE:
   
   const apiMessages = [
     { role: "system", content: systemPrompt },
-    { role: "user", content: userContent }, // This replaces the old text-only system message
-    ...messages.map(m => ({ role: m.role, content: m.text || m.content }))
+    { role: "user", content: userContent }, // Event data with images
   ];
-
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "gpt-4o", // Changed from gpt-4o-mini to gpt-4o for Vision support
-      messages: apiMessages,
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 4096 // Increased for richer responses with visual analysis
-    })
+  
+  // Append additional chat messages (text only)
+  messages.forEach(m => {
+    if (m.role && (m.content || m.text)) {
+      apiMessages.push({
+        role: m.role,
+        content: typeof m.content === 'string' ? m.content : (m.text || '')
+      });
+    }
   });
+
+  console.log(`[Vision] Total messages in API call: ${apiMessages.length}`);
+  console.log(`[Vision] Messages structure:`, JSON.stringify(apiMessages.map(m => ({
+    role: m.role,
+    contentType: Array.isArray(m.content) ? 'array' : typeof m.content
+  }))));
+
+  let res;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o", // Changed from gpt-4o-mini to gpt-4o for Vision support
+        messages: apiMessages,
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 4096 // Increased for richer responses with visual analysis
+      })
+    });
+  } catch (fetchError: any) {
+    console.error("❌ Fetch error to OpenAI:", fetchError);
+    throw new Error(`Network error calling OpenAI: ${fetchError.message}`);
+  }
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("OpenAI Error:", err);
-    throw new Error(`OpenAI API Error: ${res.status}`);
+    console.error("❌ OpenAI API returned error status:", res.status);
+    console.error("❌ OpenAI Error response:", err);
+    throw new Error(`OpenAI API Error: ${res.status} - ${err}`);
   }
 
   const data = await res.json();
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    console.error("❌ Unexpected OpenAI response structure:", JSON.stringify(data));
+    throw new Error("OpenAI returned an unexpected response structure");
+  }
+  
   const content = data.choices[0].message.content;
   
+  if (!content) {
+    console.error("❌ OpenAI returned empty content");
+    throw new Error("OpenAI returned empty content");
+  }
+  
   try {
-    return JSON.parse(content);
-  } catch (e) {
-    console.error("Failed to parse AI response:", content);
+    const parsed = JSON.parse(content);
+    console.log("✅ Successfully parsed AI response");
+    return parsed;
+  } catch (e: any) {
+    console.error("❌ Failed to parse AI response as JSON:", content);
+    console.error("❌ Parse error:", e.message);
     return { 
       draft: currentDraft, 
       chat_response: "Procesé tu solicitud pero hubo un error de formato. Por favor intenta de nuevo.",

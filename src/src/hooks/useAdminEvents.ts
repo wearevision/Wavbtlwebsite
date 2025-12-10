@@ -79,6 +79,23 @@ export const useAdminEvents = () => {
     }
   };
 
+  /**
+   * Save a single event to Supabase by index
+   */
+  const saveEvent = async (index: number) => {
+    if (index < 0 || index >= events.length) {
+      throw new Error('Invalid event index');
+    }
+
+    const event = events[index];
+    const token = await getAdminToken();
+    
+    // Save only this event
+    await saveEvents([event], token);
+    
+    setLastSavedAt(new Date().toLocaleString());
+  };
+
   const handleFileChange = async (index: number, field: 'cover' | 'logo' | 'gallery' | 'image', file: File) => {
     const uploadId = `${index}-${field}-${Date.now()}`;
     setUploading(uploadId);
@@ -458,6 +475,7 @@ export const useAdminEvents = () => {
     lastSavedAt,
     loadData,
     handleSave,
+    saveEvent, // Export single-event save
     handleFileChange,
     removeGalleryItem,
     updateEvent,
