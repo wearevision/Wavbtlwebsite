@@ -6,7 +6,7 @@ import { TextRotator } from './components/wav/TextRotator';
 import { Controls } from './components/wav/Controls';
 // Lazy load heavy components
 const Modal = React.lazy(() => import('./components/wav/Modal').then(m => ({ default: m.Modal })));
-const AdminPanelMinimal = React.lazy(() => import('./components/wav/AdminPanelMinimal').then(m => ({ default: m.AdminPanelMinimal })));
+const AdminPanel = React.lazy(() => import('./components/wav/AdminPanel').then(m => ({ default: m.AdminPanel })));
 const OpenGraphTester = React.lazy(() => import('./components/wav/OpenGraphTester').then(m => ({ default: m.OpenGraphTester })));
 const SyncHelper = React.lazy(() => import('./components/wav/SyncHelper').then(m => ({ default: m.SyncHelper })));
 
@@ -16,12 +16,18 @@ import { AboutModal } from './components/wav/AboutModal';
 import { TrapezoidButton } from './components/wav/TrapezoidButton';
 import { Info } from 'lucide-react';
 import { clsx } from 'clsx';
-import { events as staticEvents } from './data/events';
+// REMOVED: Static events import - Now 100% dynamic from Supabase
+// import { events as staticEvents } from './data/events';
 import { getEvents, getCategories } from './utils/api';
 import { WavEvent } from './types';
 import { EventCategory } from './utils/contentRules';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { projectId } from './utils/supabase/info';
+
+// CRITICAL: Force UTF-8 charset and load Outfit font with full Latin Extended support
+const FONT_PRECONNECT = 'https://fonts.googleapis.com';
+const FONT_STYLESHEET = 'https://fonts.gstatic.com';
+const OUTFIT_FONT_URL = 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=latin,latin-ext';
 
 // Interface for iOS specific requestPermission
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
@@ -65,8 +71,8 @@ console.log("🕒 Build Time: " + new Date().toISOString());
 export default function App() {
   // Debug Version
   useEffect(() => {
-    console.log("WAV BTL App v2.1.2 - Build Cache Force Refresh");
-    console.log("🚀 DEPLOYMENT V1.2.0 - CRITICAL FIX APPLIED");
+    console.log("WAV BTL App v2.1.3 - UTF-8 FONT FIX (Tildes Support)");
+    console.log("🔤 CRITICAL: Outfit font loaded with Latin Extended subset");
     console.log("⏰ Timestamp: " + new Date().toISOString());
   }, []);
 
@@ -339,7 +345,7 @@ export default function App() {
   if (showAdmin) {
     return (
       <React.Suspense fallback={<LogoLoader />}>
-        <AdminPanelMinimal 
+        <AdminPanel 
           onBack={() => {
             setShowAdmin(false);
             fetchEvents(); // Reload data when returning from admin
@@ -363,24 +369,28 @@ export default function App() {
     <HelmetProvider>
       <div className="relative w-full h-screen overflow-hidden bg-[var(--wav-neutral-black)] text-white">
         <Helmet>
+          {/* CRITICAL: Force UTF-8 encoding for Spanish accents/tildes */}
+          <meta charSet="utf-8" />
+          <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+          
           {/* ============================================================ */}
           {/* PHASE 3: CRITICAL NETWORK PRECONNECTS (Lighthouse Priority) */}
           {/* ============================================================ */}
           
           {/* Google Fonts - Critical path optimization */}
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href={FONT_PRECONNECT} />
+          <link rel="preconnect" href={FONT_STYLESHEET} crossOrigin="anonymous" />
           
           {/* PHASE 3: Preload critical font weights (Outfit 900 for titles) */}
           <link 
             rel="preload" 
             as="style" 
-            href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&display=swap"
+            href={OUTFIT_FONT_URL}
           />
           <link 
             rel="stylesheet" 
             crossOrigin="anonymous"
-            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap&subset=latin,latin-ext"
             media="print"
             onLoad={(e) => { (e.target as HTMLLinkElement).media = 'all'; }}
           />
@@ -413,7 +423,7 @@ export default function App() {
           <meta property="og:site_name" content="We Are Vision (WAV)" />
           <meta property="og:title" content={selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"} />
           <meta property="og:description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
-          <meta property="og:image" content={selectedEvent ? selectedEvent.image : (staticEvents[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
+          <meta property="og:image" content={selectedEvent ? selectedEvent.image : (events[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
           <meta property="og:url" content={selectedEvent ? window.location.href : "https://btl.wearevision.cl"} />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
@@ -423,7 +433,7 @@ export default function App() {
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={selectedEvent ? `${selectedEvent.title} | We Are Vision` : "We Are Vision (WAV) | Agencia de Marketing Experiencial & BTL"} />
           <meta name="twitter:description" content={selectedEvent ? selectedEvent.description : "WAV BTL es una agencia de marketing experiencial líder en Chile y LATAM. Creamos activaciones de marca, eventos corporativos, instalaciones tecnológicas y experiencias inmersivas."} />
-          <meta name="twitter:image" content={selectedEvent ? selectedEvent.image : (staticEvents[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
+          <meta name="twitter:image" content={selectedEvent ? selectedEvent.image : (events[0]?.image || "https://btl.wearevision.cl/og-cover.jpg")} />
         </Helmet>
         
         {/* Semantic SEO Header (Visually Hidden H1 - standard practice for SPAs) */}

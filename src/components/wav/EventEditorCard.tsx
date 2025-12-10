@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { 
   Trash2, Upload, Image as ImageIcon, Film, X, Check, 
-  AlertTriangle, ChevronRight, ChevronDown 
+  AlertTriangle, ChevronRight, ChevronDown, Wand2, Loader2
 } from 'lucide-react';
 import { FormField } from './FormField';
 import { ShareLinkButton } from './ShareLinkButton';
 import { getCharCount } from '../../utils/validation';
 import { WavEvent } from '../../types';
 import { FIELD_TOOLTIPS } from '../../utils/validation';
+import { useEventEnricher } from '../../src/hooks/useEventEnricher';
+import { toast } from 'sonner@2.0.3';
 
 interface EventEditorCardProps {
   event: WavEvent;
@@ -30,6 +32,39 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasValidationErrors = validation && !validation.isValid;
+  const { enrichEvent, isEnriching } = useEventEnricher();
+
+  // Handler for AI auto-complete
+  const handleAutoComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent collapse/expand
+    
+    if (!event.brand || !event.title) {
+      toast.error('Necesitas al menos Marca y Título para auto-completar');
+      return;
+    }
+
+    try {
+      toast.loading('Enriqueciendo evento con IA...', { id: 'enrich' });
+      const result = await enrichEvent(event);
+      
+      // Apply all non-empty fields from the result
+      Object.entries(result).forEach(([field, value]) => {
+        if (field !== 'chat_response' && field !== 'draft' && value !== undefined && value !== null && value !== '') {
+          // Map draft to description
+          if (field === 'draft') {
+            updateEvent(index, 'description', value as string);
+          } else {
+            updateEvent(index, field, value as any);
+          }
+        }
+      });
+
+      toast.success('Evento enriquecido con éxito', { id: 'enrich' });
+    } catch (error) {
+      console.error('[Auto-Complete] Error:', error);
+      toast.error('Error al enriquecer el evento', { id: 'enrich' });
+    }
+  };
 
   // Helper to get the title string for the collapsed view
   const headerTitle = [
@@ -66,6 +101,26 @@ export const EventEditorCard: React.FC<EventEditorCardProps> = ({
             </div>
 
             <div className="flex items-center gap-3 shrink-0 ml-4">
+                {/* AI Auto-Complete Button */}
+                <button
+                  onClick={handleAutoComplete}
+                  disabled={isEnriching || !event.brand || !event.title}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-md text-xs text-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Auto-completar todos los campos con IA"
+                >
+                  {isEnriching ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-3 h-3" />
+                      <span>🪄 Auto-Completar</span>
+                    </>
+                  )}
+                </button>
+                
                 {/* Error Indicator in Collapsed View */}
                 {hasValidationErrors && !isExpanded && (
                     <div className="flex items-center gap-1 px-2 py-1 bg-red-950/30 rounded text-xs text-red-400 border border-red-500/20">

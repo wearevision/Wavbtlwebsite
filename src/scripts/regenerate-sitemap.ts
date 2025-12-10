@@ -1,18 +1,18 @@
 /**
  * Script para regenerar y validar sitemaps
  * 
- * Uso:
- * 1. En desarrollo: node scripts/regenerate-sitemap.ts
- * 2. En producción: El sitemap se genera automáticamente
+ * ⚠️ DEPRECATED: Este script usaba datos estáticos de /data/events.ts
  * 
- * Este script es útil para:
- * - Validar que el sitemap se genera correctamente
- * - Ver preview del sitemap antes de deploy
- * - Debugging de URLs y metadata
+ * AHORA: Los sitemaps se generan automáticamente desde Supabase en:
+ * - https://[projectId].supabase.co/functions/v1/make-server-c4bb2206/sitemap.xml
+ * - https://[projectId].supabase.co/functions/v1/make-server-c4bb2206/sitemap.json
+ * 
+ * Para debugging, usa directamente esos endpoints.
  */
 
+// REMOVED: Static events import - Now 100% dynamic from Supabase
+// import { events as staticEvents } from '../data/events';
 import { generateCompleteSitemap } from '../utils/generateSitemap';
-import { events as staticEvents } from '../data/events';
 import { generateSlug } from '../utils/slug';
 
 // Categorías comunes (puedes expandir)
@@ -89,7 +89,7 @@ console.log('');
 console.log('🧪 Validaciones:');
 let validationErrors = 0;
 
-// 1. Verificar que todas las URLs sean únicas
+// 1. Verificar que todas las URLs sean ��nicas
 const urls = entries.map(e => e.url);
 const uniqueUrls = new Set(urls);
 if (urls.length !== uniqueUrls.size) {

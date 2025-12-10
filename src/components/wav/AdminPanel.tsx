@@ -1,23 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Loader2, Plus, Trash2, Upload, Save, ArrowLeft, Sparkles, 
-  Check, Copy, Image as ImageIcon, Film, X, Send, MessageSquare, 
-  Bot, User as UserIcon, RefreshCw, ChevronRight, Lock, Wand2, AlertTriangle, Download
+  Check, Copy, Image as ImageIcon, Film, X, ChevronRight, Lock, Wand2, AlertTriangle, Download, Zap, User as UserIcon, FileDown
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase/client';
 import { publicAnonKey, projectId } from '../../utils/supabase/info';
-import { useAdminAIChat, ChatMessage } from '../../src/hooks/useAdminAIChat';
+// Chat IA eliminado - se reemplazó por botones directos que usan useEventEnricher
 import { useAdminEvents } from '../../src/hooks/useAdminEvents';
 import { useEventValidation } from '../../src/hooks/useEventValidation';
+import { useEventEnricher } from '../../src/hooks/useEventEnricher';
 import { FormField } from './FormField';
 import { EventListView } from './EventListView';
 import { ShareLinkButton } from './ShareLinkButton';
 import { OpenAIStatusIndicator } from './OpenAIStatusIndicator';
 import { ClaudeOptimizer } from './ClaudeOptimizer';
+import { BatchProcessingModal } from './BatchProcessingModal';
 import { FIELD_TOOLTIPS, getCharCount, validateEvent } from '../../utils/validation';
 import { EventCategory } from '../../utils/contentRules';
 import { Progress } from '../ui/progress';
 import { WavEvent } from '../../types';
+import { toast } from 'sonner@2.0.3';
+import { generateLocalEventsFile } from '../../utils/sync-to-local';
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -28,6 +31,8 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [emailInput, setEmailInput] = useState("admin@wearevision.cl");
   const [passwordInput, setPasswordInput] = useState("");
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [batchMode, setBatchMode] = useState<'fill' | 'optimize'>('fill');
   const [authLoading, setAuthLoading] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(null);
   const [syncProgress, setSyncProgress] = useState(0);
@@ -57,32 +62,9 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
   // Validation hook
   const validationMap = useEventValidation(events);
 
-  const {
-    selectedAiEventIndex,
-    setSelectedAiEventIndex,
-    aiDraft,
-    setAiDraft,
-    aiFormState,
-    setAiFormState,
-    chatHistory,
-    chatInput,
-    setChatInput,
-    isRefining,
-    chatEndRef,
-    handleAiSelectEvent,
-    handleSendMessage
-  } = useAdminAIChat(events, updateEvent);
-
   useEffect(() => {
     checkSession();
   }, []);
-
-  // Sincronizar sesión de IA cuando se abre un evento en el panel de detalle
-  useEffect(() => {
-    if (selectedEventIndex !== null && selectedEventIndex !== selectedAiEventIndex) {
-      handleAiSelectEvent(selectedEventIndex);
-    }
-  }, [selectedEventIndex]);
 
   const checkSession = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -386,6 +368,64 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
     }
   };
 
+  // Handler for applying enriched data from batch processing
+  const handleApplyEnrichedData = (index: number, enrichedData: any) => {
+    // Apply all non-empty fields from the enriched result
+    Object.entries(enrichedData).forEach(([field, value]) => {
+      if (field !== 'chat_response' && field !== 'draft' && value !== undefined && value !== null && value !== '') {
+        updateEvent(index, field, value as any);
+      }
+    });
+  };
+
+  // Handler for creating local backup file (OPTIONAL - no longer required for sync)
+  const handleSyncToLocalFile = async () => {
+    try {
+      setIsSyncing(true);
+      toast.info('Generando backup de eventos desde Supabase...');
+      
+      // Get access token from current session
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      
+      if (!accessToken) {
+        toast.error('No autenticado. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+
+      const fileContent = await generateLocalEventsFile(accessToken);
+      
+      // Show modal with copy-paste instructions
+      const shouldDownload = confirm(
+        '✅ Archivo events.ts generado desde Supabase!\n\n' +
+        `Total de eventos: ${events.length}\n\n` +
+        '¿Quieres descargarlo? (Luego debes reemplazar manualmente /data/events.ts)\n\n' +
+        'Presiona OK para descargar, o Cancelar para copiar al portapapeles.'
+      );
+
+      if (shouldDownload) {
+        // Download as file
+        const blob = new Blob([fileContent], { type: 'text/typescript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'events.ts';
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success('📥 Archivo descargado! Ahora reemplaza /data/events.ts manualmente.');
+      } else {
+        // Copy to clipboard
+        await navigator.clipboard.writeText(fileContent);
+        toast.success('📋 Contenido copiado! Pégalo en /data/events.ts y guarda el archivo.');
+      }
+    } catch (error) {
+      console.error('Error syncing to local file:', error);
+      toast.error(`Error: ${error.message || 'No se pudo generar el archivo'}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Get current event
   const currentEvent = selectedEventIndex !== null ? events[selectedEventIndex] : null;
   const currentValidation = selectedEventIndex !== null ? validationMap.get(selectedEventIndex) : null;
@@ -497,13 +537,37 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
               Pull desde Supabase
             </button>
             <button 
-              onClick={handleMegaAudit} 
-              disabled={saving || isSyncing}
-              className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-9 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white disabled:opacity-50 shadow-lg hover:shadow-xl"
-              title="Optimiza TODOS los eventos con IA: llena campos faltantes, optimiza SEO, genera contenido social, infiere KPIs y más"
+              onClick={handleSyncToLocalFile} 
+              disabled={saving || isSyncing || events.length === 0}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white disabled:opacity-50"
+              title="[OPCIONAL] Descarga backup de eventos actuales (ya no necesario para sincronización - la app es 100% dinámica)"
             >
-              {isSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Llenado y Auditado Masivo
+              <FileDown className="mr-2 h-4 w-4" />
+              💾 Backup (Opcional)
+            </button>
+            <button 
+              onClick={() => {
+                setBatchMode('fill');
+                setShowBatchModal(true);
+              }} 
+              disabled={saving || isSyncing || events.length === 0}
+              className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-9 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white disabled:opacity-50"
+              title="Auto-completa SOLO los campos vacíos de todos los eventos"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              🪄 Auto-Completar (Batch)
+            </button>
+            <button 
+              onClick={() => {
+                setBatchMode('optimize');
+                setShowBatchModal(true);
+              }} 
+              disabled={saving || isSyncing || events.length === 0}
+              className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors h-9 px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white disabled:opacity-50 shadow-lg hover:shadow-xl"
+              title="Optimiza TODO en todos los eventos con visión de Productor BTL + SEO Expert"
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              ✨ Optimizar Todo (Batch)
             </button>
           </div>
 
@@ -558,7 +622,7 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
           />
         </div>
 
-        {/* Right: Event Detail + AI Chat */}
+        {/* Right: Event Detail */}
         <div className="flex-1 overflow-y-auto">
           {currentEvent && selectedEventIndex !== null ? (
             <EventDetailPanel
@@ -571,16 +635,6 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
               removeGalleryItem={removeGalleryItem}
               uploading={uploading}
               onClose={() => setSelectedEventIndex(null)}
-              chatHistory={chatHistory}
-              chatInput={chatInput}
-              setChatInput={setChatInput}
-              isRefining={isRefining}
-              chatEndRef={chatEndRef}
-              handleSendMessage={handleSendMessage}
-              aiFormState={aiFormState}
-              setAiFormState={setAiFormState}
-              handleCopy={handleCopy}
-              handleAiSelectEvent={handleAiSelectEvent}
               categories={categories}
             />
           ) : (
@@ -590,12 +644,27 @@ export const AdminPanel = ({ onBack, categories = [] }: AdminPanelProps) => {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Selecciona un evento</h3>
               <p className="text-sm text-neutral-400 max-w-md">
-                Elige un evento de la lista para editarlo con asistencia de IA conversacional.
+                Elige un evento de la lista para editarlo con herramientas de IA.
               </p>
             </div>
           )}
         </div>
       </div>
+      
+      {/* Batch Processing Modal */}
+      {showBatchModal && (
+        <BatchProcessingModal
+          events={events}
+          mode={batchMode}
+          onComplete={async () => {
+            // Auto-save to Supabase after batch processing
+            await handleSave();
+            await loadData(); // Reload data after batch processing
+          }}
+          onClose={() => setShowBatchModal(false)}
+          onSaveEvent={handleApplyEnrichedData}
+        />
+      )}
     </div>
   );
 };
@@ -611,16 +680,6 @@ interface EventDetailPanelProps {
   removeGalleryItem: (eventIndex: number, mediaId: string) => void;
   uploading: string | null;
   onClose: () => void;
-  chatHistory: ChatMessage[];
-  chatInput: string;
-  setChatInput: (value: string) => void;
-  isRefining: boolean;
-  chatEndRef: React.RefObject<HTMLDivElement>;
-  handleSendMessage: (message: string) => void;
-  aiFormState: Partial<WavEvent>;
-  setAiFormState: React.Dispatch<React.SetStateAction<Partial<WavEvent>>>;
-  handleCopy: (text: string) => void;
-  handleAiSelectEvent: (index: number) => void;
   categories: EventCategory[];
 }
 
@@ -634,16 +693,6 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
   removeGalleryItem,
   uploading,
   onClose,
-  chatHistory,
-  chatInput,
-  setChatInput,
-  isRefining,
-  chatEndRef,
-  handleSendMessage,
-  aiFormState,
-  setAiFormState,
-  handleCopy,
-  handleAiSelectEvent,
   categories
 }) => {
   return (
@@ -670,13 +719,6 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
             </h2>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={() => handleAiSelectEvent(eventIndex)}
-              className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full"
-              title="Reiniciar sesión de IA"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
             <button 
               onClick={() => {
                 if (confirm('¿Eliminar este evento?')) {
@@ -706,26 +748,7 @@ const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
           removeGalleryItem={removeGalleryItem}
           uploading={uploading}
           categories={categories}
-          handleSendMessage={handleSendMessage}
-          isRefining={isRefining}
         />
-        
-        {/* AI Chat Section */}
-        <div className="mt-8 pt-8 border-t border-neutral-800">
-          <AIChatPanel
-            event={event}
-            eventIndex={eventIndex}
-            chatHistory={chatHistory}
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            isRefining={isRefining}
-            chatEndRef={chatEndRef}
-            handleSendMessage={handleSendMessage}
-            aiFormState={aiFormState}
-            setAiFormState={setAiFormState}
-            handleCopy={handleCopy}
-          />
-        </div>
       </div>
     </div>
   );
@@ -741,8 +764,6 @@ interface EventFieldsEditorProps {
   removeGalleryItem: (eventIndex: number, mediaId: string) => void;
   uploading: string | null;
   categories: EventCategory[];
-  handleSendMessage: (message: string) => void;
-  isRefining: boolean;
 }
 
 const EventFieldsEditor: React.FC<EventFieldsEditorProps> = ({
@@ -753,12 +774,71 @@ const EventFieldsEditor: React.FC<EventFieldsEditorProps> = ({
   handleFileChange,
   removeGalleryItem,
   uploading,
-  categories,
-  handleSendMessage,
-  isRefining
+  categories
 }) => {
   const hasError = (field: string) => validation?.errors?.has(field);
   const getError = (field: string) => validation?.errors?.get(field);
+  const { enrichEvent, isEnriching } = useEventEnricher();
+
+  // Handler for AI auto-complete (FILL mode - only empty fields)
+  const handleAutoComplete = async () => {
+    if (!event.brand || !event.title) {
+      toast.error('Necesitas al menos Marca y Título para auto-completar');
+      return;
+    }
+
+    try {
+      toast.loading('Completando campos vacíos con IA...', { id: 'enrich' });
+      const result = await enrichEvent(event, 'fill');
+      
+      // Apply all non-empty fields from the result
+      Object.entries(result).forEach(([field, value]) => {
+        if (field !== 'chat_response' && value !== undefined && value !== null && value !== '') {
+          // Map draft to description
+          if (field === 'draft') {
+            updateEvent(eventIndex, 'description', value as string);
+          } else {
+            updateEvent(eventIndex, field, value as any);
+          }
+        }
+      });
+
+      toast.success('Campos vacíos completados con éxito', { id: 'enrich' });
+    } catch (error: any) {
+      console.error('Error auto-completing event:', error);
+      toast.error(`Error: ${error.message}`, { id: 'enrich' });
+    }
+  };
+
+  // Handler for AI optimization (OPTIMIZE mode - improves ALL fields)
+  const handleOptimize = async () => {
+    if (!event.brand || !event.title) {
+      toast.error('Necesitas al menos Marca y Título para optimizar');
+      return;
+    }
+
+    try {
+      toast.loading('Optimizando evento con visión de Productor BTL + SEO Expert...', { id: 'optimize' });
+      const result = await enrichEvent(event, 'optimize');
+      
+      // Apply ALL fields from the result (including overwrites)
+      Object.entries(result).forEach(([field, value]) => {
+        if (field !== 'chat_response' && value !== undefined && value !== null && value !== '') {
+          // Map draft to description
+          if (field === 'draft') {
+            updateEvent(eventIndex, 'description', value as string);
+          } else {
+            updateEvent(eventIndex, field, value as any);
+          }
+        }
+      });
+
+      toast.success('Evento optimizado con éxito', { id: 'optimize' });
+    } catch (error: any) {
+      console.error('Error optimizing event:', error);
+      toast.error(`Error: ${error.message}`, { id: 'optimize' });
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -770,68 +850,23 @@ const EventFieldsEditor: React.FC<EventFieldsEditorProps> = ({
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <button
-            onClick={() => handleSendMessage(`MODO: OPTIMIZE
-Genera una optimización completa para este evento.
-Mejora TODOS los campos textuales sin inventar información.
-
-CAMPOS REQUERIDOS (TODOS):
-1. Título optimizado
-2. Slug SEO
-3. Resumen / Meta description (max 160 caracteres)
-4. Highlights (3–5 puntos clave potentes)
-5. Keywords SEO (5-8 keywords)
-6. Hashtags generales (5-10)
-7. Título SEO (max 60 caracteres)
-8. Descripción SEO (max 155 caracteres)
-9. Tags internos (3-5 tags para filtrado)
-
-CONTENIDO EDITORIAL:
-10. Tono de comunicación (ej: Corporativo, Festivo, Premium)
-11. Audiencia/Target (ej: Millennials, Ejecutivos, Familias)
-
-SOCIAL MEDIA COMPLETO:
-12. Instagram Hook (frase de apertura impactante)
-13. Instagram Body (cuerpo del post)
-14. Instagram Closing (CTA final)
-15. Instagram Hashtags (hashtags específicos IG)
-16. Alt Instagram Copy (variante para A/B testing)
-17. LinkedIn Post (versión breve corporativa)
-18. LinkedIn Artículo (versión larga profesional)
-
-A/B TESTING:
-19. Título Alternativo #1
-20. Título Alternativo #2
-21. Resumen Alternativo #1
-22. Resumen Alternativo #2
-
-ADICIONAL:
-23. Orden sugerido de fotos con hero y justificación (en chat_response)
-24. KPIs recomendados para medir (3-5 indicadores)`)}
-            disabled={isRefining}
-            className="px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-neutral-700 disabled:to-neutral-700 text-white rounded-md text-sm font-bold flex items-center justify-center gap-2"
+            onClick={handleAutoComplete}
+            disabled={isEnriching || !event.brand || !event.title}
+            className="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:from-neutral-700 disabled:to-neutral-700 text-white rounded-md text-sm font-bold flex items-center justify-center gap-2"
+            title="Auto-completar SOLO los campos vacíos con datos realistas y profesionales"
           >
-            {isRefining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            Optimizar Todo
+            {isEnriching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+            🪄 Auto-Completar Datos
           </button>
           
           <button
-            onClick={() => handleSendMessage(`MODO: AUDIT
-Analiza este evento en profundidad y proporciona un reporte de calidad SEO y conversión.
-
-Evalúa:
-1. Título: claridad, longitud, keywords
-2. Descripción: estructura, llamados a la acción
-3. Keywords: relevancia, competitividad
-4. Hashtags: diversidad, alcance
-5. Copy IG/LI: coherencia de marca
-6. Multimedia: uso estratégico de imágenes
-
-Provee 3 recomendaciones críticas para maximizar conversión.`)}
-            disabled={isRefining}
-            className="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-neutral-700 disabled:to-neutral-700 text-white rounded-md text-sm font-bold flex items-center justify-center gap-2"
+            onClick={handleOptimize}
+            disabled={isEnriching || !event.brand || !event.title}
+            className="px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-neutral-700 disabled:to-neutral-700 text-white rounded-md text-sm font-bold flex items-center justify-center gap-2"
+            title="Optimiza TODO (incluso campos existentes) con visión de Productor BTL + SEO/AEO/LLMO Expert"
           >
-            {isRefining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-            Auditar Contenido
+            {isEnriching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            ✨ Optimizar Todo
           </button>
         </div>
       </div>
@@ -890,7 +925,7 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           required
           multiline
           rows={6}
-          maxLength={1000}
+          maxLength={800}
           charCount={getCharCount(event.description)}
         />
 
@@ -1473,122 +1508,6 @@ Provee 3 recomendaciones críticas para maximizar conversión.`)}
           charCount={getCharCount(event.alt_summary_2)}
           placeholder="Segunda variante del resumen"
         />
-      </div>
-    </div>
-  );
-};
-
-// AI Chat Panel Component
-interface AIChatPanelProps {
-  event: WavEvent;
-  eventIndex: number;
-  chatHistory: ChatMessage[];
-  chatInput: string;
-  setChatInput: (value: string) => void;
-  isRefining: boolean;
-  chatEndRef: React.RefObject<HTMLDivElement>;
-  handleSendMessage: (message: string) => void;
-  aiFormState: Partial<WavEvent>;
-  setAiFormState: React.Dispatch<React.SetStateAction<Partial<WavEvent>>>;
-  handleCopy: (text: string) => void;
-}
-
-const AIChatPanel: React.FC<AIChatPanelProps> = ({
-  event,
-  eventIndex,
-  chatHistory,
-  chatInput,
-  setChatInput,
-  isRefining,
-  chatEndRef,
-  handleSendMessage,
-  aiFormState,
-  setAiFormState,
-  handleCopy
-}) => {
-  return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-4">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-pink-400" />
-          Asistente de Edición BTL
-        </h3>
-        <p className="text-xs text-neutral-400 mt-1">
-          Refina contenidos conversacionalmente. Los cambios se aplican automáticamente.
-        </p>
-      </div>
-
-      {/* Chat History */}
-      <div className="flex-1 bg-neutral-900/30 rounded-lg border border-neutral-800 p-4 overflow-y-auto mb-4">
-        {chatHistory.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <Bot className="w-12 h-12 text-neutral-600 mb-3" />
-            <p className="text-sm text-neutral-400">
-              Comienza a conversar con la IA para optimizar este evento.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {chatHistory.map((msg, idx) => (
-              <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                )}
-                <div className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                  msg.role === 'user'
-                    ? 'bg-pink-600 text-white'
-                    : 'bg-neutral-800 text-neutral-100'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                </div>
-                {msg.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center flex-shrink-0">
-                    <UserIcon className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Chat Input */}
-      <div className="flex gap-2">
-        <textarea
-          value={chatInput}
-          onChange={(e) => setChatInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              if (chatInput.trim() && !isRefining) {
-                handleSendMessage(chatInput);
-              }
-            }
-          }}
-          placeholder="Escribe tu mensaje para la IA..."
-          className="flex-1 bg-neutral-900 border border-neutral-800 rounded-md px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 resize-none"
-          rows={3}
-          disabled={isRefining}
-        />
-        <button
-          onClick={() => {
-            if (chatInput.trim() && !isRefining) {
-              handleSendMessage(chatInput);
-            }
-          }}
-          disabled={!chatInput.trim() || isRefining}
-          className="px-6 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isRefining ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Send className="w-5 h-5" />
-          )}
-        </button>
       </div>
     </div>
   );

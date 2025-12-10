@@ -585,6 +585,80 @@ app.get(`${BASE_PATH}/events`, async (c) => {
   }
 });
 
+// GET /search-event?q=term - Search for specific event (Temporary debug endpoint)
+app.get(`${BASE_PATH}/search-event`, async (c) => {
+    try {
+        const searchTerm = c.req.query('q') || '';
+        const events = await kv.get("wav_events") || [];
+        
+        if (!searchTerm) {
+            return c.json({ 
+                error: 'Missing query parameter',
+                message: 'Use ?q=search_term',
+                total_events: events.length
+            }, 400);
+        }
+
+        const found = events.find((e: any) => 
+            e.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (!found) {
+            const allBrands = [...new Set(events.map((e: any) => e.brand).filter(Boolean))];
+            return c.json({ 
+                error: 'Not found', 
+                message: `No event found matching "${searchTerm}"`,
+                total_events: events.length,
+                available_brands: allBrands.slice(0, 30)
+            }, 404);
+        }
+
+        return c.json(found);
+    } catch (e) {
+        console.error("Error searching event:", e);
+        return c.json({ error: e.message }, 500);
+    }
+});
+
+// GET /generate-local-file - Generate TypeScript code for /data/events.ts (Protected)
+app.get(`${BASE_PATH}/generate-local-file`, async (c) => {
+    if (!await verifyAuth(c)) return c.text("Unauthorized", 401);
+
+    try {
+        const events = await kv.get("wav_events") || [];
+        const normalizedEvents = events.map((event: any) => normalizeEvent(event));
+
+        const timestamp = new Date().toISOString();
+        const fileContent = `/**
+ * WAV Events - Local Static Data
+ * 
+ * This file is AUTO-GENERATED from Supabase KV Store.
+ * Last sync: ${timestamp}
+ * Total events: ${normalizedEvents.length}
+ * 
+ * Purpose:
+ * - SEO optimization (static data for SSR)
+ * - OG tags generation  
+ * - Fallback when Supabase is unreachable
+ * 
+ * DO NOT EDIT MANUALLY - Use AdminPanel to edit events, then click "Sync → Local File".
+ */
+
+export const events = ${JSON.stringify(normalizedEvents, null, 2)};
+`;
+
+        return c.text(fileContent, 200, {
+            'Content-Type': 'text/plain',
+            'Content-Disposition': 'attachment; filename="events.ts"'
+        });
+    } catch (e) {
+        console.error("Error generating local file:", e);
+        return c.json({ error: e.message }, 500);
+    }
+});
+
 // REMOVED: Duplicate sitemap.xml and robots.txt routes (moved to line 2101+)
 
 /**
@@ -771,7 +845,52 @@ app.post(`${BASE_PATH}/refine`, async (c) => {
   try {
     const { messages, currentDraft, event } = await c.req.json();
     const result = await generateRefinement(messages, currentDraft, event);
-    return c.json(result);
+    
+    // Sanitize result to enforce character limits
+    const sanitized = {
+      ...result,
+      // Core content limits
+      draft: result.draft?.substring(0, 800) || result.draft,
+      title: result.title?.substring(0, 100) || result.title,
+      summary: result.summary?.substring(0, 160) || result.summary,
+      
+      // SEO limits (STRICT)
+      seo_title: result.seo_title?.substring(0, 60) || result.seo_title,
+      seo_description: result.seo_description?.substring(0, 155) || result.seo_description,
+      
+      // Editorial limits
+      tone: result.tone?.substring(0, 50) || result.tone,
+      audience: result.audience?.substring(0, 150) || result.audience,
+      
+      // Social media limits
+      instagram_hook: result.instagram_hook?.substring(0, 150) || result.instagram_hook,
+      instagram_body: result.instagram_body?.substring(0, 500) || result.instagram_body,
+      instagram_closing: result.instagram_closing?.substring(0, 150) || result.instagram_closing,
+      instagram_hashtags: result.instagram_hashtags?.substring(0, 300) || result.instagram_hashtags,
+      alt_instagram: result.alt_instagram?.substring(0, 500) || result.alt_instagram,
+      linkedin_post: result.linkedin_post?.substring(0, 1300) || result.linkedin_post,
+      
+      // A/B testing limits
+      alt_title_1: result.alt_title_1?.substring(0, 100) || result.alt_title_1,
+      alt_title_2: result.alt_title_2?.substring(0, 100) || result.alt_title_2,
+      alt_summary_1: result.alt_summary_1?.substring(0, 160) || result.alt_summary_1,
+      alt_summary_2: result.alt_summary_2?.substring(0, 160) || result.alt_summary_2,
+      
+      // Performance limits
+      client: result.client?.substring(0, 100) || result.client,
+      venue: result.venue?.substring(0, 200) || result.venue,
+      subcategory: result.subcategory?.substring(0, 100) || result.subcategory,
+      results_notes: result.results_notes?.substring(0, 300) || result.results_notes,
+      
+      // Array limits (truncate each item)
+      highlights: result.highlights?.map((h: string) => h.substring(0, 100)) || result.highlights,
+      keywords: result.keywords?.map((k: string) => k.substring(0, 50)) || result.keywords,
+      tags: result.tags?.map((t: string) => t.substring(0, 50)) || result.tags,
+      hashtags: result.hashtags?.map((h: string) => h.substring(0, 30)) || result.hashtags,
+      kpis: result.kpis?.map((k: string) => k.substring(0, 150)) || result.kpis,
+    };
+    
+    return c.json(sanitized);
   } catch (e) {
     console.error("Error in /refine:", e);
     return c.json({ error: e.message }, 500);

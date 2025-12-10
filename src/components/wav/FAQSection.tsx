@@ -18,7 +18,7 @@ export const FAQSection = () => {
             <span className="transform group-open:rotate-180 transition-transform duration-300 text-xs ml-2">▼</span>
           </summary>
           <p className="mt-4 text-[#A1A1AA] leading-relaxed text-sm">
-            Diseño de stands, mapping 3D, automatización de eventos y experiencias inmersivas en Chile, Perú y Colombia.
+            Eventos Corporativos, Lanzamientos, Eventos de Relacionamiento, Estrategias BTL / PR / Digital / Influencer Marketing, Diseño e implementación de stands, mapping 3D, implementación de nuevas tecnologías y experiencias inmersivas en Chile, Perú y Colombia.
           </p>
         </details>
 
@@ -38,7 +38,7 @@ export const FAQSection = () => {
             <span className="transform group-open:rotate-180 transition-transform duration-300 text-xs ml-2">▼</span>
           </summary>
           <p className="mt-4 text-[#A1A1AA] leading-relaxed text-sm">
-            Contáctanos vía formulario para una evaluación técnica y propuesta creativa personalizada.
+            Contáctanos vía mail en el menú para una evaluación técnica y propuesta creativa personalizada.
           </p>
         </details>
       </div>

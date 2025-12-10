@@ -1,4 +1,5 @@
-import { events as staticEvents } from '../data/events';
+// REMOVED: Static events import - Now 100% dynamic from Supabase
+// import { events as staticEvents } from '../data/events';
 import { projectId, publicAnonKey } from './supabase/info';
 import { WavEvent } from '../types';
 import { generateSlug } from './slug';
@@ -232,20 +233,21 @@ export const getEvents = async (): Promise<WavEvent[]> => {
     const data = await response.json();
     
     if (!Array.isArray(data)) {
-      console.warn("⚠️ Falling back to static events due to invalid data structure.");
-      return staticEvents.map((e, i) => validateEvent(e, i));
+      console.warn("⚠️ Invalid data structure from Supabase - returning empty array");
+      return [];
     }
 
     if (data.length === 0) {
-      console.log("✅ Returning empty array.");
+      console.log("✅ Returning empty array (no events in Supabase)");
       return [];
     }
     
-    console.log(`✅ Successfully fetched ${data.length} events.`);
+    console.log(`✅ Successfully fetched ${data.length} events from Supabase`);
     return data.map((item, index) => validateEvent(item, index));
   } catch (e) {
     console.error("❌ Network/Logic Error in getEvents:", e);
-    return staticEvents.map((e, i) => validateEvent(e, i));
+    console.warn("⚠️ Returning empty array (Supabase unavailable)");
+    return []; // Return empty instead of static fallback
   } finally {
     console.groupEnd();
   }

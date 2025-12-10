@@ -239,16 +239,17 @@ export const Modal: React.FC<ModalProps> = ({ event, onClose, isMobile, onNext, 
               </div>
               
               {/* METADATA GRID - INCREASED SPACING */}
-              <div className="grid grid-cols-2 gap-6 lg:gap-8 pt-8 lg:pt-10 relative border-t border-white/10">
-                 <h2 className="sr-only">Detalles del Evento</h2>
-                 <div>
-                   <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Cliente</h3>
-                   <span className="text-sm lg:text-base text-white font-light">{event.brand}</span>
-                 </div>
+              <div className="grid grid-cols-2 gap-4 text-xs">
                  <div>
                    <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Año</h3>
-                   <span className="text-sm lg:text-base text-white font-light">2024</span>
+                   <span className="text-sm lg:text-base text-white font-light">{event.year || new Date().getFullYear()}</span>
                  </div>
+                  {event.venue && (
+                    <div>
+                      <h3 className="block text-xs uppercase tracking-widest text-neutral-500 mb-2 font-medium">Lugar</h3>
+                      <span className="text-sm lg:text-base text-white font-light">{event.venue}</span>
+                    </div>
+                  )}
               </div>
 
             </motion.div>
