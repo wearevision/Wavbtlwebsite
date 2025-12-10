@@ -54,6 +54,8 @@ export const Wall: React.FC<WallProps> = ({ mouseX, mouseY, onSelect, isMobile =
         image: eventData.image, 
         title: eventData.title,
         brand: eventData.brand,
+        // AEO: Pass technical summary for LLM crawlers
+        technical_summary: eventData.technical_summary,
       };
     });
   }, [events, gridConfig, isLoading]);

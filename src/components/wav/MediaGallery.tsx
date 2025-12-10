@@ -68,10 +68,21 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ gallery, className, 
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={currentMedia.id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1.05, // Zoom continuo suave (siempre ligeramente más grande)
+          }}
+          exit={{ opacity: 0, scale: 1.08 }}
+          transition={{ 
+            opacity: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+            scale: { 
+              duration: 20, // 20 segundos para zoom muy lento
+              ease: "linear", // Continuo uniforme
+              repeat: Infinity, // Infinito
+              repeatType: "reverse" // Va y viene (1.05 → 1.08 → 1.05)
+            }
+          }}
           className="absolute inset-0 w-full h-full"
         >
           {currentMedia.type === 'video' ? (

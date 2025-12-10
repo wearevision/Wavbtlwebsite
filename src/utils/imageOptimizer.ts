@@ -1,26 +1,14 @@
 /**
- * WAV BTL Image Optimizer
+ * FALLBACK PLACEHOLDER: Lightweight SVG for failed image loads
+ * Prevents layout shifts (CLS) when images fail to load
  * 
- * Supabase Storage Image Transformation API
- * Docs: https://supabase.com/docs/guides/storage/serving/image-transformations
- * 
- * Genera URLs optimizadas con:
- * - Formato WebP (70-90% más liviano que JPEG/PNG)
- * - Crop automático (cover/contain/fill)
- * - Resize inteligente
- * - Quality adaptativo
+ * Returns a 16:10 aspect ratio gray trapezoid matching WAV brand geometry
  */
-
-export type ImageFit = 'cover' | 'contain' | 'fill';
-export type ImageFormat = 'webp' | 'avif' | 'origin';
-
-export interface ImageOptimizationOptions {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: ImageFormat;
-  resize?: ImageFit;
-}
+const FALLBACK_PLACEHOLDER = 
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"%3E' +
+  '%3Cpath d="M160 0h640v500H0z" fill="%23171717"/%3E' +
+  '%3Cpath d="M400 250l-60-60h120z" fill="%23404040"/%3E' +
+  '%3C/svg%3E';
 
 /**
  * Optimiza una URL de Supabase Storage con transformaciones automáticas
@@ -42,8 +30,15 @@ export const optimizeImage = (
   url: string,
   options: ImageOptimizationOptions = {}
 ): string => {
+  // ROBUSTNESS: Return fallback for invalid/empty URLs
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    console.warn('⚠️ [imageOptimizer] Invalid URL provided, returning fallback');
+    return FALLBACK_PLACEHOLDER;
+  }
+
   // Si no es una URL de Supabase Storage, retornar sin modificar
-  if (!url || !url.includes('supabase.co/storage')) {
+  // (puede ser una URL externa válida o un data URI)
+  if (!url.includes('supabase.co/storage')) {
     return url;
   }
 

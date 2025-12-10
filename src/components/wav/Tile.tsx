@@ -12,9 +12,10 @@ interface TileProps {
   onSelect: () => void;
   priority?: boolean;
   isLoading?: boolean;
+  technical_summary?: string; // AEO: For LLM crawlers
 }
 
-export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onSelect, priority = false, isLoading = false }) => {
+export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onSelect, priority = false, isLoading = false, technical_summary }) => {
   // Geometry Update:
   // "Left side same angle as right side" -> Parallelogram ( / / )
   // "Top/Bottom parallel to render" -> Horizontal top/bottom edges
@@ -25,6 +26,7 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
   const textRef = useRef<HTMLHeadingElement>(null);
   const [scale, setScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // OPTIMIZATION: Only calculate text fitting on hover to save CPU.
   // The text is hidden (opacity-0) by default, so we don't need to calc it until required.
@@ -92,7 +94,7 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
   }
 
   return (
-    <motion.div
+    <motion.article
       layoutId={`tile-${id}`}
       className="relative group cursor-pointer w-full aspect-[1.6/1]"
       style={{ 
@@ -121,8 +123,14 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
         whileHover={{ scale: 1.1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
       >
         <img
+          // LCP OPTIMIZATION: Critical tiles use aggressive eager loading
+          // Peripheral tiles use lazy loading to reduce initial network load
           loading={priority ? "eager" : "lazy"}
-          decoding="async"
+          // DECODING STRATEGY: 
+          // - Critical: sync (blocks until decoded, ensures immediate LCP paint)
+          // - Peripheral: async (non-blocking, better for offscreen content)
+          decoding={priority ? "sync" : "async"}
+          // FETCH PRIORITY: Browser hint for network prioritization
           fetchPriority={priority ? "high" : "low"}
           src={optimizeForTile(image, 'medium')}
           srcSet={generateSrcSet(image, 'tile')}
@@ -136,6 +144,7 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
             imageLoaded ? "opacity-100" : "opacity-0"
           )}
           onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
         />
       </motion.div>
 
@@ -166,6 +175,15 @@ export const Tile = React.memo<TileProps>(({ id, image, title, brand, index, onS
       <div 
         className="absolute inset-0 pointer-events-none border-[2px] border-black/80"
       />
-    </motion.div>
+      
+      {/* AEO OPTIMIZATION: Hidden structured data for LLM crawlers */}
+      {technical_summary && (
+        <div className="sr-only" aria-hidden="true">
+          <meta itemProp="description" content={technical_summary} />
+          <p itemProp="name">{title}</p>
+          <p itemProp="brand">{brand}</p>
+        </div>
+      )}
+    </motion.article>
   );
 });

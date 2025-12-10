@@ -57,6 +57,26 @@
   clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
 }
 
+/* NEW: Modal Desktop - Ambos lados con diagonal 17° paralela */
+.clip-modal-desktop {
+  clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%);
+}
+
+/* NEW: Media Gallery Container - Diagonal 17° en ambos lados (trapezoide simétrico) */
+.clip-media-gallery {
+  clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+}
+
+/* NEW: Content Container - Diagonal izquierda para alineación paralela */
+.clip-content-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 6% 100%);
+}
+
+/* NEW: Mobile Media Container - Diagonal inferior 17° */
+.clip-mobile-media {
+  clip-path: polygon(0 0, 100% 0, 100% 83%, 0 100%);
+}
+
 .bg-brand-gradient {
   background: linear-gradient(135deg, rgba(255,0,168,1) 0%, rgba(155,0,255,1) 50%, rgba(0,68,255,1) 100%);
 }
